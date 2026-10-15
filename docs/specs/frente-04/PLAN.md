@@ -82,7 +82,7 @@ Testes: limites dos rótulos (79,9%, 80%, 95%, 5%, 20%); inversão para `lower_b
 ### E5 — API e UI de resultados
 
 - `services/api/results/`: `GET /results/{faroId}?grain=user|session&platform=all|site|android|ios` retornando `ResultsResponse` (MET-14); `GET /metrics`, `POST /metrics` (E2); cache por `asOf`.
-- `apps/web/features/resultados/`: implementa o template da frente 5 (MET-15) com as seções já validadas no protótipo: cabeçalho com tags, design no topo, variantes com split, síntese, "o que fazer", tabela por seção com NORTE/GUARDA/SECUNDÁRIA, alternância usuário/sessão e consolidado/plataforma, saúde do teste, detectabilidade, "como os números são calculados" e "fonte dos dados". Até o template da frente 5 chegar, usa um mock local `templates.mock.ts` com a estrutura do protótipo.
+- `apps/web/features/resultados/`: **etapa 1 (entregue 15/10)**: números-chave (stat tiles) sobre `GET /results/:faroId`, montados no detalhe do painel; fonte obrigatória: as consultas do roadmap do Digital (E8), com fixtures só como fallback sinalizado na tela. **Etapa 2**: implementa o template da frente 5 (MET-15) com as seções já validadas no protótipo: cabeçalho com tags, design no topo, variantes com split, síntese, "o que fazer", tabela por seção com NORTE/GUARDA/SECUNDÁRIA, alternância usuário/sessão e consolidado/plataforma, saúde do teste, detectabilidade, "como os números são calculados" e "fonte dos dados". Até o template da frente 5 chegar, usa um mock local `templates.mock.ts` com a estrutura do protótipo.
 
 ### E6 — Fontes de Saúde, Fintech, Retenção e CSAT (uma por vez, com dono)
 

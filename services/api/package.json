@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/app.ts",
     "./experiments/governance": "./src/painel/governance/index.ts",
-    "./experiments/status": "./src/painel/status/index.ts"
+    "./experiments/status": "./src/painel/status/index.ts",
+    "./resultados/roadmap": "./src/resultados/roadmap/index.ts"
   },
   "scripts": {
     "dev": "node --watch src/server.ts",
