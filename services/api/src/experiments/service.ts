@@ -29,12 +29,16 @@ import {
   sampleSizePerGroup,
   statusAfterSave,
   suggestCampaignType,
+  suggestDates,
+  suggestMde,
   unlockedSteps,
   type DraftFields,
+  type HistoricalEffect,
 } from '@faro/config-core';
 import type { Db } from '../db/client.ts';
 import type { Ports } from '../ports.ts';
 import { HttpError } from '../errors.ts';
+import { buildDataset } from '../painel/dataset.ts';
 import {
   appendAudit,
   appendEvent,
@@ -97,6 +101,8 @@ function canonical(v: unknown): string {
 const changed = (a: unknown, b: unknown) => canonical(a) !== canonical(b);
 
 const DY_LINKED: ExperimentStatus[] = ['pronto_para_configurar', 'configurado_no_dy', 'rodando', 'decidido'];
+/** Testes com leitura para servir de base histórica (sugestão de MDE). */
+const WITH_RESULTS: ExperimentStatus[] = ['rodando', 'decidido', 'encerrado'];
 /** Campos auditados após configurado_no_dy (requisito não funcional de auditoria). */
 const AUDITED = ['name', 'bu', 'ownerSquad', 'audience', 'allocation'] as const;
 
@@ -295,6 +301,63 @@ export function createExperimentService(db: Db, ports: Ports) {
         return exp;
       });
       return view(exp);
+    },
+
+    /**
+     * Ajuste de produto 15/10: sugestão de datas a partir da duração mínima (CFG-08),
+     * com os testes interpostos (mesmas páginas e plataformas, ativos ou agendados).
+     */
+    async suggestDates(faroId: string) {
+      const catalog = await ports.metrics.list();
+      const exp = await mustGet(db, faroId);
+      const d = await derive(exp, catalog);
+      const a = exp.allocation;
+      const busy = (await listExperiments(db))
+        .filter(
+          (o) =>
+            o.faroId !== faroId &&
+            DY_LINKED.includes(o.status) &&
+            !!o.allocation.startDate &&
+            !!o.allocation.endDate &&
+            o.allocation.pages.some((p) => a.pages.includes(p)) &&
+            o.allocation.platforms.some((p) => a.platforms.includes(p)),
+        )
+        .map((o) => ({ faroId: o.faroId, name: o.name, startDate: o.allocation.startDate, endDate: o.allocation.endDate }));
+      return suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy });
+    },
+
+    /**
+     * Ajuste de produto 15/10: MDE sugerido pela base histórica — testes parecidos
+     * (mesma NORTE) e o efeito que observaram. Resultados vêm do dataset da frente 4.
+     */
+    async suggestMde(faroId: string) {
+      const exp = await mustGet(db, faroId);
+      const metricId = exp.design.primaryMetricId;
+      if (!metricId) throw new HttpError(422, 'sem_norte', 'Escolha a métrica primária antes de sugerir o efeito mínimo.');
+      const ds = await buildDataset(db);
+      const history: HistoricalEffect[] = ds.experiments
+        .filter((o) => o.faroId !== faroId && WITH_RESULTS.includes(o.status))
+        .flatMap((o) => {
+          const rows = ds.metricResults.filter(
+            (r) => r.faroId === o.faroId && r.metricId === metricId && r.platform === 'all' && r.grain === 'user' && r.deltaRelative != null,
+          );
+          if (!rows.length) return [];
+          // Teste com mais de uma variante: vale a de maior efeito absoluto.
+          const best = rows.reduce((x, y) => (Math.abs(y.deltaRelative!) > Math.abs(x.deltaRelative!) ? y : x));
+          return [
+            {
+              faroId: o.faroId,
+              name: o.name,
+              metricId,
+              deltaRelative: best.deltaRelative!,
+              ...(best.label ? { label: best.label } : {}),
+              pages: o.allocation.pages,
+              bu: o.bu,
+              platforms: o.allocation.platforms,
+            },
+          ];
+        });
+      return suggestMde({ metricId, pages: exp.allocation.pages, bu: exp.bu, platforms: exp.allocation.platforms, history });
     },
 
     /** CFG-11. */

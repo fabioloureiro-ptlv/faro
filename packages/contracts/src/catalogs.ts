@@ -8,6 +8,9 @@ export const PageCatalogEntrySchema = z.object({
   name: z.string(),
   /** Usuários únicos por dia na página, todas as plataformas (dado simulado do protótipo). */
   dailyUsers: z.number().int().positive(),
+  /** 0.3.0 (pedido à frente 3): URL/caminho canônicos, pré-preenchidos no wizard quando existem. */
+  urlPattern: z.string().optional(),
+  appPath: z.string().optional(),
 });
 
 export const PageCatalogSchema = z.object({
@@ -15,11 +18,19 @@ export const PageCatalogSchema = z.object({
   platformShare: z.record(PlatformSchema, z.number().min(0).max(1)),
 });
 
+/** 0.3.0 (ajuste de produto 15/10): de onde o público pré-segmentado vem. */
+export const AudienceOriginSchema = z.object({
+  system: z.enum(['bigquery', 'dy', 'faro', 'manual']),
+  /** Texto curto para a UI (ex.: nome do SQL versionado, nome do público no DY). */
+  label: z.string(),
+});
+
 export const AudienceShortcutSchema = z.object({
   id: z.string(),
   name: z.string(),
   share: z.number().min(0).max(1),
   dyAttribute: z.string().optional(),
+  origin: AudienceOriginSchema.optional(),
   /** Frente 3: regra estruturada do atalho (SEG-02/03), quando expressável no construtor. */
   rule: AudienceRuleSchema.optional(),
   /** Ids de atalhos declaradamente disjuntos deste (SEG-10), ex.: novos × recorrentes. */
@@ -42,5 +53,6 @@ export const TemplateSchema = z.object({
 
 export type PageCatalogEntry = z.infer<typeof PageCatalogEntrySchema>;
 export type PageCatalog = z.infer<typeof PageCatalogSchema>;
+export type AudienceOrigin = z.infer<typeof AudienceOriginSchema>;
 export type AudienceShortcut = z.infer<typeof AudienceShortcutSchema>;
 export type Template = z.infer<typeof TemplateSchema>;

@@ -1,5 +1,6 @@
 // Cliente da API do Faro. Erros chegam como { error, message, details } (services/api/src/app.ts).
 import type { DySheet, Experiment, MetricDefinition, PageCatalog, AudienceShortcut, Template } from '@faro/contracts';
+import type { DateSuggestion, MdeSuggestion } from '@faro/config-core';
 
 export interface ApiErrorBody {
   error: string;
@@ -78,6 +79,9 @@ export function useFaroApi() {
     confirm: (id: string, body: { campaignId: string; configuredBy: string; configuredAt: string }) =>
       call<ServerView>(`/experiments/${id}/dy-confirmation`, { method: 'POST', body }),
     duplicate: (id: string) => call<ServerView>(`/experiments/${id}/duplicate`, { method: 'POST', body: {} }),
+    // Ajustes de produto 15/10: sugestão de datas (com testes interpostos) e de MDE (base histórica).
+    dateSuggestion: (id: string) => call<DateSuggestion>(`/experiments/${id}/date-suggestion`),
+    mdeSuggestion: (id: string) => call<MdeSuggestion>(`/experiments/${id}/mde-suggestion`),
     importLegacy: (body: { dyCampaignId: string; bu: string; ownerSquad: string }) =>
       call<ServerView>('/experiments/import-legacy', { method: 'POST', body }),
     dyCampaigns: () => call<DyCampaignRow[]>('/experiments/dy-campaigns'),

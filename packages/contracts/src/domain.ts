@@ -86,9 +86,18 @@ export interface Audience {
   dyAttribute?: string; // atributo publicado no DY via User Data API
 }
 
+/** Acréscimo 0.3.0 (frente 1, ajuste de produto 15/10): onde exatamente a página fica. */
+export interface PageTarget {
+  pageId: string; // id do catálogo de páginas
+  urlPattern?: string; // site: URL ou caminho (ex.: /carrinho, https://www.petlove.com.br/busca?q=)
+  appPath?: string; // app: rota ou tela (ex.: HomeScreen, app://carrinho)
+}
+
 export interface Allocation {
   platforms: Platform[];
   pages: string[]; // ids do catálogo de páginas
+  /** Precisão por página (URL no site, caminho no app). Opcional; vai para a ficha do DY. */
+  pageTargets?: PageTarget[];
   trafficPercent: number; // % do público elegível no teste
   split: number[]; // ex.: [0.5, 0.5]
   startDate: string;

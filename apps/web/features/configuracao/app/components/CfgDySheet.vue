@@ -3,6 +3,8 @@
 import type { DySheet } from '@faro/contracts';
 
 const props = defineProps<{ sheet: DySheet; markdownUrl: string }>();
+/** Ajuste 15/10: a confirmação no DY só abre depois de a ficha ser copiada ou exportada. */
+const emit = defineEmits<{ exported: [] }>();
 const copied = ref<string | null>(null);
 async function copy(key: string, value: string) {
   try {
@@ -24,8 +26,8 @@ const all = computed(() => props.sheet.blocks.map((b) => `${b.label}\n${b.value}
         <p class="small muted" style="margin: 0">Copie campo a campo no console do Dynamic Yield. Nada aqui precisa ser inventado.</p>
       </div>
       <div class="row">
-        <button type="button" class="btn ghost small" @click="copy('__all', all)">{{ copied === '__all' ? 'Copiado' : 'Copiar tudo' }}</button>
-        <a class="btn ghost small" :href="markdownUrl" download>Exportar Markdown</a>
+        <button type="button" class="btn ghost small" @click="copy('__all', all).then(() => emit('exported'))">{{ copied === '__all' ? 'Copiado' : 'Copiar tudo' }}</button>
+        <a class="btn ghost small" :href="markdownUrl" download @click="emit('exported')">Exportar Markdown</a>
       </div>
     </div>
     <ol class="blocks">

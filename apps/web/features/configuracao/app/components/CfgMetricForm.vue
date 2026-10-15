@@ -7,6 +7,9 @@ import { useExperimentDraft } from '../composables/useExperimentDraft';
 const props = defineProps<{ section?: string }>();
 const emit = defineEmits<{ created: [m: MetricDefinition]; cancel: [] }>();
 const { addMetric } = useExperimentDraft();
+// Ajuste 15/10: pode haver mais de um formulário na tela (NORTE e guardrails) — ids únicos.
+const uid = useId();
+const id = (k: string) => `${uid}-${k}`;
 const form = reactive({ name: '', kind: 'proportion' as 'proportion' | 'mean', definition: '', base: '', sd: '' });
 const error = ref('');
 const busy = ref(false);
@@ -47,25 +50,25 @@ async function submit() {
       Entra no catálogo como rascunho e fica disponível neste e nos próximos experimentos. O time de métricas publica o cálculo oficial.
     </p>
     <div class="pair">
-      <div><label class="sub" for="nm-name">Nome</label><input id="nm-name" v-model="form.name" type="text" placeholder="Ex.: Pedidos com 2+ itens"></div>
+      <div><label class="sub" :for="id('nm-name')">Nome</label><input :id="id('nm-name')" v-model="form.name" type="text" placeholder="Ex.: Pedidos com 2+ itens"></div>
       <div>
-        <label class="sub" for="nm-kind">Tipo</label>
-        <select id="nm-kind" v-model="form.kind">
+        <label class="sub" :for="id('nm-kind')">Tipo</label>
+        <select :id="id('nm-kind')" v-model="form.kind">
           <option value="proportion">Taxa (% de usuários que fazem algo)</option>
           <option value="mean">Valor médio (R$, itens, minutos)</option>
         </select>
       </div>
     </div>
-    <label class="sub" for="nm-def" style="display: block; margin-top: 10px">Como é calculada</label>
-    <input id="nm-def" v-model="form.definition" type="text" :placeholder="form.kind === 'mean' ? 'Ex.: receita total ÷ usuários expostos' : 'Ex.: usuários com pedido de 2+ itens ÷ usuários expostos'">
+    <label class="sub" :for="id('nm-def')" style="display: block; margin-top: 10px">Como é calculada</label>
+    <input :id="id('nm-def')" v-model="form.definition" type="text" :placeholder="form.kind === 'mean' ? 'Ex.: receita total ÷ usuários expostos' : 'Ex.: usuários com pedido de 2+ itens ÷ usuários expostos'">
     <div class="pair" style="margin-top: 10px">
       <div>
-        <label class="sub" for="nm-base">{{ form.kind === 'proportion' ? 'Taxa atual (%)' : 'Média atual' }}</label>
-        <input id="nm-base" v-model="form.base" type="text" inputmode="decimal" :placeholder="form.kind === 'proportion' ? 'Ex.: 12,5' : 'Ex.: 189'">
+        <label class="sub" :for="id('nm-base')">{{ form.kind === 'proportion' ? 'Taxa atual (%)' : 'Média atual' }}</label>
+        <input :id="id('nm-base')" v-model="form.base" type="text" inputmode="decimal" :placeholder="form.kind === 'proportion' ? 'Ex.: 12,5' : 'Ex.: 189'">
       </div>
       <div v-if="form.kind === 'mean'">
-        <label class="sub" for="nm-sd">Desvio padrão</label>
-        <input id="nm-sd" v-model="form.sd" type="text" inputmode="decimal" placeholder="Ex.: 240">
+        <label class="sub" :for="id('nm-sd')">Desvio padrão</label>
+        <input :id="id('nm-sd')" v-model="form.sd" type="text" inputmode="decimal" placeholder="Ex.: 240">
       </div>
     </div>
     <p class="err" role="alert">{{ error }}</p>

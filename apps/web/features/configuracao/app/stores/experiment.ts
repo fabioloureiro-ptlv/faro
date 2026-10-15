@@ -137,6 +137,16 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
     applyServer(await api.confirm(experiment.value!.faroId, body), true);
   }
 
+  /** Sugestões lidas do servidor sobre o estado salvo: salva antes de pedir. */
+  async function suggestDates() {
+    await save();
+    return api.dateSuggestion(experiment.value!.faroId);
+  }
+  async function suggestMde() {
+    await save();
+    return api.mdeSuggestion(experiment.value!.faroId);
+  }
+
   async function addMetric(input: Parameters<typeof api.createMetric>[0]) {
     const m = await api.createMetric(input);
     catalog.value = [...catalog.value, m];
@@ -147,6 +157,6 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
     experiment, catalog, pageCatalog, shortcuts, others, eligibleDaily, designRegistered,
     saveState, savedAt, saveError,
     gate, primaryMetric, nPerGroup, baseline, duration, audience, overlap, unlocked,
-    load, save, resolveOverlap, setCampaignType, markReady, confirm, addMetric,
+    load, save, resolveOverlap, setCampaignType, markReady, confirm, addMetric, suggestDates, suggestMde,
   };
 });

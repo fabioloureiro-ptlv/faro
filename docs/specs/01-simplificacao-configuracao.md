@@ -110,3 +110,8 @@ Cada uma segue a opção mais conservadora, marcada no código com `// DECISAO-P
 | 8 | Status de um legado importado | `configurado_no_dy`; a frente 2 promove a `rodando` | `services/api/src/experiments/service.ts` |
 | 9 | % de tráfego de legado (o export não traz) | 100% | `services/api/src/experiments/service.ts` |
 | 10 | Identidade do usuário | Header `x-faro-user` (front envia o valor de `runtimeConfig.public.faroUser`) até existir SSO | `services/api/src/http.ts`, `apps/web/nuxt.config.ts` |
+| 11 | Sugestão de datas: quando começar e como arredondar? | Início no dia seguinte; janela em semanas inteiras (≥ 7 dias) a partir da duração mínima; "interposto" = teste ativo ou agendado nas mesmas páginas e plataformas | `packages/config-core/src/suggest-dates.ts` |
+| 12 | MDE pelo histórico: qual estatística? | Mediana do \|efeito relativo\| dos testes com a mesma NORTE (variante de maior efeito), arredondada a 0,5 p.p. e limitada a 1–30%; semelhança (página, BU, plataforma) só ordena a lista | `packages/config-core/src/suggest-mde.ts` |
+| 13 | Alvo de página (URL/caminho) é obrigatório? | Não: opcional e sem validação de formato; vai para a ficha quando preenchido | `packages/contracts/src/schemas.ts` (`PageTargetSchema`) |
+| 14 | Público já criado no DY: como registrar? | Como `source: 'manual'` com `dyAttribute` e participação informada pelo time; a regra continua no DY | `CfgStepAudience.vue` |
+| 15 | Confirmação faseada: onde guardar o progresso? | No navegador (`localStorage` por `faroId`); nada vai para a API até a confirmação | `CfgStepReview.vue` |

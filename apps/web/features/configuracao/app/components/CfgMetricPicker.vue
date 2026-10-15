@@ -23,11 +23,15 @@ const chosen = computed(() =>
   props.selected.map((id) => byId.value.get(id)).filter((m): m is MetricDefinition => !!m),
 );
 
-// Com uma métrica já escolhida, abre na área dela.
+// Abre na área da métrica escolhida e, na seleção única, acompanha a troca de métrica
+// (ajuste 15/10: métrica recém-criada entra selecionada e o dropdown precisa mostrá-la).
 watch(
-  () => props.selected,
+  () => [...props.selected],
   (sel) => {
-    if (!area.value && sel.length) area.value = byId.value.get(sel[0]!)?.section ?? '';
+    if (!sel.length) return;
+    const last = byId.value.get(sel[sel.length - 1]!);
+    if (!last) return;
+    if (!area.value || (!props.multiple && last.section !== area.value)) area.value = last.section;
   },
   { immediate: true },
 );

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Etapa 4 — Revisão, ficha do DY e confirmação (CFG-11, CFG-12, CFG-13).
 import type { DySheet } from '@faro/contracts';
+import { pageLine } from '@faro/config-core';
 import { ApiError, useFaroApi, type FaroEventRow } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
 import { PLATFORM_LABEL, fmtDate, fmtInt, fmtPct } from '../utils/labels';
@@ -13,6 +14,7 @@ const d = computed(() => e.value.design);
 const platformName = (p: keyof typeof PLATFORM_LABEL) => PLATFORM_LABEL[p];
 const metricName = (id: string) => catalog.value.find((m) => m.id === id)?.name ?? id;
 const pageName = (id: string) => pageCatalog.value?.pages.find((p) => p.id === id)?.name ?? id;
+const pageLabel = (id: string) => pageLine(id, pageName(id), e.value.allocation.pageTargets);
 const otherName = (id: string) => others.value.find((o) => o.faroId === id)?.name ?? id;
 const RES = { exclusao_mutua: 'Exclusão mútua', paralelo: 'Rodar em paralelo', reagendar: 'Reagendar' } as const;
 
@@ -46,7 +48,25 @@ async function changeType(t: 'custom_code' | 'api_custom' | 'recommendation') {
   await loadSheet();
 }
 
-// Confirmação (CFG-12)
+// Confirmação (CFG-12), faseada (ajuste 15/10): 1) copiar a ficha, 2) colar no console
+// e criar a campanha, 3) só então confirmar com o ID. O progresso fica no navegador.
+const phase = reactive({ copied: false, pasted: false });
+const phaseKey = () => `faro:dy-phase:${e.value.faroId}`;
+onMounted(() => {
+  try {
+    const raw = localStorage.getItem(phaseKey());
+    if (raw) Object.assign(phase, JSON.parse(raw) as Partial<typeof phase>);
+  } catch {
+    /* sem storage: fases só nesta sessão */
+  }
+});
+watch(phase, () => {
+  try {
+    localStorage.setItem(phaseKey(), JSON.stringify(phase));
+  } catch {
+    /* idem */
+  }
+});
 const nowLocal = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 const form = reactive({ campaignId: '', configuredBy: api.actor, configuredAt: nowLocal() });
 const formErr = ref('');
@@ -79,7 +99,11 @@ async function submitConfirm() {
         <dd>{{ metricName(d.primaryMetricId) }} · efeito mínimo de {{ fmtPct(d.mdeRelative) }}<span v-if="d.baselineOverride"> · linha de base ajustada para {{ d.baselineOverride }}</span></dd>
         <dt>Secundárias</dt><dd>{{ d.secondaryMetricIds.map(metricName).join(', ') }}</dd>
         <dt>Guardrails</dt><dd>{{ d.guardrailMetricIds.length ? d.guardrailMetricIds.map(metricName).join(', ') : 'Nenhum' }}</dd>
-        <dt>Onde</dt><dd>{{ e.allocation.pages.map(pageName).join(', ') }} em {{ e.allocation.platforms.map(platformName).join(', ') }}</dd>
+        <dt>Onde</dt>
+        <dd>
+          <div v-for="id in e.allocation.pages" :key="id">{{ pageLabel(id) }}</div>
+          <div class="small muted">em {{ e.allocation.platforms.map(platformName).join(', ') }}</div>
+        </dd>
         <dt>Público</dt><dd>{{ e.audience.description }} (~{{ fmtPct(e.audience.estimatedShare ?? 1, 0) }} da base), {{ e.allocation.trafficPercent }}% do tráfego, divisão {{ e.allocation.split.map((s) => fmtPct(s, 0)).join(' × ') }}</dd>
         <dt>Período</dt><dd>{{ fmtDate(e.allocation.startDate) }} a {{ fmtDate(e.allocation.endDate) }} · ~{{ fmtInt(eligibleDaily) }} usuários/dia · {{ nPerGroup ? fmtInt(nPerGroup) : '–' }} por grupo · mínimo de {{ duration?.durationDays ?? '–' }} dias</dd>
         <dt>Sobreposição</dt>
@@ -107,18 +131,43 @@ async function submitConfirm() {
         </select>
       </section>
 
-      <div class="panel"><CfgDySheet :sheet="sheet" :markdown-url="api.sheetMarkdownUrl(e.faroId)" /></div>
+      <div class="panel"><CfgDySheet :sheet="sheet" :markdown-url="api.sheetMarkdownUrl(e.faroId)" @exported="phase.copied = true" /></div>
 
       <section v-if="e.status === 'pronto_para_configurar'" class="panel" aria-labelledby="conf-title">
         <h2 id="conf-title">Confirmar configuração no DY</h2>
-        <p class="small muted">Depois de criar a campanha no console, cole o ID dela aqui. O status muda para configurado no DY e o Faro passa a checar a campanha todo dia.</p>
-        <form class="pair" @submit.prevent="submitConfirm">
-          <div class="field"><label for="c-id">ID da campanha no DY</label><input id="c-id" v-model="form.campaignId" type="text" autocomplete="off" aria-describedby="c-err"></div>
-          <div class="field"><label for="c-by">Quem configurou</label><input id="c-by" v-model="form.configuredBy" type="email"></div>
-          <div class="field"><label for="c-at">Quando</label><input id="c-at" v-model="form.configuredAt" type="datetime-local"></div>
-          <div class="field" style="align-self: end"><button class="btn" type="submit">Confirmar configuração</button></div>
-        </form>
-        <p id="c-err" class="err" role="alert">{{ formErr }}</p>
+        <p class="small muted">Em três passos: copie a ficha, cole no console do DY e só então confirme com o ID da campanha. O status muda para configurado no DY e o Faro passa a checar a campanha todo dia.</p>
+        <ol class="phases">
+          <li :class="{ done: phase.copied }">
+            <span class="n" aria-hidden="true">1</span>
+            <div>
+              <b>Copiar a ficha</b>
+              <span class="small muted">Use “Copiar tudo” ou “Exportar Markdown” na ficha acima.</span>
+              <span class="visually-hidden">{{ phase.copied ? 'concluído' : 'pendente' }}</span>
+            </div>
+          </li>
+          <li :class="{ done: phase.pasted, locked: !phase.copied }">
+            <span class="n" aria-hidden="true">2</span>
+            <div>
+              <b>Colar no console do DY e criar a campanha</b>
+              <label class="small check"><input v-model="phase.pasted" type="checkbox" :disabled="!phase.copied"> Já colei a ficha e a campanha existe no DY</label>
+              <span v-if="!phase.copied" class="small muted">Libera depois de copiar a ficha.</span>
+            </div>
+          </li>
+          <li :class="{ locked: !phase.pasted }">
+            <span class="n" aria-hidden="true">3</span>
+            <div style="flex: 1">
+              <b>Confirmar com o ID da campanha</b>
+              <form v-if="phase.pasted" class="pair" style="margin-top: 8px" @submit.prevent="submitConfirm">
+                <div class="field"><label for="c-id">ID da campanha no DY</label><input id="c-id" v-model="form.campaignId" type="text" autocomplete="off" aria-describedby="c-err"></div>
+                <div class="field"><label for="c-by">Quem configurou</label><input id="c-by" v-model="form.configuredBy" type="email"></div>
+                <div class="field"><label for="c-at">Quando</label><input id="c-at" v-model="form.configuredAt" type="datetime-local"></div>
+                <div class="field" style="align-self: end"><button class="btn" type="submit">Confirmar configuração</button></div>
+              </form>
+              <span v-else class="small muted">Libera depois do passo 2.</span>
+              <p id="c-err" class="err" role="alert">{{ formErr }}</p>
+            </div>
+          </li>
+        </ol>
       </section>
 
       <section v-else class="panel">
@@ -141,6 +190,15 @@ async function submitConfirm() {
 
 <style scoped>
 .stack { display: flex; flex-direction: column; gap: 18px; }
+.phases { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.phases li { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.phases li > div { display: flex; flex-direction: column; gap: 4px; }
+.phases .n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--line); color: var(--ink); }
+.phases li.done { border-color: var(--ok); }
+.phases li.done .n { background: var(--ok); color: #fff; }
+.phases li.locked { opacity: 0.6; }
+.check { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.check input { accent-color: var(--brand); }
 dl.sum { display: grid; grid-template-columns: 180px 1fr; gap: 10px 18px; margin: 0; }
 dl.sum dt { color: var(--muted); font-weight: 600; }
 dl.sum dd { margin: 0; }

@@ -111,9 +111,16 @@ export const AudienceSchema = z.object({
   dyAttribute: z.string().optional(),
 });
 
+export const PageTargetSchema = z.object({
+  pageId: z.string().min(1),
+  urlPattern: z.string().trim().max(300).optional(),
+  appPath: z.string().trim().max(200).optional(),
+});
+
 export const AllocationSchema = z.object({
   platforms: z.array(PlatformSchema),
   pages: z.array(z.string()),
+  pageTargets: z.array(PageTargetSchema).optional(),
   trafficPercent: z.number().min(0).max(100),
   split: z.array(z.number().min(0).max(1)),
   startDate: z.union([isoDate, z.literal('')]),

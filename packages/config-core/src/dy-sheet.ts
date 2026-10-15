@@ -6,6 +6,7 @@ import type {
   Experiment,
   MetricDefinition,
   PageCatalogEntry,
+  PageTarget,
   Platform,
 } from '@faro/contracts';
 
@@ -59,6 +60,15 @@ export function apiSelector(faroId: string): string {
 const pct = (x: number) => `${Math.round(x * 1000) / 10}%`.replace('.', ',');
 const ddmmyyyy = (iso: string) => iso.split('-').reverse().join('/');
 
+/** Linha da página na ficha: nome (id) e, quando informados, URL no site e caminho no app. */
+export function pageLine(id: string, name: string, targets: PageTarget[] | undefined): string {
+  const t = targets?.find((x) => x.pageId === id);
+  const parts = [`${name} (${id})`];
+  if (t?.urlPattern) parts.push(`site: ${t.urlPattern}`);
+  if (t?.appPath) parts.push(`app: ${t.appPath}`);
+  return parts.join(' · ');
+}
+
 export interface DySheetContext {
   metric: Pick<MetricDefinition, 'id' | 'name'> | undefined;
   pages: PageCatalogEntry[];
@@ -81,7 +91,14 @@ export function buildDySheet(exp: Experiment, ctx: DySheetContext): DySheet {
       value: exp.dy?.selector ?? apiSelector(exp.faroId),
       hint: 'O mesmo identificador que o time de front/app usa para pedir a variação.',
     },
-    { key: 'pages', label: 'Páginas', value: a.pages.map((p) => `${pageName(p)} (${p})`).join('\n') },
+    {
+      key: 'pages',
+      label: 'Páginas',
+      value: a.pages.map((p) => pageLine(p, pageName(p), a.pageTargets)).join('\n'),
+      ...(a.pageTargets?.some((t) => t.urlPattern || t.appPath)
+        ? { hint: 'Use a URL (site) e o caminho (app) como condição de página no console.' }
+        : {}),
+    },
     { key: 'platforms', label: 'Plataformas', value: a.platforms.map((p) => PLATFORM_NAME[p]).join('\n') },
     {
       key: 'audience',
