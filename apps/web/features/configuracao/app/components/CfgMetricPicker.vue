@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Seletor de métricas em dois campos (ajuste de produto 14/10): primeiro a ÁREA,
-// depois a métrica daquela área. Criar métrica só aparece com a área escolhida.
+// depois a MÉTRICA da área em dropdown (ajuste de 15/10). Criar métrica só
+// aparece com a área escolhida.
 import type { MetricDefinition } from '@faro/contracts';
 
 const props = defineProps<{
@@ -30,6 +31,24 @@ watch(
   },
   { immediate: true },
 );
+
+// Dropdown da métrica: seleção única mostra a escolhida; múltipla funciona como "adicionar".
+const metricSelect = computed({
+  get: () => (props.multiple ? '' : (props.selected.find((id) => byId.value.get(id)?.section === area.value) ?? '')),
+  set: (id: string) => {
+    if (!id) return;
+    if (!props.multiple) {
+      const current = props.selected[0];
+      if (current === id) return;
+      if (current) emit('toggle', current); // limpa a atual antes de trocar
+      emit('toggle', id);
+    } else if (!props.selected.includes(id)) {
+      emit('toggle', id);
+    }
+  },
+});
+
+const singleChosen = computed(() => (!props.multiple && props.selected[0] ? byId.value.get(props.selected[0]) : undefined));
 </script>
 
 <template>
@@ -43,28 +62,22 @@ watch(
         </select>
       </div>
       <div>
-        <span class="sub" style="display: block">Métrica{{ multiple ? 's' : '' }} da área</span>
-        <div v-if="area" class="chips" style="margin-top: 6px">
-          <span v-for="m in daArea" :key="m.id" class="tipwrap">
-            <button
-              type="button"
-              class="chip"
-              :aria-pressed="selected.includes(m.id)"
-              :disabled="disabledIds?.includes(m.id)"
-              :aria-describedby="`${uid}-${m.id}`"
-              @click="emit('toggle', m.id)"
-            >
-              {{ m.name }}<span v-if="m.status === 'rascunho'" class="small muted"> · rascunho</span>
-            </button>
-            <span :id="`${uid}-${m.id}`" role="tooltip" class="tip">{{ m.definition }}</span>
-          </span>
-          <button v-if="allowCreate" type="button" class="chip add" @click="emit('create', area as MetricDefinition['section'])">
-            + Criar métrica em {{ area }}
-          </button>
-        </div>
-        <p v-else class="small muted" style="margin: 8px 0 0">Escolha a área para ver as métricas.</p>
+        <label class="sub" :for="`${uid}-met`">{{ multiple ? 'Adicionar métrica da área' : 'Métrica da área' }}</label>
+        <select :id="`${uid}-met`" v-model="metricSelect" :disabled="!area">
+          <option value="" disabled>{{ area ? (multiple ? 'Adicionar métrica…' : 'Escolha a métrica…') : 'Escolha a área primeiro' }}</option>
+          <option v-for="m in daArea" :key="m.id" :value="m.id" :disabled="disabledIds?.includes(m.id) || (multiple && selected.includes(m.id))">
+            {{ m.name }}{{ m.status === 'rascunho' ? ' · rascunho' : '' }}
+          </option>
+        </select>
+        <button v-if="allowCreate && area" type="button" class="chip add" style="margin-top: 8px" @click="emit('create', area as MetricDefinition['section'])">
+          + Criar métrica em {{ area }}
+        </button>
       </div>
     </div>
+
+    <p v-if="singleChosen" class="small muted" style="margin: 8px 0 0">
+      <b>{{ singleChosen.section }} · {{ singleChosen.name }}</b> — {{ singleChosen.definition }}
+    </p>
     <p v-if="multiple && chosen.length" class="small" style="margin: 8px 0 0">
       Selecionadas:
       <button
@@ -72,7 +85,7 @@ watch(
         :key="m.id"
         type="button"
         class="chip mini"
-        :title="`Remover ${m.name}`"
+        :title="`${m.definition} (clique para remover)`"
         @click="emit('toggle', m.id)"
       >
         {{ m.section }} · {{ m.name }} ×
@@ -86,7 +99,4 @@ watch(
 .picker { align-items: start; }
 .picker select { width: 100%; }
 .mini { margin: 2px 4px 0 0; font-size: 12.5px; }
-.tipwrap { position: relative; display: inline-flex; }
-.tip { position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 10; width: max-content; max-width: 280px; background: var(--ink); color: var(--bg); font-size: 12.5px; padding: 8px 10px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
-.tipwrap:hover .tip, .tipwrap:focus-within .tip { opacity: 1; }
 </style>
