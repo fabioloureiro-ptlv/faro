@@ -11,6 +11,7 @@ import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
 import { addCustomShortcut, allShortcuts } from './custom.ts';
 import { BASE_CLIENTES, buildShortcut, ImportPayloadSchema, planImport, verifySqlSegments } from './import.ts';
+import { checkPackage, type PackageRunner } from './package.ts';
 import { audienceRuleToSql, PROJECT } from './rule-sql.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
@@ -148,4 +149,55 @@ export async function publicoRoutes(app: FastifyInstance) {
     const plan = await verifySqlSegments(planImport(parsed.data, allShortcuts()), dryRunColumns);
     return { importados: plan.novos.map((s) => addCustomShortcut(s)), ignorados: plan.ignorados };
   });
+
+  // Pacote de segmento (saída da skill criar-segmento-faro): `check` só confere; o POST confere de novo
+  // e adiciona ao catálogo. Nada é gravado se alguma verificação falhar.
+  app.post('/publico/audiences/package/check', async (req) => {
+    requireActor(req);
+    const { ok, verificacoes, resumo } = await checkPackage(req.body, allShortcuts(), bigQueryRunner());
+    return { ok, verificacoes, ...(resumo ? { resumo } : {}) };
+  });
+
+  app.post('/publico/audiences/package', async (req, reply) => {
+    requireActor(req);
+    const r = await checkPackage(req.body, allShortcuts(), bigQueryRunner());
+    if (!r.ok || !r.shortcut)
+      throw new HttpError(
+        422,
+        'pacote_invalido',
+        'O pacote não passou nas verificações; nada foi adicionado.',
+        r.verificacoes.filter((x) => x.status === 'erro').map((x) => ({ id: x.id, message: `${x.rotulo}: ${x.detalhe ?? ''}` })),
+      );
+    try {
+      reply.code(201);
+      return { shortcut: addCustomShortcut(r.shortcut), verificacoes: r.verificacoes, resumo: r.resumo };
+    } catch (e) {
+      throw new HttpError(409, 'segmento_existente', (e as Error).message);
+    }
+  });
+}
+
+/** Execução real no BigQuery para as verificações do pacote; erros de credencial viram aviso, não bloqueio. */
+function bigQueryRunner(): PackageRunner {
+  const client = async () => {
+    const { BigQuery } = await import('@google-cloud/bigquery');
+    return new BigQuery({ projectId: PROJECT });
+  };
+  const withParams = (params: Record<string, number>) => (Object.keys(params).length ? { params } : {});
+  return {
+    async dryRun(sql, params) {
+      const bq = await client();
+      const [job] = await bq.createQueryJob({ query: sql, ...withParams(params), dryRun: true });
+      const stats = job.metadata.statistics;
+      const fields = (stats?.query?.schema?.fields ?? []) as { name: string }[];
+      return { gigabytes: Math.round((Number(stats?.totalBytesProcessed) / 1e9) * 10) / 10, colunas: fields.map((f) => f.name) };
+    },
+    async count(sql, params) {
+      const bq = await client();
+      const query = `SELECT COUNT(*) AS linhas, COUNT(DISTINCT cuid) AS clientes, COUNTIF(cuid IS NULL) AS sem_cuid FROM (\n${sql.replace(/;\s*$/, '')}\n)`;
+      const [rows] = await bq.query({ query, ...withParams(params) });
+      const r = rows[0] as { linhas: number; clientes: number; sem_cuid: number };
+      return { linhas: Number(r.linhas), clientes: Number(r.clientes), semCuid: Number(r.sem_cuid) };
+    },
+  };
 }

@@ -6,14 +6,14 @@
 import { reactive } from 'vue';
 import { useAsyncData, useHead } from '#imports';
 import { defaultAudienceParams } from '@faro/contracts';
-import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
+import { ApiError, useFaroApi, type PackageCheck } from '~~/features/configuracao/app/composables/useFaroApi';
 
 useHead({ title: 'Segmentos' });
 
 const api = useFaroApi();
 const REPO_SQLS = 'https://github.com/fabioloureiro-ptlv/faro/tree/main/data/models/audiences';
 
-const { data: catalogo } = await useAsyncData('segmentos', () => api.audiencesFull());
+const { data: catalogo, refresh } = await useAsyncData('segmentos', () => api.audiencesFull());
 
 const pct = (x: number) => `${(x * 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 const nf = (n: number) => n.toLocaleString('pt-BR');
@@ -53,6 +53,82 @@ async function verQuery(id: string, hasParams: boolean) {
   }
 }
 
+// ---- Incluir novo segmento: cola o pacote que a skill criar-segmento-faro entrega ----
+const EXEMPLO_PACOTE = `{
+  "versao": 1,
+  "segmento": {
+    "id": "sem-compra",
+    "name": "Clientes sem compra",
+    "descricao": "Clientes cuja última compra foi há mais de N dias",
+    "dyAttribute": "faro_aud_sem_compra",
+    "parameters": [
+      { "name": "dias_sem_compra", "label": "Dias sem compra (mais de)", "type": "integer", "default": 180, "min": 1, "max": 1825, "unit": "dias" }
+    ]
+  },
+  "sql": [
+    "SELECT public_id AS cuid, chv_cliente",
+    "FROM \`petlove-dataeng-prod-01.dw_corporativo.dim_cliente\`",
+    "WHERE public_id IS NOT NULL",
+    "  AND dt_ultima_compra < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL @dias_sem_compra DAY)"
+  ]
+}`;
+const novo = reactive({
+  aberto: false,
+  texto: '',
+  conferido: '', // texto que passou na conferência: mudou o texto, confere de novo
+  busy: '' as '' | 'check' | 'add',
+  erro: '',
+  resultado: null as PackageCheck | null,
+  adicionado: '',
+});
+const STATUS_LABEL = { ok: 'OK', erro: 'Erro', aviso: 'Atenção', pulado: 'Não conferido' } as const;
+const podeAdicionar = () => !!novo.resultado?.ok && novo.conferido === novo.texto && !novo.busy;
+
+function lerPacote(): unknown | undefined {
+  novo.erro = '';
+  try {
+    return JSON.parse(novo.texto);
+  } catch {
+    novo.erro = 'Isso não é um JSON válido. Cole exatamente o que a skill entregou.';
+    return undefined;
+  }
+}
+
+async function conferir() {
+  const pacote = lerPacote();
+  novo.adicionado = '';
+  if (pacote === undefined) return;
+  novo.busy = 'check';
+  novo.resultado = null;
+  try {
+    novo.resultado = await api.segmentPackageCheck(pacote);
+    novo.conferido = novo.texto;
+  } catch (e) {
+    novo.erro = e instanceof ApiError ? e.message : 'Não foi possível conferir o pacote.';
+  } finally {
+    novo.busy = '';
+  }
+}
+
+async function adicionar() {
+  const pacote = lerPacote();
+  if (pacote === undefined || !podeAdicionar()) return;
+  novo.busy = 'add';
+  try {
+    const r = await api.segmentPackageAdd(pacote);
+    novo.adicionado = r.shortcut.name;
+    novo.texto = '';
+    novo.conferido = '';
+    novo.resultado = null;
+    novo.aberto = false;
+    await refresh();
+  } catch (e) {
+    novo.erro = e instanceof ApiError ? [e.message, ...(e.body.details ?? []).map((d) => d.message)].join(' ') : 'Não foi possível adicionar o segmento.';
+  } finally {
+    novo.busy = '';
+  }
+}
+
 async function contar(id: string, hasParams: boolean) {
   const e = st(id);
   e.busy = 'count';
@@ -73,12 +149,59 @@ async function contar(id: string, hasParams: boolean) {
 <template>
   <main class="pagina">
     <header class="topo">
-      <h1>Segmentos</h1>
+      <div class="topo-linha">
+        <h1>Segmentos</h1>
+        <button type="button" class="primario" :aria-expanded="novo.aberto" aria-controls="novo-segmento" @click="novo.aberto = !novo.aberto">
+          {{ novo.aberto ? 'Fechar' : '+ Incluir novo segmento' }}
+        </button>
+      </div>
       <p class="sub">
         Cada segmento tem uma query (uma linha por cliente, com <code>cuid</code>) e, quando faz sentido, parâmetros. As queries ficam em
         <a :href="REPO_SQLS" target="_blank" rel="noopener">data/models/audiences</a>.
       </p>
     </header>
+
+    <p v-if="novo.adicionado" role="status" class="sucesso">Segmento <strong>{{ novo.adicionado }}</strong> adicionado ao catálogo. Já aparece na etapa de Público do wizard.</p>
+
+    <section v-if="novo.aberto" id="novo-segmento" class="card nova" aria-labelledby="nova-title">
+      <h2 id="nova-title">Incluir novo segmento</h2>
+      <ol class="passos">
+        <li>No Claude Code, rode a skill <code>criar-segmento-faro</code> e descreva o público.</li>
+        <li>Copie o pacote em JSON que a skill entrega no final.</li>
+        <li>Cole abaixo e confira. O Faro roda a query no BigQuery e só libera se ela devolver <code>cuid</code> e uma linha por cliente.</li>
+      </ol>
+      <label class="campo" for="novo-json">
+        <span>Pacote do segmento (JSON)</span>
+        <textarea id="novo-json" v-model="novo.texto" rows="10" spellcheck="false" placeholder="Cole aqui o JSON da skill" />
+      </label>
+      <details class="exemplo">
+        <summary>Ver o formato do pacote</summary>
+        <pre>{{ EXEMPLO_PACOTE }}</pre>
+        <p class="meta">
+          <code>sql</code> pode ser texto ou uma lista de linhas. Todo <code>@parametro</code> usado na query precisa estar em <code>parameters</code>, e o
+          contrário também. <code>share</code> é opcional: sem ele, o Faro calcula pela contagem.
+        </p>
+      </details>
+      <div class="acoes-form">
+        <button type="button" :disabled="!novo.texto.trim() || !!novo.busy" @click="conferir">
+          {{ novo.busy === 'check' ? 'Conferindo no BigQuery…' : 'Conferir pacote' }}
+        </button>
+        <button type="button" class="primario" :disabled="!podeAdicionar()" @click="adicionar">
+          {{ novo.busy === 'add' ? 'Adicionando…' : 'Adicionar ao catálogo' }}
+        </button>
+        <span v-if="novo.resultado?.ok && novo.conferido !== novo.texto" class="meta">O texto mudou: confira de novo.</span>
+      </div>
+      <p v-if="novo.erro" role="alert" class="erro">{{ novo.erro }}</p>
+      <ul v-if="novo.resultado" class="verificacoes" aria-label="Verificações do pacote">
+        <li v-for="x in novo.resultado.verificacoes" :key="x.id" :class="x.status">
+          <span class="selo">{{ STATUS_LABEL[x.status] }}</span>
+          <span><strong>{{ x.rotulo }}</strong><template v-if="x.detalhe"> — {{ x.detalhe }}</template></span>
+        </li>
+      </ul>
+      <p v-if="novo.resultado?.ok" class="sucesso">
+        Pronto para entrar: <strong>{{ novo.resultado.resumo?.name }}</strong>, atributo DY <code>{{ novo.resultado.resumo?.dyAttribute }}</code>.
+      </p>
+    </section>
 
     <ul class="lista">
       <li v-for="s in catalogo ?? []" :key="s.id" class="card">
@@ -131,8 +254,8 @@ async function contar(id: string, hasParams: boolean) {
     </ul>
 
     <p class="rodape">
-      Para incluir um segmento novo, adicione a query em <code>data/models/audiences/</code> e uma entrada em <code>catalog.json</code> (nome,
-      <code>sqlRef</code> e, se houver, <code>parameters</code>). Ele aparece aqui e na etapa de Público do wizard sem reiniciar a API.
+      Os segmentos incluídos por aqui ficam no servidor da API (<code>services/api/.data</code>), fora do catálogo versionado. Para versionar um deles,
+      mova a query para <code>data/models/audiences/</code> e a entrada para <code>catalog.json</code>.
     </p>
   </main>
 </template>
@@ -258,6 +381,98 @@ pre {
   font-size: 12px;
   overflow-x: auto;
   white-space: pre-wrap;
+}
+.topo-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.nova {
+  margin-bottom: 20px;
+}
+.passos {
+  margin: 8px 0 14px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.campo {
+  display: block;
+}
+.campo span {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.campo textarea {
+  width: 100%;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  resize: vertical;
+}
+.exemplo {
+  margin-top: 10px;
+}
+.exemplo summary {
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.acoes-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.verificacoes {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.verificacoes li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+}
+.selo {
+  flex: none;
+  min-width: 96px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+}
+.verificacoes .ok .selo {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.verificacoes .erro .selo {
+  background: var(--risk-soft);
+  color: var(--risk);
+}
+.verificacoes .aviso .selo {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.sucesso {
+  color: var(--ok);
+  margin: 12px 0 0;
 }
 .rodape {
   margin: 20px 0 0;

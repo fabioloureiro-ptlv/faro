@@ -40,6 +40,19 @@ export interface DyCampaignRow {
   observedSplit: number[];
 }
 
+export interface PackageVerification {
+  id: string;
+  rotulo: string;
+  status: 'ok' | 'erro' | 'aviso' | 'pulado';
+  detalhe?: string;
+}
+
+export interface PackageCheck {
+  ok: boolean;
+  verificacoes: PackageVerification[];
+  resumo?: { id: string; name: string; dyAttribute: string; share?: number; clientes?: number; gigabytes?: number; parameters: string[] };
+}
+
 export interface FaroEventRow {
   id: number;
   type: string;
@@ -110,6 +123,10 @@ export function useFaroApi() {
       }),
     // Tela /segmento: catálogo completo (com query e parâmetros).
     audiencesFull: () => call<(AudienceShortcut & { origem: string })[]>('/publico/audiences'),
+    // Pacote de segmento (saída da skill criar-segmento-faro): conferir sem gravar, e adicionar ao catálogo.
+    segmentPackageCheck: (pacote: unknown) => call<PackageCheck>('/publico/audiences/package/check', { method: 'POST', body: pacote }),
+    segmentPackageAdd: (pacote: unknown) =>
+      call<PackageCheck & { shortcut: AudienceShortcut }>('/publico/audiences/package', { method: 'POST', body: pacote }),
     templates: () => call<Template[]>('/templates'),
   };
 }
