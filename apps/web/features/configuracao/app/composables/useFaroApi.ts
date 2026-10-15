@@ -102,13 +102,12 @@ export function useFaroApi() {
       }),
     // Tela /segmento: catálogo completo, preview de regra nova e aprovação.
     audiencesFull: () => call<(AudienceShortcut & { origem: string })[]>('/publico/audiences'),
-    audiencePreview: (rule: unknown, run: boolean) =>
-      call<{ sql: string; gigabytes: number; clientes?: number; share?: number }>('/publico/audiences/preview', {
-        method: 'POST',
-        body: { rule, run },
-      }),
-    audienceCreate: (body: { name: string; rule: unknown; clientes?: number; share?: number }) =>
-      call<AudienceShortcut>('/publico/audiences', { method: 'POST', body }),
+    // Segmentos aprovados no artefato "Segmentos": cola o JSON exportado de lá.
+    audienceImport: (payload: unknown) =>
+      call<{ importados: AudienceShortcut[]; ignorados: { name: string; motivo: string; detalhe: string }[] }>(
+        '/publico/audiences/import',
+        { method: 'POST', body: payload },
+      ),
     templates: () => call<Template[]>('/templates'),
   };
 }

@@ -29,7 +29,8 @@ const PROPERTY_SQL: Record<string, (values: string[], op: 'eq' | 'in' | 'neq') =
   },
 };
 
-const esc = (s: string) => s.replaceAll("'", "\\'");
+// Barra primeiro: um valor terminado em `\` ou com `\'` fecharia o literal e injetaria SQL.
+const esc = (s: string) => s.replaceAll('\\', '\\\\').replaceAll("'", "\\'");
 
 function conditionSql(c: AudienceCondition): string {
   switch (c.type) {

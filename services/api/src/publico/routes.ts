@@ -9,13 +9,11 @@ import { z } from 'zod';
 import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
-import { addCustomShortcut, allShortcuts, slugAudienceId } from './custom.ts';
+import { addCustomShortcut, allShortcuts } from './custom.ts';
+import { BASE_CLIENTES, buildShortcut, ImportPayloadSchema, planImport } from './import.ts';
 import { audienceRuleToSql, PROJECT } from './rule-sql.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
-// DECISAO-PENDENTE: base de clientes com public_id em 14/10 (dim_cliente), usada
-// para converter a volumetria contada em participação (share) do segmento novo.
-const BASE_CLIENTES = 15_270_545;
 
 function sqlFor(a: AudienceShortcut): { sql: string; source: 'rule' | 'sqlRef' } | undefined {
   if (a.sqlRef) {
@@ -109,15 +107,7 @@ export async function publicoRoutes(app: FastifyInstance) {
   app.post('/publico/audiences', async (req, reply) => {
     requireActor(req);
     const input = CreateInput.parse(req.body ?? {});
-    const id = slugAudienceId(input.name);
-    const share = input.share ?? (input.clientes != null ? Math.round((input.clientes / BASE_CLIENTES) * 10000) / 10000 : 1);
-    const shortcut: AudienceShortcut = {
-      id,
-      name: input.name.trim(),
-      share: Math.min(1, Math.max(0.0001, share)),
-      dyAttribute: `faro_aud_${id.replaceAll('-', '_')}`,
-      rule: input.rule,
-    };
+    const shortcut = buildShortcut(input);
     try {
       reply.code(201);
       // Aprovado: entra no catálogo e, por consequência, na etapa de Público do wizard.
@@ -125,5 +115,18 @@ export async function publicoRoutes(app: FastifyInstance) {
     } catch (e) {
       throw new HttpError(409, 'segmento_existente', (e as Error).message);
     }
+  });
+
+  // Segmentos montados e aprovados fora do app (artefato "Segmentos"): a regra é
+  // revalidada e o SQL regenerado aqui; o que já existe ou não compila é devolvido
+  // em `ignorados` sem derrubar o restante do lote.
+  app.post('/publico/audiences/import', async (req) => {
+    requireActor(req);
+    const parsed = ImportPayloadSchema.safeParse(req.body);
+    if (!parsed.success)
+      throw new HttpError(400, 'formato_invalido', 'Envie uma lista de segmentos ou { "segmentos": [...] }.');
+    if (!parsed.data.length) throw new HttpError(400, 'lote_vazio', 'Nenhum segmento no JSON.');
+    const plan = planImport(parsed.data, allShortcuts());
+    return { importados: plan.novos.map((s) => addCustomShortcut(s)), ignorados: plan.ignorados };
   });
 }

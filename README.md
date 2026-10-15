@@ -37,6 +37,16 @@ npm test && npm run typecheck && npm run lint
 | `npm run job:sync-results -w @faro/api` | Resultados reais dos testes (dy_results.sql, ~10 GB/45 dias) → `.data/results.json`; o painel e `GET /results/:faroId` passam a usar números reais |
 | `npm run job:publish-audiences -w @faro/api -- --dry-run` | Públicos da frente 3: valida/gera listas `chv_cliente,cuid` em `.data/audiences/` (subida na User Data API ainda manual) |
 
+`job:sync-dy` e `job:sync-results` também rodam pelo botão **Atualizar da DY** da Lista do Painel (`POST /painel/dy-refresh`, ~1 min); a API segue no ar e relê os arquivos ao terminar.
+
+## Segmentos novos
+
+O catálogo (fixture + importados) aparece em `/segmento`. Um segmento novo nasce no artefato **Segmentos Faro** (claude.ai): a pessoa descreve o público em texto corrido, o Claude sugere a **regra** (`AudienceRule`), o artefato gera a query, roda a volumetria no BigQuery e, aprovado, salva no catálogo do artefato. Para usar no Faro: no artefato, *Exportar para o Faro*; em `/segmento`, colar o JSON em *Importar do artefato* (`POST /publico/audiences/import`). A regra é revalidada e o SQL regenerado pelo gerador do Faro (`publico/rule-sql.ts`); o que já existe ou não compila volta em `ignorados`. O segmento importado aparece na etapa de Público do wizard.
+
+O artefato embute uma porta JS do gerador de SQL; depois de mexer em `rule-sql.ts`, rode `node services/api/scripts/check-artifact-sql.ts <segmentos-faro.html>` para conferir que as duas continuam idênticas, e `node services/api/scripts/export-catalog-seed.ts <pasta>` para regerar o catálogo inicial do artefato.
+
+Se o banco local (`services/api/.data/pglite`) ficar ilegível por um encerramento brusco, a API o guarda em `pglite-corrompido-<data>` e recria a partir das fixtures; rascunhos locais se perdem.
+
 ## Estrutura
 
 | Pasta | O quê |

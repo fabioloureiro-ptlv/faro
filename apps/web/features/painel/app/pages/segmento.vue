@@ -1,12 +1,10 @@
 <script setup lang="ts">
-// Tela /segmento (pedido de produto 15/10): catálogo de segmentos vivo (fixture +
-// aprovados aqui), link para o método no repositório e criação de segmento novo
-// com reuso-primeiro (sugestão do catálogo), preview de custo e volumetria real
-// no BigQuery antes do OK. Aprovado, o segmento entra no catálogo e aparece na
-// etapa de Público do wizard automaticamente (services/api/src/publico/custom.ts).
-import { computed, reactive, ref } from 'vue';
+// Tela /segmento (pedido de produto 15/10): catálogo vivo (fixture + importados), link
+// para o método no repositório e para o artefato onde o segmento novo é montado
+// (texto corrido → Claude sugere a regra → volumetria → aprovação). O segmento aprovado
+// lá chega aqui por importação de JSON e passa a aparecer na etapa de Público do wizard.
+import { reactive, ref } from 'vue';
 import { useAsyncData, useHead } from '#imports';
-import type { AudienceShortcut } from '@faro/contracts';
 import PainelNav from '~~/features/painel/app/components/PainelNav.vue';
 import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
 
@@ -15,6 +13,8 @@ useHead({ title: 'Segmentos · Faro' });
 const api = useFaroApi();
 const REPO_CATALOGO = 'https://github.com/fabioloureiro-ptlv/faro#readme';
 const REPO_SQLS = 'https://github.com/fabioloureiro-ptlv/faro/tree/main/data/models/audiences';
+const ARTEFATO = 'https://claude.ai/artifact/Wc1zkoyEGz3Lj3nmPETreA';
+const EXEMPLO_JSON = '{ "versao": 1, "segmentos": [ { "name": "…", "rule": { … }, "clientes": 143762 } ] }';
 
 const { data: catalogo, refresh } = await useAsyncData('segmentos', () => api.audiencesFull());
 
@@ -61,108 +61,40 @@ async function contar(id: string) {
   }
 }
 
-// ---- Criação de segmento novo ----
-type CondForm = {
-  type: 'comprou' | 'propriedade' | 'evento';
-  dimension: 'categoria' | 'marca' | 'item';
-  values: string;
-  windowDays: number;
-  key: 'especie_pet' | 'clube' | 'plano_saude';
-  op: 'eq' | 'neq';
-  eventName: string;
-  minCount: number;
+// ---- Importar do artefato ----
+const texto = ref('');
+const importBusy = ref(false);
+const importErro = ref('');
+const importado = ref<{ importados: { id: string; name: string }[]; ignorados: { name: string; motivo: string; detalhe: string }[] } | null>(null);
+
+const MOTIVO_LABEL: Record<string, string> = {
+  ja_existe: 'já está no catálogo',
+  formato_invalido: 'formato inválido',
+  regra_nao_suportada: 'regra não suportada',
 };
 
-const novoCond = (): CondForm => ({
-  type: 'comprou',
-  dimension: 'categoria',
-  values: '',
-  windowDays: 90,
-  key: 'especie_pet',
-  op: 'eq',
-  eventName: '',
-  minCount: 1,
-});
-
-const nome = ref('');
-const ruleOp = ref<'and' | 'or'>('and');
-const conds = ref<CondForm[]>([novoCond()]);
-
-// Reuso-primeiro (SEG-01): antes de criar, mostramos o que já existe parecido.
-// Heurística local por palavras do nome e dos valores — não é busca semântica.
-const sugestoes = computed(() => {
-  const termos = `${nome.value} ${conds.value.map((c) => c.values).join(' ')}`
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .split(/[^a-z0-9]+/)
-    .filter((t) => t.length >= 4);
-  if (!termos.length || !catalogo.value) return [];
-  return catalogo.value.filter((s) => {
-    const alvo = `${s.name} ${s.id}`.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return termos.some((t) => alvo.includes(t));
-  });
-});
-
-function toRule() {
-  const conditions = conds.value.map((c) => {
-    const values = c.values
-      .split(',')
-      .map((v) => v.trim())
-      .filter(Boolean);
-    if (c.type === 'comprou') return { type: 'comprou', dimension: c.dimension, values, windowDays: c.windowDays };
-    if (c.type === 'evento')
-      return { type: 'evento', eventName: c.eventName.trim(), windowDays: c.windowDays, ...(c.minCount > 1 ? { minCount: c.minCount } : {}) };
-    // propriedade: clube e plano_saude são flags (valor irrelevante para o gerador de SQL).
-    return { type: 'propriedade', key: c.key, op: c.op, values: c.key === 'especie_pet' ? values : ['1'] };
-  });
-  return { op: ruleOp.value, conditions };
-}
-
-const preview = ref<{ sql: string; gigabytes: number; clientes?: number; share?: number } | null>(null);
-const previewBusy = ref<false | 'sql' | 'count' | 'create'>(false);
-const previewErro = ref('');
-const criado = ref<AudienceShortcut | null>(null);
-
-async function gerarPreview(run: boolean) {
-  previewBusy.value = run ? 'count' : 'sql';
-  previewErro.value = '';
+async function importar() {
+  importErro.value = '';
+  importado.value = null;
+  let payload: unknown;
   try {
-    const r = await api.audiencePreview(toRule(), run);
-    preview.value = { ...(preview.value ?? { sql: '', gigabytes: 0 }), ...r };
-  } catch (e) {
-    previewErro.value = e instanceof ApiError ? e.message : 'Falha ao gerar o preview.';
-  } finally {
-    previewBusy.value = false;
+    payload = JSON.parse(texto.value);
+  } catch {
+    importErro.value = 'Isso não é um JSON válido. Cole exatamente o que o artefato copiou.';
+    return;
   }
-}
-
-async function aprovar() {
-  if (!preview.value) return;
-  previewBusy.value = 'create';
-  previewErro.value = '';
+  importBusy.value = true;
   try {
-    criado.value = await api.audienceCreate({
-      name: nome.value.trim(),
-      rule: toRule(),
-      clientes: preview.value.clientes,
-      share: preview.value.share,
-    });
-    await refresh();
-    nome.value = '';
-    conds.value = [novoCond()];
-    preview.value = null;
+    importado.value = await api.audienceImport(payload);
+    if (importado.value.importados.length) {
+      texto.value = '';
+      await refresh();
+    }
   } catch (e) {
-    previewErro.value = e instanceof ApiError ? e.message : 'Falha ao salvar o segmento.';
+    importErro.value = e instanceof ApiError ? e.message : 'Falha ao importar.';
   } finally {
-    previewBusy.value = false;
+    importBusy.value = false;
   }
-}
-
-// Mudou a regra ou o nome → o preview antigo não vale mais como base do OK.
-function invalidar() {
-  preview.value = null;
-  criado.value = null;
 }
 </script>
 
@@ -232,125 +164,50 @@ function invalidar() {
     </section>
 
     <section class="card" aria-labelledby="h-novo">
-      <h2 id="h-novo">Criar segmento novo</h2>
+      <h2 id="h-novo">Precisa de um segmento novo?</h2>
       <p class="muted">
-        Descreva o público por condições; o Faro gera a query (1 linha por cliente, com <code>cuid</code> para o
-        DY), estima o custo e conta a volumetria real antes de você aprovar.
+        O segmento novo é montado no artefato:
+        você descreve o público em texto corrido, o Claude sugere a regra e a query, e você confere a volumetria e
+        aprova. Depois traga o resultado para cá.
       </p>
+      <ol class="passos">
+        <li>
+          Abra o <a :href="ARTEFATO" target="_blank" rel="noopener">artefato Segmentos Faro</a> e crie e aprove o
+          segmento.
+        </li>
+        <li>No artefato, abra <em>Exportar para o Faro</em> e copie o JSON.</li>
+        <li>Cole abaixo e importe. O segmento passa a aparecer no catálogo e na etapa de Público do wizard.</li>
+      </ol>
 
-      <label class="campo">
-        <span>Nome do segmento</span>
-        <input v-model="nome" type="text" placeholder="ex.: Compradores de ração de gato (6 meses)" @input="invalidar" />
+      <label class="campo" for="import-json">
+        <span>JSON exportado do artefato</span>
+        <textarea
+          id="import-json"
+          v-model="texto"
+          rows="6"
+          spellcheck="false"
+          :placeholder="EXEMPLO_JSON"
+        />
       </label>
-
-      <aside v-if="sugestoes.length" class="sugestao" aria-live="polite">
-        <strong>Já temos no catálogo algo parecido</strong> — reusar evita segmento duplicado:
-        <ul>
-          <li v-for="s in sugestoes" :key="s.id">{{ s.name }} ({{ pct(s.share) }} da base)</li>
-        </ul>
-      </aside>
-
-      <fieldset class="regra">
-        <legend>
-          Clientes que atendem
-          <select v-model="ruleOp" @change="invalidar">
-            <option value="and">todas as condições</option>
-            <option value="or">qualquer condição</option>
-          </select>
-        </legend>
-
-        <div v-for="(c, i) in conds" :key="i" class="cond">
-          <select v-model="c.type" @change="invalidar">
-            <option value="comprou">Comprou</option>
-            <option value="propriedade">Propriedade</option>
-            <option value="evento">Evento GA4</option>
-          </select>
-
-          <template v-if="c.type === 'comprou'">
-            <select v-model="c.dimension" @change="invalidar">
-              <option value="categoria">categoria</option>
-              <option value="marca">marca</option>
-              <option value="item">item (chv_produto)</option>
-            </select>
-            <input v-model="c.values" type="text" placeholder="valores separados por vírgula" @input="invalidar" />
-            <label class="inline">
-              nos últimos
-              <input v-model.number="c.windowDays" type="number" min="1" max="730" @input="invalidar" /> dias
-            </label>
-          </template>
-
-          <template v-else-if="c.type === 'propriedade'">
-            <select v-model="c.key" @change="invalidar">
-              <option value="especie_pet">espécie do pet</option>
-              <option value="clube">assinante do Clube</option>
-              <option value="plano_saude">plano de saúde ativo</option>
-            </select>
-            <select v-model="c.op" @change="invalidar">
-              <option value="eq">é</option>
-              <option value="neq">não é</option>
-            </select>
-            <input
-              v-if="c.key === 'especie_pet'"
-              v-model="c.values"
-              type="text"
-              placeholder="cachorro, gato, passaro, roedor, reptil, peixe"
-              @input="invalidar"
-            />
-          </template>
-
-          <template v-else>
-            <input v-model="c.eventName" type="text" placeholder="nome do evento (ex.: add_to_cart)" @input="invalidar" />
-            <label class="inline">
-              nos últimos
-              <input v-model.number="c.windowDays" type="number" min="1" max="730" @input="invalidar" /> dias
-            </label>
-            <label class="inline">
-              mínimo <input v-model.number="c.minCount" type="number" min="1" @input="invalidar" /> vezes
-            </label>
-          </template>
-
-          <button v-if="conds.length > 1" type="button" class="remover" @click="conds.splice(i, 1); invalidar()">
-            Remover
-          </button>
-        </div>
-
-        <button type="button" class="add" @click="conds.push(novoCond())">+ Adicionar condição</button>
-      </fieldset>
-
-      <div class="passos">
-        <button type="button" :disabled="previewBusy !== false" @click="gerarPreview(false)">
-          {{ previewBusy === 'sql' ? 'Gerando…' : '1 · Gerar SQL e custo' }}
-        </button>
-        <button type="button" :disabled="previewBusy !== false || !preview" @click="gerarPreview(true)">
-          {{ previewBusy === 'count' ? 'Contando…' : '2 · Contar volumetria' }}
-        </button>
-        <button
-          type="button"
-          class="aprovar"
-          :disabled="previewBusy !== false || !preview || preview.clientes === undefined || nome.trim().length < 4"
-          @click="aprovar"
-        >
-          {{ previewBusy === 'create' ? 'Salvando…' : '3 · Aprovar e adicionar ao catálogo' }}
+      <div class="linha">
+        <button type="button" class="aprovar" :disabled="importBusy || !texto.trim()" @click="importar">
+          {{ importBusy ? 'Importando…' : 'Importar no catálogo' }}
         </button>
       </div>
 
-      <p v-if="previewErro" role="alert" class="erro">{{ previewErro }}</p>
-
-      <div v-if="preview" class="resultado">
-        <p>
-          Custo estimado da query: <strong>{{ preview.gigabytes.toLocaleString('pt-BR') }} GB</strong>
-          <template v-if="preview.clientes !== undefined">
-            · Volumetria: <strong>{{ nf(preview.clientes) }}</strong> clientes
-            <template v-if="preview.share !== undefined">({{ pct(preview.share) }} da base com public_id)</template>
-          </template>
+      <p v-if="importErro" role="alert" class="erro">{{ importErro }}</p>
+      <div v-if="importado" class="resultado" role="status">
+        <p v-if="importado.importados.length" class="sucesso">
+          {{ importado.importados.length === 1 ? 'Segmento importado' : `${importado.importados.length} segmentos importados` }}:
+          <strong>{{ importado.importados.map((s) => s.name).join(', ') }}</strong>. Já disponível(is) na etapa de
+          Público do wizard.
         </p>
-        <pre>{{ preview.sql }}</pre>
+        <ul v-if="importado.ignorados.length" class="ignorados">
+          <li v-for="i in importado.ignorados" :key="i.name">
+            <strong>{{ i.name }}</strong> — {{ MOTIVO_LABEL[i.motivo] ?? i.motivo }}<span v-if="i.motivo !== 'ja_existe'">: {{ i.detalhe }}</span>
+          </li>
+        </ul>
       </div>
-
-      <p v-if="criado" class="sucesso" role="status">
-        Segmento <strong>{{ criado.name }}</strong> aprovado e adicionado ao catálogo (atributo DY
-        <code>{{ criado.dyAttribute }}</code>). Ele já aparece na etapa de Público ao criar um experimento.
-      </p>
     </section>
   </main>
 </template>
@@ -378,7 +235,8 @@ h1 {
   color: var(--muted);
   max-width: 78ch;
 }
-.sub a {
+.sub a,
+.card a {
   color: var(--brand);
 }
 .card {
@@ -463,12 +321,17 @@ pre {
 }
 .sucesso {
   color: var(--ok, #157f3d);
-  margin-top: 10px;
+}
+.passos {
+  margin: 8px 0 14px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .campo {
   display: block;
   margin: 12px 0;
-  max-width: 520px;
 }
 .campo span {
   display: block;
@@ -476,90 +339,36 @@ pre {
   font-weight: 600;
   margin-bottom: 4px;
 }
-.campo input,
-.cond input,
-.cond select,
-.regra legend select {
-  font: inherit;
-  font-size: 14px;
-  padding: 6px 8px;
+.campo textarea {
+  width: 100%;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
+  color: var(--ink);
+  resize: vertical;
 }
-.campo input {
-  width: 100%;
-}
-.sugestao {
-  border: 1px solid var(--warn, #b8860b);
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin: 10px 0;
-  font-size: 13.5px;
-}
-.sugestao ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-}
-.regra {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  margin: 14px 0;
-}
-.regra legend {
-  font-weight: 600;
-  font-size: 14px;
-  padding: 0 6px;
-}
-.cond {
+.linha {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--line);
-}
-.cond:last-of-type {
-  border-bottom: 0;
-}
-.cond input[type='text'] {
-  flex: 1;
-  min-width: 220px;
-}
-.cond input[type='number'] {
-  width: 70px;
-}
-.inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
-  color: var(--muted);
-}
-.remover {
-  color: var(--risk);
-}
-.add {
-  margin-top: 8px;
-}
-.passos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0;
-}
-.passos button {
-  padding: 8px 14px;
-  font-weight: 600;
 }
 .aprovar {
   background: var(--brand);
   border-color: var(--brand);
   color: #fff;
+  padding: 8px 14px;
+  font-weight: 600;
 }
 .resultado {
-  margin-top: 8px;
+  margin-top: 10px;
+}
+.ignorados {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13.5px;
 }
 .sr-only {
   position: absolute;
