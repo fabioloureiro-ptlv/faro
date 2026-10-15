@@ -39,6 +39,11 @@ export function buildShortcut(input: z.infer<typeof ImportItemSchema>): Audience
     name: input.name.trim(),
     share: Math.min(1, Math.max(0.0001, share)),
     dyAttribute: `faro_aud_${id.replaceAll('-', '_')}`,
+    // O seletor de público do wizard agrupa os atalhos por origem.
+    origin: {
+      system: 'bigquery',
+      label: input.rule ? 'regra do construtor de públicos, gerada em SQL (importada do artefato Segmentos)' : 'SQL livre aprovado no artefato Segmentos',
+    },
     // Com regra, o SQL é sempre regenerado a partir dela; só sem regra o SQL livre é guardado.
     ...(input.rule ? { rule: input.rule } : { sql: input.sql }),
   };
