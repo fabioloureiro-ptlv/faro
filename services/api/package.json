@@ -14,6 +14,7 @@
     "job:dy-consistency": "node src/jobs/dy-consistency.ts",
     "job:sync-dy": "node src/jobs/sync-dy-campaigns.ts",
     "job:publish-audiences": "node src/publico/jobs/publish-audiences.ts",
+    "job:sync-results": "node src/resultados/jobs/sync-results.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {

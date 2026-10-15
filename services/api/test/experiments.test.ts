@@ -53,7 +53,9 @@ describe('rascunho e faroId (CFG-10, CFG-01)', () => {
   it('cria a partir de template (frente 5)', async () => {
     const { experiment } = await createDraft(ctx.app, { templateId: 'tpl-teste-preco' });
     expect(experiment.templateId).toBe('tpl-teste-preco');
-    expect(experiment.design.primaryMetricId).toBe('receita_por_usuario');
+    // Biblioteca real da frente 5 (05-templates.md § 5): teste de preço decide por
+    // margem 2, não por receita (o mock da frente 1 usava receita_por_usuario).
+    expect(experiment.design.primaryMetricId).toBe('margem_2_por_usuario');
     const bad = await ctx.app.inject({ method: 'POST', url: '/experiments', headers: PM, payload: { templateId: 'x' } });
     expect(bad.statusCode).toBe(422);
   });

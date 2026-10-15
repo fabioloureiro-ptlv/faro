@@ -1,0 +1,39 @@
+{
+  "id": "relatorio-padrao",
+  "version": 1,
+  "sections": [
+    { "key": "cabecalho", "title": "Cabeçalho", "visible": true, "order": 1 },
+    { "key": "avisos", "title": "Avisos", "visible": true, "order": 2 },
+    { "key": "design", "title": "Design do experimento", "visible": true, "order": 3 },
+    { "key": "variantes", "title": "Variantes e split observado", "visible": true, "order": 4 },
+    { "key": "sintese", "title": "Síntese", "visible": true, "order": 5 },
+    { "key": "recomendacao", "title": "O que fazer", "visible": true, "order": 6 },
+    { "key": "metricas", "title": "Métricas", "visible": true, "order": 7 },
+    { "key": "saude", "title": "Saúde do teste", "visible": true, "order": 8 },
+    { "key": "detectabilidade", "title": "Detectabilidade", "visible": true, "order": 9 },
+    { "key": "metodologia", "title": "Como os números são calculados", "visible": true, "order": 10 }
+  ],
+  "metricSections": [
+    { "key": "engajamento", "title": "Engajamento" },
+    { "key": "ecom", "title": "eCom" },
+    { "key": "clube", "title": "Clube" },
+    { "key": "saude", "title": "Saúde" },
+    { "key": "fintech", "title": "Fintech" },
+    { "key": "retencao", "title": "Retenção" },
+    { "key": "atendimento", "title": "Atendimento" },
+    { "key": "operacao", "title": "Operação" }
+  ],
+  "copy": {
+    "aviso_srm": "O split observado difere do planejado (SRM). Investigue antes de ler os resultados.",
+    "aviso_maturacao": "Métricas com efeito tardio ainda estão maturando; os valores podem mudar.",
+    "aviso_split_instavel": "Dias com split instável foram excluídos da janela de leitura.",
+    "metodologia": "Usuários que viram mais de uma variante são excluídos. Proporções com Agresti-Caffo; efeitos em log-razão (delta method); Dunnett para mais de uma variante; guardas com Holm; exploratórias com Benjamini-Hochberg; leitura bayesiana com prior Normal(0; 0,03) no log da razão. Fonte: data/models/results/dy_results.sql."
+  },
+  "labels": {
+    "melhora_confirmada": { "text": "Melhora confirmada", "tone": "ok" },
+    "tendencia_de_melhora": { "text": "Tendência de melhora", "tone": "ok" },
+    "sem_tendencia": { "text": "Sem tendência", "tone": "neutral" },
+    "tendencia_de_queda": { "text": "Tendência de queda", "tone": "warn" },
+    "queda_confirmada": { "text": "Queda confirmada", "tone": "risk" }
+  }
+}

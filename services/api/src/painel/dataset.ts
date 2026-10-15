@@ -27,6 +27,7 @@ import { DY_EXPORT_PATH, fileDyExport, hasDyExportFile } from '../adapters/dy-ex
 import { readFileSync } from 'node:fs';
 import type { Db } from '../db/client.ts';
 import { listAudit, listEvents, listExperiments } from '../experiments/repository.ts';
+import { hasRealResults, realMetricResults } from '../resultados/results.ts';
 import { evaluateGovernance, orphanAlerts } from './governance/index.ts';
 
 // DECISAO-PENDENTE: dono dos alertas sem squad (órfãs) até o time definir.
@@ -137,9 +138,17 @@ export async function buildDataset(db: Db): Promise<PainelDataset> {
   const experiments = await listExperiments(db);
   const linkedCampaigns = linkCampaigns(base.campaigns, experiments);
   const today = addDays(base.asOf, 1);
+  // Frente 4: quando o sync de resultados já rodou, os números reais substituem a
+  // fixture para os testes vinculáveis; os demais seguem com a fixture.
+  let metricResults = base.metricResults;
+  if (hasRealResults()) {
+    const real = realMetricResults(experiments);
+    const covered = new Set(real.map((r) => r.faroId));
+    metricResults = [...base.metricResults.filter((r) => !covered.has(r.faroId)), ...real];
+  }
   return {
     experiments,
-    metricResults: base.metricResults,
+    metricResults,
     metrics: base.metrics,
     pages: base.pages,
     health: base.health,

@@ -1,0 +1,118 @@
+[
+  {
+    "id": "tpl-banner-home",
+    "version": 1,
+    "status": "publicado",
+    "name": "Banner ou bloco na home",
+    "description": "Troca de banner ou bloco de destaque na home.",
+    "whenToUse": "Mudanças de vitrine, destaque ou comunicação na home. Duração mínima de 14 dias; atenção à sobreposição com outros testes de home.",
+    "defaults": {
+      "design": { "primaryMetricId": "receita_por_usuario", "secondaryMetricIds": ["conversao", "cliques_recomendacao"], "guardrailMetricIds": ["margem_2_por_usuario"], "mdeRelative": 0.05 },
+      "hypothesisHint": "Se destacarmos [oferta] no banner da home, então a receita por usuário vai aumentar, porque o cliente encontra a oferta sem buscar.",
+      "contextChecklist": ["Qual o CTR atual do banner?", "Que evidência sugere que a troca melhora receita?"],
+      "allocation": { "pages": ["home"], "split": [0.5, 0.5], "trafficPercent": 100 },
+      "dy": { "campaignType": "custom_code", "namingPattern": "FARO-AAAA-NNNN | Home | <nome>", "labels": ["home"], "checklist": ["Selector do bloco conferido", "Fallback sem flicker"] }
+    },
+    "owner": "time-experimentacao@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-pdp",
+    "version": 1,
+    "status": "publicado",
+    "name": "Mudança na página de produto",
+    "description": "Alterações de layout ou informação na PDP.",
+    "whenToUse": "Mudanças que afetam a decisão de compra na página de produto.",
+    "defaults": {
+      "design": { "primaryMetricId": "conversao_carrinho", "secondaryMetricIds": ["conversao", "ticket_medio"], "guardrailMetricIds": ["tempo_carregamento"], "mdeRelative": 0.05 },
+      "allocation": { "pages": ["produto"], "split": [0.5, 0.5] }
+    },
+    "owner": "time-experimentacao@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-teste-preco",
+    "version": 1,
+    "status": "publicado",
+    "name": "Teste de preço ou desconto",
+    "description": "Variação de preço ou desconto exibido. Decide por margem, não por receita.",
+    "whenToUse": "Qualquer teste que mexa em preço, desconto ou cupom. Exige aprovação de Pricing.",
+    "defaults": {
+      "design": { "primaryMetricId": "margem_2_por_usuario", "secondaryMetricIds": ["receita_por_usuario", "conversao"], "guardrailMetricIds": ["ticket_medio"], "mdeRelative": 0.03 }
+    },
+    "lockedFields": ["design.guardrailMetricIds"],
+    "owner": "pricing@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-checkout",
+    "version": 1,
+    "status": "publicado",
+    "name": "Fluxo de checkout ou pagamento",
+    "description": "Mudanças no carrinho, checkout ou meios de pagamento.",
+    "whenToUse": "Fluxos sensíveis: sobreposição tratada como alta por padrão.",
+    "defaults": {
+      "design": { "primaryMetricId": "conversao", "secondaryMetricIds": ["receita_por_usuario"], "guardrailMetricIds": ["taxa_devolucao", "chamados_sac"], "mdeRelative": 0.03 },
+      "allocation": { "pages": ["checkout"], "split": [0.5, 0.5] }
+    },
+    "owner": "time-experimentacao@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-upsell-repet-clube",
+    "version": 1,
+    "status": "publicado",
+    "name": "Upsell de Repet ou Clube",
+    "description": "Ofertas de assinatura Repet ou adesão ao Clube.",
+    "whenToUse": "Testes de adesão a recorrência. Churn tem maturação: o relatório mostra 'ainda maturando'.",
+    "defaults": {
+      "design": { "primaryMetricId": "conversao_repet_nova", "secondaryMetricIds": ["receita_por_usuario", "conversao_clube"], "guardrailMetricIds": ["churn_clube", "cancelamento_repet"], "mdeRelative": 0.05 }
+    },
+    "owner": "time-experimentacao@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-funil-saude",
+    "version": 1,
+    "status": "publicado",
+    "name": "Funil de Saúde (cadastro, contratação, retenção)",
+    "description": "Mudanças no funil do plano de saúde.",
+    "whenToUse": "Aquisição e retenção de Saúde.",
+    "bu": "saude",
+    "defaults": {
+      "design": { "primaryMetricId": "conversao_saude", "secondaryMetricIds": ["vidas_por_usuario", "retencao_30d"], "guardrailMetricIds": ["churn_saude", "chamados_sac"], "mdeRelative": 0.05 },
+      "audience": { "description": "Clientes novos no plano de saúde (30 dias)", "source": "atalho", "estimatedShare": 0.004, "dyAttribute": "faro_aud_saude_novos_30d" }
+    },
+    "owner": "saude@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-oferta-fintech",
+    "version": 1,
+    "status": "publicado",
+    "name": "Oferta Fintech (cashback, crédito)",
+    "description": "Ofertas financeiras: cashback, crédito, parcelamento.",
+    "whenToUse": "Exige aprovação de Risco; inadimplência tem maturação.",
+    "bu": "fintech",
+    "defaults": {
+      "design": { "primaryMetricId": "conversao", "secondaryMetricIds": ["receita_por_usuario"], "guardrailMetricIds": [], "mdeRelative": 0.05 }
+    },
+    "lockedFields": ["design.primaryMetricId"],
+    "owner": "risco@example.com",
+    "updatedAt": "2026-10-15"
+  },
+  {
+    "id": "tpl-recomendacao",
+    "version": 1,
+    "status": "publicado",
+    "name": "Recomendação de produtos",
+    "description": "Vitrine ou estratégia de recomendação.",
+    "whenToUse": "Mudanças em widgets de recomendação (home, PDP, carrinho).",
+    "defaults": {
+      "design": { "primaryMetricId": "cliques_recomendacao", "secondaryMetricIds": ["conversao_carrinho", "receita_por_usuario"], "guardrailMetricIds": ["tempo_carregamento"], "mdeRelative": 0.05 },
+      "dy": { "campaignType": "recommendation", "namingPattern": "FARO-AAAA-NNNN | Reco | <nome>", "labels": ["recomendacao"], "checklist": ["Estratégia configurada", "Fallback de catálogo"] }
+    },
+    "owner": "time-experimentacao@example.com",
+    "updatedAt": "2026-10-15"
+  }
+]

@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { HttpError } from '../errors.ts';
 import { slugMetricId } from '../mocks/metric-catalog.ts';
+import { getCampaignTemplate, getReportTemplate, listCampaignTemplates } from '../templates/library.ts';
 import type { Ports } from '../ports.ts';
 import { requireActor } from '../http.ts';
 
@@ -36,4 +37,12 @@ export async function catalogRoutes(app: FastifyInstance, ports: Ports) {
   app.get('/catalog/pages', async () => ports.audience.pageCatalog());
   app.get('/catalog/audiences', async () => ports.audience.shortcuts());
   app.get('/templates', async () => ports.templates.list());
+  // Frente 5 (TPL-01/05): biblioteca completa e template de relatório para a UI de resultados.
+  app.get('/templates/full', async () => listCampaignTemplates());
+  app.get<{ Params: { id: string } }>('/templates/full/:id', async (req) => {
+    const t = getCampaignTemplate(req.params.id);
+    if (!t) throw new HttpError(404, 'template_inexistente', 'Template não encontrado.');
+    return t;
+  });
+  app.get('/report-template', async () => getReportTemplate());
 }

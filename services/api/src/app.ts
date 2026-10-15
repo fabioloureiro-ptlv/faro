@@ -7,11 +7,12 @@ import { catalogRoutes } from './catalog/routes.ts';
 import { experimentRoutes } from './experiments/routes.ts';
 import { createExperimentService } from './experiments/service.ts';
 import { painelRoutes } from './painel/routes.ts';
+import { resultadosRoutes } from './resultados/routes.ts';
 import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
 import { mockMetricCatalog } from './mocks/metric-catalog.ts';
-import { mockTemplates } from './mocks/templates.ts';
 import { audiencePort, overlapPort } from './publico/engine.ts';
+import { templatesPort } from './templates/library.ts';
 import type { Ports } from './ports.ts';
 
 export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports {
@@ -20,7 +21,8 @@ export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports 
     // Frente 3 real (unificação): públicos e sobreposição saem de src/publico.
     audience: audiencePort(),
     overlap: overlapPort(),
-    templates: mockTemplates(),
+    // Frente 5 real (unificação): biblioteca de templates como dados.
+    templates: templatesPort(),
     // Export real quando o sync já rodou (npm run job:sync-dy); mock caso contrário.
     dyExport: hasDyExportFile() ? fileDyExport() : mockDyExport(),
     now,
@@ -52,5 +54,6 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
   await experimentRoutes(app, svc, db);
   await catalogRoutes(app, ports);
   await painelRoutes(app, db);
+  await resultadosRoutes(app, db);
   return app;
 }
