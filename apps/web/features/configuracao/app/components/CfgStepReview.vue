@@ -104,7 +104,7 @@ async function submitConfirm() {
           <div v-for="id in e.allocation.pages" :key="id">{{ pageLabel(id) }}</div>
           <div class="small muted">em {{ e.allocation.platforms.map(platformName).join(', ') }}</div>
         </dd>
-        <dt>Público</dt><dd>{{ e.audience.description }} (~{{ fmtPct(e.audience.estimatedShare ?? 1, 0) }} da base), {{ e.allocation.trafficPercent }}% do tráfego, divisão {{ e.allocation.split.map((s) => fmtPct(s, 0)).join(' × ') }}</dd>
+        <dt>Público</dt><dd>{{ e.audience.description }}<template v-if="e.audience.params && Object.keys(e.audience.params).length"> ({{ Object.entries(e.audience.params).map(([k, v]) => `${k} = ${v}`).join(', ') }})</template> (~{{ fmtPct(e.audience.estimatedShare ?? 1, 0) }} da base), {{ e.allocation.trafficPercent }}% do tráfego, divisão {{ e.allocation.split.map((s) => fmtPct(s, 0)).join(' × ') }}</dd>
         <dt>Período</dt><dd>{{ fmtDate(e.allocation.startDate) }} a {{ fmtDate(e.allocation.endDate) }} · ~{{ fmtInt(eligibleDaily) }} usuários/dia · {{ nPerGroup ? fmtInt(nPerGroup) : '–' }} por grupo · mínimo de {{ duration?.durationDays ?? '–' }} dias</dd>
         <dt>Sobreposição</dt>
         <dd>

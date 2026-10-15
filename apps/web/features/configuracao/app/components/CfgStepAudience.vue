@@ -3,6 +3,7 @@
 // 1) Definição: onde o teste aparece e quem entra, sem estimativas.
 // 2) Público-alvo: a query de segmentação da frente 3, o processamento da
 //    estimativa real (BigQuery) e só então os elegíveis por dia.
+import { audienceAttributeFor, defaultAudienceParams } from '@faro/contracts';
 import type { AudienceOrigin, AudienceShortcut, PageTarget, Platform } from '@faro/contracts';
 import type { DateSuggestion, DateWindow } from '@faro/config-core';
 import { ApiError, useFaroApi } from '../composables/useFaroApi';
@@ -87,7 +88,16 @@ const existingDy = computed(() => (e.value.audience.source === 'manual' && e.val
 
 function pickShortcut(id: string) {
   const s = shortcuts.value.find((x) => x.id === id)!;
-  e.value.audience = { description: s.name, source: 'atalho', estimatedShare: s.share, ...(s.dyAttribute ? { dyAttribute: s.dyAttribute } : {}) };
+  // Segmento com parâmetros começa nos padrões do catálogo; o atributo no DY acompanha o valor escolhido.
+  const params = defaultAudienceParams(s.parameters);
+  const attribute = audienceAttributeFor(s.dyAttribute, s.parameters, params);
+  e.value.audience = {
+    description: s.name,
+    source: 'atalho',
+    estimatedShare: s.share,
+    ...(attribute ? { dyAttribute: attribute } : {}),
+    ...(s.parameters?.length ? { params } : {}),
+  };
   seg.sql = '';
   seg.clientes = null;
   seg.erro = '';
@@ -143,16 +153,37 @@ const definicaoOk = computed(
 
 // ---- Aba público-alvo: código de segmentação e processamento (frente 3) ----
 const seg = reactive({ sql: '', fonte: '', gigabytes: 0, clientes: null as number | null, erro: '', carregando: false });
-const temCodigo = computed(() => !!activeShortcut.value && (!!activeShortcut.value.rule || !!activeShortcut.value.sqlRef));
+const temCodigo = computed(() => !!activeShortcut.value && (!!activeShortcut.value.rule || !!activeShortcut.value.sqlRef || !!activeShortcut.value.sql));
+
+// Parâmetros do segmento escolhido: o valor do experimento, ou o padrão do catálogo.
+const paramList = computed(() => activeShortcut.value?.parameters ?? []);
+const paramValues = computed<Record<string, number>>(() => ({
+  ...defaultAudienceParams(activeShortcut.value?.parameters),
+  ...(e.value.audience.params ?? {}),
+}));
+function setParam(name: string, raw: string) {
+  const s = activeShortcut.value;
+  const value = Number(raw);
+  if (!s || raw.trim() === '' || !Number.isFinite(value)) return;
+  const next = { ...paramValues.value, [name]: value };
+  e.value.audience.params = next;
+  const attribute = audienceAttributeFor(s.dyAttribute, s.parameters, next);
+  if (attribute) e.value.audience.dyAttribute = attribute;
+  // A estimativa anterior era de outro valor.
+  seg.sql = '';
+  seg.clientes = null;
+  seg.erro = '';
+}
+const queryParams = computed(() => (paramList.value.length ? paramValues.value : undefined));
 
 async function puxarCodigo() {
   if (!activeShortcut.value) return;
   seg.erro = '';
   seg.carregando = true;
   try {
-    const r = await api.audienceSql(activeShortcut.value.id);
+    const r = await api.audienceSql(activeShortcut.value.id, queryParams.value);
     seg.sql = r.sql;
-    seg.fonte = r.source === 'sqlRef' ? 'SQL versionado (data/models/audiences)' : 'gerado da regra do atalho';
+    seg.fonte = r.source === 'sqlRef' ? 'SQL versionado (data/models/audiences)' : r.source === 'sql' ? 'SQL guardado no catálogo' : 'gerado da regra do atalho';
   } catch (err) {
     seg.erro = err instanceof ApiError ? err.message : 'Não foi possível puxar o código de segmentação.';
   } finally {
@@ -165,7 +196,7 @@ async function processar() {
   seg.erro = '';
   seg.carregando = true;
   try {
-    const r = await api.audienceEstimate(activeShortcut.value.id, true);
+    const r = await api.audienceEstimate(activeShortcut.value.id, true, queryParams.value);
     seg.sql = r.sql;
     seg.gigabytes = r.gigabytes;
     seg.clientes = r.clientes ?? null;
@@ -238,6 +269,19 @@ async function processar() {
         </div>
         <p v-if="activeShortcut?.origin" class="small muted" style="margin: 8px 0 0">Fonte: {{ activeShortcut.origin.label }}.</p>
         <p v-else-if="existingDy" class="small muted" style="margin: 8px 0 0">Público já criado no DY · atributo <code>{{ existingDy }}</code>.</p>
+        <div v-for="p in paramList" :key="p.name" class="field param">
+          <label :for="`f-param-${p.name}`">{{ p.label }}</label>
+          <input
+            :id="`f-param-${p.name}`"
+            type="number"
+            :min="p.min"
+            :max="p.max"
+            :step="p.type === 'integer' ? 1 : 'any'"
+            :value="paramValues[p.name]"
+            @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
+          >
+          <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
+        </div>
 
         <button type="button" class="chip add" style="margin-top: 10px" :aria-expanded="dyAud.open" @click="dyAud.open = !dyAud.open">+ Usar público já criado no DY</button>
         <form v-if="dyAud.open" class="dyform" @submit.prevent="useDyAudience">
@@ -320,6 +364,19 @@ async function processar() {
         </p>
 
         <template v-if="temCodigo">
+          <div v-for="p in paramList" :key="p.name" class="field param">
+            <label :for="`f-alvo-param-${p.name}`">{{ p.label }}</label>
+            <input
+              :id="`f-alvo-param-${p.name}`"
+              type="number"
+              :min="p.min"
+              :max="p.max"
+              :step="p.type === 'integer' ? 1 : 'any'"
+              :value="paramValues[p.name]"
+              @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
+            >
+            <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
+          </div>
           <div class="row" style="gap: 10px; flex-wrap: wrap">
             <button type="button" class="btn ghost" :disabled="seg.carregando" @click="puxarCodigo">Puxar código de segmentação</button>
             <button type="button" class="btn" :disabled="seg.carregando" @click="processar">{{ seg.carregando ? 'Processando…' : 'Processar estimativa no BigQuery' }}</button>
@@ -365,6 +422,7 @@ async function processar() {
 </template>
 
 <style scoped>
+.param { max-width: 320px; margin-top: 12px; }
 .targets .trow { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 8px; align-items: center; margin-top: 6px; }
 .targets input { width: 100%; }
 @media (max-width: 900px) { .targets .trow { grid-template-columns: 1fr; } }

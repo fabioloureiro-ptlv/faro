@@ -18,7 +18,7 @@ export function listCatalogShortcuts(): AudienceShortcut[] {
   try {
     raw = JSON.parse(readFileSync(CATALOG_PATH, 'utf-8'));
   } catch (e) {
-    throw new Error(`Catálogo de segmentos ilegível (${CATALOG_PATH}): ${(e as Error).message}`);
+    throw new Error(`Catálogo de segmentos ilegível (${CATALOG_PATH}): ${(e as Error).message}`, { cause: e });
   }
   return (raw as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
 }

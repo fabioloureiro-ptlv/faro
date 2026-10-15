@@ -39,13 +39,15 @@ npm test && npm run typecheck && npm run lint
 
 `job:sync-dy` e `job:sync-results` também rodam pelo botão **Atualizar da DY** da Lista do Painel (`POST /painel/dy-refresh`, ~1 min); a API segue no ar e relê os arquivos ao terminar.
 
-## Segmentos novos
+## Catálogo de segmentos
 
-O catálogo (fixture + importados) aparece em `/segmento`. Um segmento novo nasce no artefato **Segmentos Faro** (claude.ai): a pessoa descreve o público em texto corrido, o Claude consulta o catálogo de dados (OpenMetadata e BigQuery, via conectores locais do app) e escreve uma **query livre**, o artefato valida (dry run), roda a volumetria e, aprovado, salva no catálogo do artefato. A única exigência de forma: **uma linha por indivíduo, com `cuid`** (`dim_cliente.public_id`); o artefato bloqueia a aprovação se a contagem mostrar linhas duplicadas ou `cuid` nulo.
+O catálogo é o arquivo versionado `data/models/audiences/catalog.json`; aparece em `/segmento` (aba Segmentos) e na etapa de Público do wizard. Hoje tem dois segmentos: **Todos os clientes** (sem query) e **Clientes inadimplentes**. Cada segmento com query aponta (`sqlRef`) para um `.sql` na mesma pasta que devolve **uma linha por cliente, com `cuid`** (`dim_cliente.public_id`, o identificador da DY).
 
-Para usar no Faro: no artefato, *Exportar para o Faro*; em `/segmento`, colar o JSON em *Importar do artefato* (`POST /publico/audiences/import`). Itens com `sql` passam pela guarda estática (`publico/sql-guard.ts`: só `SELECT`/`WITH`, um comando, coluna `cuid`) e por um dry run no BigQuery que confere as colunas; itens com `rule` têm o SQL regenerado pelo gerador do Faro (`publico/rule-sql.ts`). O que já existe ou não passa volta em `ignorados`. O segmento importado aparece na etapa de Público do wizard e é publicável por `job:publish-audiences`.
+**Parâmetros.** Um segmento pode declarar `parameters` no catálogo (nome, rótulo, tipo, padrão, mínimo, máximo, unidade). O nome é um parâmetro nomeado do BigQuery usado na query (`@dias_inadimplencia`): o valor vai separado do texto, nunca concatenado. O wizard e `/segmento` mostram os campos; o experimento guarda o valor escolhido em `audience.params`, e o atributo no DY ganha o valor (`faro_aud_inadimplentes_60`, `_90`, …), porque públicos com valores diferentes são listas diferentes. `job:publish-audiences` aceita `--param=dias_inadimplencia=90`.
 
-O artefato embute uma cópia da guarda de SQL; depois de mexer em `sql-guard.ts`, rode `node services/api/scripts/check-artifact-sql.ts <segmentos-faro.html>` para conferir que as duas continuam idênticas, e `node services/api/scripts/export-catalog-seed.ts <pasta>` para regerar o catálogo inicial do artefato.
+**Incluir um segmento novo:** adicione o `.sql` em `data/models/audiences/` e uma entrada em `catalog.json`. O arquivo é lido a cada chamada, então não precisa reiniciar a API. `services/api/src/publico/catalog.test.ts` confere que todo `@parâmetro` da query está declarado e vice-versa.
+
+**Importação (sem tela).** `POST /publico/audiences/import` segue disponível para segmentos montados fora do app (por exemplo no artefato **Segmentos Faro**): itens com `sql` passam pela guarda estática (`publico/sql-guard.ts`: só `SELECT`/`WITH`, um comando, coluna `cuid`) e por um dry run que confere as colunas; itens com `rule` têm o SQL regenerado (`publico/rule-sql.ts`). Eles ficam em `services/api/.data/audiences-custom.json`, fora do catálogo versionado.
 
 Se o banco local (`services/api/.data/pglite`) ficar ilegível por um encerramento brusco, a API o guarda em `pglite-corrompido-<data>` e recria a partir das fixtures; rascunhos locais se perdem.
 
