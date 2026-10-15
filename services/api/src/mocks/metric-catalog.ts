@@ -33,7 +33,7 @@ export function mockMetricCatalog(db: Db, now: () => Date): MetricCatalogPort {
       const def: MetricDefinition = {
         id,
         name: input.name.trim(),
-        section: 'eCom',
+        section: input.section ?? 'eCom',
         kind: input.kind,
         direction: 'higher_better',
         unit: input.kind === 'proportion' ? 'percent' : 'count',

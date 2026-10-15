@@ -4,6 +4,7 @@ import type { MetricDefinition } from '@faro/contracts';
 import { ApiError } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
 
+const props = defineProps<{ section?: string }>();
 const emit = defineEmits<{ created: [m: MetricDefinition]; cancel: [] }>();
 const { addMetric } = useExperimentDraft();
 const form = reactive({ name: '', kind: 'proportion' as 'proportion' | 'mean', definition: '', base: '', sd: '' });
@@ -26,6 +27,7 @@ async function submit() {
       name: form.name.trim(),
       kind: form.kind,
       definition: form.definition.trim(),
+      ...(props.section ? { section: props.section } : {}),
       baseline: form.kind === 'proportion' ? b / 100 : b,
       ...(form.kind === 'mean' ? { stdDev: sd } : {}),
     });
@@ -40,7 +42,7 @@ async function submit() {
 
 <template>
   <form class="mform" @submit.prevent="submit">
-    <h3>Nova métrica</h3>
+    <h3>Nova métrica{{ section ? ` — área ${section}` : '' }}</h3>
     <p class="small muted" style="margin: 0 0 8px">
       Entra no catálogo como rascunho e fica disponível neste e nos próximos experimentos. O time de métricas publica o cálculo oficial.
     </p>

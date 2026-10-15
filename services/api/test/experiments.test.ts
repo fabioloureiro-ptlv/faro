@@ -252,6 +252,8 @@ describe('duplicar e importar legado (CFG-14, CFG-15)', () => {
         ...e.design,
         context: 'A home antiga do app tinha baixa descoberta de categorias e de saúde; dados de navegação mostram queda de cliques.',
         hypothesis: { change: 'a nova home do app substituir a antiga', expectedEffect: 'a receita por usuário vai aumentar', because: 'a navegação por categorias fica mais curta' },
+        // Ajuste de produto (14/10): design registrado exige Figma ou print em cada variante.
+        variants: e.design.variants.map((v: { key: string }) => ({ ...v, figmaUrl: 'https://www.figma.com/file/nexus/home-nova' })),
         primaryMetricId: 'receita_por_usuario',
         secondaryMetricIds: ['conversao_carrinho'],
       },

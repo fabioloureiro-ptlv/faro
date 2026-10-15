@@ -37,7 +37,8 @@ export interface Design {
   context: string; // problema + evidência
   hypothesis: { change: string; expectedEffect: string; because: string };
   control: { name: string; description: string; figmaUrl?: string };
-  variants: { key: string; name: string; description: string; figmaUrl?: string }[];
+  /** Cada variante precisa de Figma OU print (imagem) — um dos dois é obrigatório. */
+  variants: { key: string; name: string; description: string; figmaUrl?: string; printUrl?: string }[];
   primaryMetricId: string; // exatamente uma (NORTE)
   secondaryMetricIds: string[]; // ≥ 1
   guardrailMetricIds: string[]; // ≥ 0 (GUARDA)

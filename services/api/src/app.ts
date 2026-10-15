@@ -12,6 +12,7 @@ import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
 import { mockMetricCatalog } from './mocks/metric-catalog.ts';
 import { audiencePort, overlapPort } from './publico/engine.ts';
+import { publicoRoutes } from './publico/routes.ts';
 import { templatesPort } from './templates/library.ts';
 import type { Ports } from './ports.ts';
 
@@ -55,5 +56,6 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
   await catalogRoutes(app, ports);
   await painelRoutes(app, db);
   await resultadosRoutes(app, db);
+  await publicoRoutes(app);
   return app;
 }

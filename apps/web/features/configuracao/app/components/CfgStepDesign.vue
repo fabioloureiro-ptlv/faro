@@ -7,7 +7,8 @@ import { BU_LABEL, fmtInt } from '../utils/labels';
 
 const emit = defineEmits<{ next: [] }>();
 const { experiment: exp, catalog, gate, nPerGroup, primaryMetric, baseline, designRegistered } = useExperimentDraft();
-const creatingMetric = ref(false);
+// Criar métrica abre com a área já escolhida no picker (ajuste de produto 14/10).
+const creatingMetric = ref<'' | string>('');
 const e = computed(() => exp.value!);
 const d = computed(() => e.value.design);
 const err = (id: string) => gate.value?.checks.find((c) => c.id === id && !c.ok)?.message;
@@ -28,6 +29,23 @@ function addVariant() {
   const key = String.fromCharCode(97 + d.value.variants.length);
   d.value.variants.push({ key, name: `Variante ${key.toUpperCase()}`, description: '' });
   equalSplit();
+}
+// Mídia da variante: Figma OU print — um dos dois é obrigatório (gate midia_variantes).
+const mediaKind = reactive<Record<string, 'figma' | 'print'>>({});
+const kindOf = (v: { key: string; printUrl?: string }) => mediaKind[v.key] ?? (v.printUrl ? 'print' : 'figma');
+function onPrint(v: { printUrl?: string; figmaUrl?: string }, ev: Event) {
+  const file = (ev.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  if (file.size > 1_500_000) {
+    alert('Print muito grande (máx. 1,5 MB). Reduza a imagem ou use o link do Figma.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    v.printUrl = String(reader.result);
+    touched.midia_variantes = true;
+  };
+  reader.readAsDataURL(file);
 }
 function removeVariant(i: number) {
   d.value.variants.splice(i, 1);
@@ -112,13 +130,11 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
 
       <fieldset class="field">
         <legend>O que vai mudar</legend>
-        <p class="hint">Descreva cada versão e, se tiver, cole o link do Figma do antes e do depois.</p>
+        <p class="hint">Descreva cada versão. Cada variante precisa do Figma <b>ou</b> de um print — um dos dois é obrigatório.</p>
         <div class="pair">
           <div>
             <label class="sub" for="f-ctrl">Controle (como é hoje)</label>
             <textarea id="f-ctrl" v-model="d.control.description" @blur="touched.controle_variantes = true" />
-            <input v-model="d.control.figmaUrl" type="url" aria-label="Link do Figma do controle" placeholder="Figma do antes: https://www.figma.com/…" :aria-invalid="!!figErr(d.control.figmaUrl)" class="fig">
-            <p class="err">{{ figErr(d.control.figmaUrl) }}</p>
           </div>
           <div v-for="(v, i) in d.variants" :key="v.key">
             <div class="spread">
@@ -126,24 +142,43 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
               <button v-if="d.variants.length > 1" type="button" class="btn ghost small" @click="removeVariant(i)">Remover</button>
             </div>
             <textarea :id="`f-var-${v.key}`" v-model="v.description" @blur="touched.controle_variantes = true" />
-            <input v-model="v.figmaUrl" type="url" :aria-label="`Link do Figma da ${v.name}`" placeholder="Figma do depois: https://www.figma.com/…" :aria-invalid="!!figErr(v.figmaUrl)" class="fig">
-            <p class="err">{{ figErr(v.figmaUrl) }}</p>
+            <div class="chips" style="margin-top: 8px" role="group" :aria-label="`Mídia da ${v.name}`">
+              <button type="button" class="chip" :aria-pressed="kindOf(v) === 'figma'" @click="mediaKind[v.key] = 'figma'">Link do Figma</button>
+              <button type="button" class="chip" :aria-pressed="kindOf(v) === 'print'" @click="mediaKind[v.key] = 'print'">Print</button>
+            </div>
+            <template v-if="kindOf(v) === 'figma'">
+              <input v-model="v.figmaUrl" type="url" :aria-label="`Link do Figma da ${v.name}`" placeholder="https://www.figma.com/…" :aria-invalid="!!figErr(v.figmaUrl)" class="fig" @blur="touched.midia_variantes = true">
+              <p class="err">{{ figErr(v.figmaUrl) }}</p>
+            </template>
+            <template v-else>
+              <input type="file" accept="image/*" :aria-label="`Print da ${v.name}`" class="fig" @change="onPrint(v, $event)">
+              <p v-if="v.printUrl" class="small muted" style="margin: 6px 0 0">
+                <img :src="v.printUrl" :alt="`Print da ${v.name}`" style="max-width: 100%; max-height: 120px; border: 1px solid var(--line); border-radius: 8px">
+                <button type="button" class="btn ghost small" @click="delete v.printUrl">Remover print</button>
+              </p>
+            </template>
           </div>
         </div>
         <button v-if="d.variants.length < 3" type="button" class="chip add" @click="addVariant">+ Adicionar variante</button>
         <p class="err">{{ show('controle_variantes') }}</p>
+        <p class="err">{{ show('midia_variantes') }}</p>
       </fieldset>
 
       <div class="field">
         <span id="l-primary" class="lbl">Métrica primária (NORTE)</span>
-        <p class="hint">Só uma. É ela que decide se o teste ganhou. Passe o mouse para ver a definição.</p>
-        <CfgMetricChips label="Métrica primária" :metrics="catalog" :selected="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="togglePrimary">
-          <button v-if="!creatingMetric" type="button" class="chip add" @click="creatingMetric = true">+ Criar métrica</button>
-        </CfgMetricChips>
-        <CfgMetricForm v-if="creatingMetric" @cancel="creatingMetric = false" @created="(m) => { creatingMetric = false; if (!d.primaryMetricId) togglePrimary(m.id); }" />
+        <p class="hint">Escolha a área e depois a métrica. Só uma: é ela que decide se o teste ganhou.</p>
+        <CfgMetricPicker
+          label="Métrica primária"
+          allow-create
+          :metrics="catalog"
+          :selected="d.primaryMetricId ? [d.primaryMetricId] : []"
+          @toggle="togglePrimary"
+          @create="(area) => (creatingMetric = area)"
+        />
+        <CfgMetricForm v-if="creatingMetric" :section="creatingMetric" @cancel="creatingMetric = ''" @created="(m) => { creatingMetric = ''; if (!d.primaryMetricId) togglePrimary(m.id); }" />
         <div v-if="primaryMetric" class="basebox">
           <div>
-            <label for="f-base" class="sub">{{ isRate ? 'Linha de base atual (%)' : 'Variabilidade (desvio ÷ média)' }}</label>
+            <label for="f-base" class="sub">{{ isRate ? 'Valor de referência atual (%)' : 'Variabilidade (desvio ÷ média)' }}</label>
             <input id="f-base" v-model.lazy="baselineInput" type="number" step="any" min="0">
           </div>
           <p class="small muted" style="margin: 0; flex: 1; min-width: 200px">
@@ -155,14 +190,14 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
 
       <div class="field">
         <span class="lbl">Métricas secundárias</span>
-        <p class="hint">Ajudam a explicar o resultado, mas não decidem sozinhas. Pelo menos uma.</p>
-        <CfgMetricChips label="Métricas secundárias" multiple :metrics="catalog" :selected="d.secondaryMetricIds" :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="(id) => toggleIn('secondaryMetricIds', id)" />
+        <p class="hint">Escolha a área e depois as métricas (pode mais de uma, inclusive de áreas diferentes). Pelo menos uma.</p>
+        <CfgMetricPicker label="Métricas secundárias" multiple :metrics="catalog" :selected="d.secondaryMetricIds" :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="(id) => toggleIn('secondaryMetricIds', id)" />
       </div>
 
       <div class="field">
         <span class="lbl">Guardrails (GUARDA, opcional)</span>
-        <p class="hint">Métricas que não podem piorar.</p>
-        <CfgMetricChips label="Guardrails" multiple :metrics="catalog" :selected="d.guardrailMetricIds" :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="(id) => toggleIn('guardrailMetricIds', id)" />
+        <p class="hint">Métricas que não podem piorar. Escolha por área, como nas secundárias.</p>
+        <CfgMetricPicker label="Guardrails" multiple :metrics="catalog" :selected="d.guardrailMetricIds" :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="(id) => toggleIn('guardrailMetricIds', id)" />
       </div>
 
       <div class="field">

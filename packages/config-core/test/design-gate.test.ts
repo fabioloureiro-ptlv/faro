@@ -26,13 +26,22 @@ describe('gate de design (CFG-02)', () => {
     ['hipotese', withDesign({ hypothesis: { change: 'mudar o botão', expectedEffect: '', because: 'sim, porque' } })],
     ['controle_variantes', withDesign({ control: { name: 'Controle', description: '' } })],
     ['controle_variantes', withDesign({ variants: [] })],
-    ['controle_variantes', withDesign({ variants: [{ key: 'a', name: 'A', description: '' }] })],
+    ['controle_variantes', withDesign({ variants: [{ key: 'a', name: 'A', description: '', figmaUrl: 'https://www.figma.com/file/x/y' }] })],
     ['metrica_primaria', withDesign({ primaryMetricId: '' })],
     ['metricas_secundarias', withDesign({ secondaryMetricIds: [] })],
     ['primaria_fora_das_secundarias', withDesign({ secondaryMetricIds: ['conversao_carrinho'] })],
     ['mde', withDesign({ mdeRelative: 0 })],
     ['figma', withDesign({ control: { name: 'Controle', description: 'Card atual', figmaUrl: 'https://evil.com/figma.com/x' } })],
+    // Ajuste de produto (14/10): variante precisa de Figma OU print.
+    ['midia_variantes', withDesign({ variants: [{ key: 'a', name: 'A', description: 'Card com selo' }] })],
   ];
+
+  it('print no lugar do Figma satisfaz a mídia da variante', () => {
+    const e = withDesign({
+      variants: [{ key: 'a', name: 'A', description: 'Card com selo', printUrl: 'data:image/png;base64,iVBORw0KGgo=' }],
+    });
+    expect(failing(e)).toEqual([]);
+  });
 
   it.each(cases)('falha isolada em %s', (id, exp) => {
     expect(failing(exp)).toEqual([id]);

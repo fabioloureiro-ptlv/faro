@@ -83,10 +83,17 @@ export function useFaroApi() {
     dyCampaigns: () => call<DyCampaignRow[]>('/experiments/dy-campaigns'),
     events: (faroId: string) => call<FaroEventRow[]>(`/events?faroId=${encodeURIComponent(faroId)}`),
     metrics: () => call<MetricDefinition[]>('/catalog/metrics'),
-    createMetric: (body: { name: string; kind: 'proportion' | 'mean'; definition: string; baseline: number; stdDev?: number }) =>
+    createMetric: (body: { name: string; kind: 'proportion' | 'mean'; definition: string; section?: string; baseline: number; stdDev?: number }) =>
       call<MetricDefinition>('/catalog/metrics', { method: 'POST', body }),
     pages: () => call<PageCatalog>('/catalog/pages'),
     shortcuts: () => call<AudienceShortcut[]>('/catalog/audiences'),
+    // Frente 3 (ajuste de produto 14/10): query de segmentação e estimativa do público-alvo.
+    audienceSql: (id: string) => call<{ sql: string; source: string }>(`/publico/audiences/${encodeURIComponent(id)}/sql`),
+    audienceEstimate: (id: string, run: boolean) =>
+      call<{ sql: string; gigabytes: number; clientes?: number }>(`/publico/audiences/${encodeURIComponent(id)}/estimate`, {
+        method: 'POST',
+        body: { run },
+      }),
     templates: () => call<Template[]>('/templates'),
   };
 }

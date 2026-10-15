@@ -33,6 +33,11 @@ export const DesignSchema = z.object({
       name: z.string(),
       description: z.string(),
       figmaUrl: z.string().optional(),
+      /** Print da variante: URL https ou imagem embutida (data:image/...). */
+      printUrl: z
+        .string()
+        .regex(/^(https:\/\/|data:image\/)/, 'print precisa ser uma URL https ou uma imagem')
+        .optional(),
     }),
   ),
   primaryMetricId: z.string(),

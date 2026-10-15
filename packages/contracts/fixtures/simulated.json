@@ -23,7 +23,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Barra de progresso “faltam R$ X para frete grátis” no topo do carrinho"
+            "description": "Barra de progresso “faltam R$ X para frete grátis” no topo do carrinho",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0002-a"
           }
         ],
         "primaryMetricId": "conversao",
@@ -97,7 +98,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Compra programada (Repet) pré-selecionada com economia em destaque"
+            "description": "Compra programada (Repet) pré-selecionada com economia em destaque",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0003-a"
           }
         ],
         "primaryMetricId": "conversao_repet_nova",
@@ -170,7 +172,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Fluxo em 3 telas: pet, endereço, plano"
+            "description": "Fluxo em 3 telas: pet, endereço, plano",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0004-a"
           }
         ],
         "primaryMetricId": "conversao_saude",
@@ -244,7 +247,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Carrossel por raça e porte do pet cadastrado"
+            "description": "Carrossel por raça e porte do pet cadastrado",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0005-a"
           }
         ],
         "primaryMetricId": "cliques_recomendacao",
@@ -319,7 +323,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Cupom aplicado automaticamente com aviso"
+            "description": "Cupom aplicado automaticamente com aviso",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0006-a"
           }
         ],
         "primaryMetricId": "conversao",
@@ -398,7 +403,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Bloco “Você ganha R$ X de cashback” acima dos meios de pagamento"
+            "description": "Bloco “Você ganha R$ X de cashback” acima dos meios de pagamento",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0007-a"
           }
         ],
         "primaryMetricId": "conversao",
@@ -472,7 +478,8 @@
           {
             "key": "a",
             "name": "Variante A",
-            "description": "Card “Agende banho e tosa perto de você” abaixo do banner principal"
+            "description": "Card “Agende banho e tosa perto de você” abaixo do banner principal",
+            "figmaUrl": "https://www.figma.com/file/proto/faro-2026-0008-a"
           }
         ],
         "primaryMetricId": "cliques_recomendacao",

@@ -15,6 +15,7 @@ export type GateCheckId =
   | 'metricas_secundarias'
   | 'primaria_fora_das_secundarias'
   | 'mde'
+  | 'midia_variantes'
   | 'figma';
 
 export interface GateCheck {
@@ -55,6 +56,10 @@ export function evaluateDesignGate(input: DesignInput, knownMetricIds?: Readonly
   const figmaUrls = [d.control.figmaUrl, ...d.variants.map((v) => v.figmaUrl)].filter(
     (u): u is string => !!u && u.trim() !== '',
   );
+  // Ajuste de produto (14/10): toda variante precisa de Figma válido OU print.
+  // Sem variantes, quem acusa é controle_variantes; esta regra fica neutra.
+  const isPrint = (u?: string) => !!u && /^(https:\/\/|data:image\/)/.test(u.trim());
+  const mediaOk = d.variants.every((v) => isFigmaUrl(v.figmaUrl ?? '') || isPrint(v.printUrl));
 
   const checks: GateCheck[] = [
     check('nome', 'Nome do experimento', filled(input.name, MIN_NAME), `Dê um nome com pelo menos ${MIN_NAME} caracteres.`),
@@ -115,8 +120,14 @@ export function evaluateDesignGate(input: DesignInput, knownMetricIds?: Readonly
       'Defina o efeito mínimo detectável (maior que 0% e menor que 100%).',
     ),
     check(
+      'midia_variantes',
+      'Cada variante com Figma ou print',
+      mediaOk,
+      'Cole o link do Figma ou anexe um print em cada variante — um dos dois é obrigatório.',
+    ),
+    check(
       'figma',
-      'Links do Figma válidos (opcional)',
+      'Links do Figma válidos',
       figmaUrls.every(isFigmaUrl),
       'Use um link do Figma (https://www.figma.com/…) ou deixe o campo vazio.',
     ),

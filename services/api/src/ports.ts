@@ -23,6 +23,8 @@ export interface DraftMetricInput {
   name: string;
   kind: 'proportion' | 'mean';
   definition: string;
+  /** Área do catálogo onde a métrica entra (ajuste de produto 14/10: escolhida antes de criar). */
+  section?: MetricDefinition['section'];
   /** Proporção: taxa 0–1. Média: valor médio atual. */
   baseline: number;
   /** Só para média: desvio padrão atual. */

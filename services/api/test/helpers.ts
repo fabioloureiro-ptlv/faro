@@ -49,7 +49,14 @@ export const completeDesign: Experiment['design'] = {
     because: 'o cliente sabe o prazo antes de abrir o produto',
   },
   control: { name: 'Controle', description: 'Card da busca sem informação de entrega' },
-  variants: [{ key: 'a', name: 'Variante A', description: 'Card com selo “Chega amanhã”' }],
+  variants: [
+    {
+      key: 'a',
+      name: 'Variante A',
+      description: 'Card com selo “Chega amanhã”',
+      figmaUrl: 'https://www.figma.com/file/abc/selo-chega-amanha',
+    },
+  ],
   primaryMetricId: 'conversao_carrinho',
   secondaryMetricIds: ['conversao', 'receita_por_usuario'],
   guardrailMetricIds: ['tempo_carregamento'],
