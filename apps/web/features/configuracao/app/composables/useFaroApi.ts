@@ -94,6 +94,15 @@ export function useFaroApi() {
         method: 'POST',
         body: { run },
       }),
+    // Tela /segmento: catálogo completo, preview de regra nova e aprovação.
+    audiencesFull: () => call<(AudienceShortcut & { origem: string })[]>('/publico/audiences'),
+    audiencePreview: (rule: unknown, run: boolean) =>
+      call<{ sql: string; gigabytes: number; clientes?: number; share?: number }>('/publico/audiences/preview', {
+        method: 'POST',
+        body: { rule, run },
+      }),
+    audienceCreate: (body: { name: string; rule: unknown; clientes?: number; share?: number }) =>
+      call<AudienceShortcut>('/publico/audiences', { method: 'POST', body }),
     templates: () => call<Template[]>('/templates'),
   };
 }

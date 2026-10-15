@@ -8,7 +8,7 @@ import type { Db } from '../db/client.ts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
 import { appendEvent, getExperiment, updateExperiment } from '../experiments/repository.ts';
-import { buildDataset, buildTimelineEvents, orphanItems } from './dataset.ts';
+import { buildDataset, buildTimelineEvents, DY_PSEUDO_PREFIX } from './dataset.ts';
 import { allowedTransitions, closeExperiment, closingChecklist, decideExperiment, type Actor, type CommandResult, type TransitionEvent } from './status/index.ts';
 import { missingDesignFields } from './governance/index.ts';
 
@@ -92,7 +92,9 @@ export async function painelRoutes(app: FastifyInstance, db: Db) {
     const metricIds = new Set([d.primaryMetricId, ...d.secondaryMetricIds, ...d.guardrailMetricIds]);
     const relatedIds = new Set((experiment.overlap ?? []).map((o) => o.otherFaroId));
     const actor = actorFrom(actorEmail);
-    const allowed = allowedTransitions(experiment, actor);
+    // Teste sintético do DY (não cadastrado): leitura apenas, sem comandos.
+    const sintetico = faroId.startsWith(DY_PSEUDO_PREFIX);
+    const allowed = sintetico ? [] : allowedTransitions(experiment, actor);
     const campaign = ds.linkedCampaigns.find((c) => c.labels.includes(`faro:${faroId}`));
 
     return {
@@ -110,12 +112,6 @@ export async function painelRoutes(app: FastifyInstance, db: Db) {
       actions: { actor: actorEmail, canDecide: allowed.includes('decidido'), canClose: allowed.includes('encerrado') },
       missingDesign: missingDesignFields(d),
     };
-  });
-
-  app.get('/dy-campaigns/orphans', async (req) => {
-    requireActor(req);
-    const ds = await buildDataset(db);
-    return { asOf: ds.asOf, items: orphanItems(ds) };
   });
 
   app.post<{ Params: { faroId: string } }>('/experiments/:faroId/decision', async (req) => {

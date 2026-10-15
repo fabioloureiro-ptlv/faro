@@ -27,8 +27,8 @@ import { DY_EXPORT_PATH, fileDyExport, hasDyExportFile } from '../adapters/dy-ex
 import { readFileSync } from 'node:fs';
 import type { Db } from '../db/client.ts';
 import { listAudit, listEvents, listExperiments } from '../experiments/repository.ts';
-import { hasRealResults, realMetricResults } from '../resultados/results.ts';
-import { evaluateGovernance, orphanAlerts } from './governance/index.ts';
+import { hasRealResults, loadRows, metricIdFromColumn, realMetricResults, type ResultRow } from '../resultados/results.ts';
+import { evaluateGovernance } from './governance/index.ts';
 
 // DECISAO-PENDENTE: dono dos alertas sem squad (órfãs) até o time definir.
 export const EXPERIMENTATION_TEAM = 'time-experimentacao@example.com';
@@ -123,6 +123,108 @@ const addDays = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
+/** Prefixo dos testes sintetizados do DY (não cadastrados no Faro). */
+export const DY_PSEUDO_PREFIX = 'FARO-0000-';
+
+const BU_MAP: Record<string, Experiment['bu']> = {
+  ecom: 'ecom',
+  saude: 'saude',
+  servico: 'servicos',
+  fintech: 'fintech',
+  cross: 'ecossistema',
+};
+
+/** Mapeia o primeiro segmento da URL do export para o catálogo de páginas. */
+function pageFromSegment(seg: string): string | undefined {
+  const s = seg.toLowerCase();
+  if (s === 'home' || s === '') return 'home';
+  if (s.includes('busca') || s.includes('search')) return 'busca';
+  if (s.includes('carrinho') || s.includes('cart')) return 'carrinho';
+  if (s.includes('checkout')) return 'checkout';
+  if (s.includes('saude') || s.includes('plano')) return 'saude';
+  if (s.includes('conta')) return 'conta';
+  if (['cachorro', 'gato', 'gatos', 'passaros', 'roedores', 'peixes', 'repteis'].includes(s)) return 'produto';
+  return undefined;
+}
+
+/**
+ * Ajuste de produto (15/10): os testes A/B realmente ativos no DY (saída do
+ * dy_results, 2–6 variantes, com exposição recente) aparecem na Lista e no Mapa
+ * temporal como experimentos sintéticos `FARO-0000-NNNN`, marcados como não
+ * cadastrados. "Programados para o futuro" não existe no export (DECISAO-PENDENTE:
+ * depende do cadastro no Faro ou de agenda externa).
+ */
+function dyActiveExperiments(existing: Experiment[], campaigns: DyCampaignStatus[], asOf: string): Experiment[] {
+  if (!hasRealResults()) return [];
+  const known = new Set(
+    existing.flatMap((e) => [e.dy?.campaignName, e.name]).filter((n): n is string => !!n).map((n) => n.trim().toLowerCase()),
+  );
+  const exportPages = new Map<string, { campaignId: string; pages: string[] }>();
+  try {
+    const raw = JSON.parse(readFileSync(DY_EXPORT_PATH, 'utf-8')) as {
+      campaigns: { campaignId: string; campaignName: string; pages: string[] }[];
+    };
+    for (const c of raw.campaigns) exportPages.set(c.campaignName.trim().toLowerCase(), { campaignId: c.campaignId, pages: c.pages });
+  } catch {
+    /* sem export: segue sem páginas */
+  }
+
+  const byCampaign = new Map<string, ResultRow[]>();
+  for (const r of loadRows()) {
+    if (r.grao !== 'usuario' || r.device !== 'Total') continue;
+    const list = byCampaign.get(r.campanha) ?? [];
+    list.push(r);
+    byCampaign.set(r.campanha, list);
+  }
+
+  const names = [...byCampaign.keys()].filter((n) => !known.has(n.trim().toLowerCase())).sort();
+  return names.flatMap((campanha, i) => {
+    const rows = byCampaign.get(campanha)!;
+    const control = rows.find((r) => r.is_controle) ?? rows[0];
+    const variants = rows.filter((r) => r !== control);
+    if (!control || !variants.length) return [];
+    const exp = exportPages.get(campanha.trim().toLowerCase());
+    const pages = [...new Set((exp?.pages ?? []).map(pageFromSegment).filter((p): p is string => !!p))];
+    const platforms: Experiment['allocation']['platforms'] = rows[0]!.stream === 'web' ? ['site'] : ['android', 'ios'];
+    const total = rows.reduce((s, r) => s + (r.unidades ?? 0), 0) || 1;
+    const norteId = metricIdFromColumn(String(control.metrica_norte ?? 'receita_por_unidade'));
+    const faroId = `${DY_PSEUDO_PREFIX}${String(i + 1).padStart(4, '0')}`;
+    return [
+      {
+        faroId,
+        name: campanha,
+        bu: BU_MAP[rows[0]!.bu] ?? 'ecom',
+        ownerSquad: 'DY · não cadastrado',
+        ownerEmail: EXPERIMENTATION_TEAM,
+        status: 'rodando',
+        design: {
+          context: '',
+          hypothesis: { change: '', expectedEffect: '', because: '' },
+          control: { name: control.variacao, description: control.variacao },
+          variants: variants.map((v, j) => ({ key: String.fromCharCode(97 + j), name: v.variacao, description: v.variacao })),
+          primaryMetricId: norteId,
+          secondaryMetricIds: [],
+          guardrailMetricIds: [],
+          mdeRelative: 0.05,
+        },
+        audience: { description: 'Não registrado (teste criado direto no DY)', source: 'manual' },
+        allocation: {
+          platforms,
+          pages,
+          trafficPercent: 100,
+          split: [control, ...variants].map((r) => Math.round((r.unidades / total) * 10000) / 10000),
+          startDate: String(control.data_inicio_leitura),
+          endDate: String(control.data_fim_leitura),
+        },
+        dy: { campaignName: campanha, ...(exp ? { campaignId: exp.campaignId } : {}), labels: [] },
+        legacy: true,
+        createdAt: String(control.data_inicio_leitura),
+        updatedAt: asOf,
+      } satisfies Experiment,
+    ];
+  });
+}
+
 /** Sintetiza o label `faro:` nas campanhas vinculadas por campaignId (o export real não traz labels). */
 function linkCampaigns(campaigns: DyCampaignStatus[], experiments: Experiment[]): DyCampaignStatus[] {
   const byCampaign = new Map(
@@ -135,7 +237,10 @@ function linkCampaigns(campaigns: DyCampaignStatus[], experiments: Experiment[])
 
 export async function buildDataset(db: Db): Promise<PainelDataset> {
   const base = loadStatic();
-  const experiments = await listExperiments(db);
+  const registered = await listExperiments(db);
+  // Testes ativos no DY sem cadastro aparecem na Lista e no Mapa (FARO-0000-…).
+  const dyActive = dyActiveExperiments(registered, base.campaigns, base.asOf);
+  const experiments = [...registered, ...dyActive];
   const linkedCampaigns = linkCampaigns(base.campaigns, experiments);
   const today = addDays(base.asOf, 1);
   // Frente 4: quando o sync de resultados já rodou, os números reais substituem a
@@ -154,11 +259,10 @@ export async function buildDataset(db: Db): Promise<PainelDataset> {
     health: base.health,
     linkedCampaigns,
     allCampaigns: base.campaigns,
-    // DECISAO-PENDENTE: o alerta de órfã fica fora do motor geral enquanto o export
-    // real não traz labels (todas as 2 mil campanhas seriam órfãs). A tela de órfãs
-    // usa orphanAlerts sobre o export completo, com corte.
+    // Governança só sobre os testes cadastrados: os sintéticos do DY (FARO-0000-…)
+    // não têm design por definição e inundariam os alertas.
     alerts: evaluateGovernance({
-      experiments,
+      experiments: registered,
       campaigns: linkedCampaigns,
       norteResults: base.metricResults,
       health: base.health,
@@ -168,27 +272,6 @@ export async function buildDataset(db: Db): Promise<PainelDataset> {
     asOf: base.asOf,
     today,
   };
-}
-
-/** Órfãs para a tela: campanhas ativas sem experimento, mais recentes primeiro (corte de 200). */
-export function orphanItems(ds: PainelDataset): { campaign: DyCampaignStatus; alert: GovernanceAlert }[] {
-  const linked = new Set(ds.linkedCampaigns.map((c) => c.campaignId));
-  const candidates = ds.allCampaigns
-    .filter((c) => c.active && !linked.has(c.campaignId))
-    .sort((a, b) => (b.lastExposureDate ?? '').localeCompare(a.lastExposureDate ?? ''))
-    .slice(0, 200);
-  const alerts = orphanAlerts({
-    experiments: ds.experiments,
-    campaigns: candidates,
-    norteResults: [],
-    health: [],
-    today: ds.today,
-    experimentationTeam: EXPERIMENTATION_TEAM,
-  });
-  const byId = new Map(alerts.map((a) => [a.dyCampaignId!, a]));
-  return candidates
-    .map((campaign) => ({ campaign, alert: byId.get(campaign.campaignId) }))
-    .filter((x): x is { campaign: DyCampaignStatus; alert: GovernanceAlert } => !!x.alert);
 }
 
 /** Linha do tempo do experimento a partir do outbox + auditoria da frente 1. */

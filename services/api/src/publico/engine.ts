@@ -5,6 +5,7 @@
 import type { Allocation, Audience, AudienceShortcut, Experiment, OverlapDecision } from '@faro/contracts';
 import type { AudiencePort, OverlapPort } from '../ports.ts';
 import { fx } from '../mocks/fixtures.ts';
+import { allShortcuts } from './custom.ts';
 
 const ACTIVE: Experiment['status'][] = ['pronto_para_configurar', 'configurado_no_dy', 'rodando', 'decidido'];
 const SENSITIVE_PAGES = ['carrinho', 'checkout'];
@@ -13,12 +14,13 @@ export const HIGH_SHARE_THRESHOLD = 0.2;
 export const LOW_DAILY_THRESHOLD = 2000;
 export const LOW_SHARE_THRESHOLD = 0.05;
 
-const shortcuts: AudienceShortcut[] = fx.audiences;
+// Fixture + segmentos aprovados pela tela /segmento (custom.ts).
+const shortcuts = (): AudienceShortcut[] => allShortcuts();
 
 function shortcutOf(a: Audience): AudienceShortcut | undefined {
   if (a.source !== 'atalho') return undefined;
   const text = a.description.trim().toLowerCase();
-  return shortcuts.find((s) => s.name.toLowerCase() === text || s.id === text);
+  return shortcuts().find((s) => s.name.toLowerCase() === text || s.id === text);
 }
 
 /**
@@ -95,7 +97,7 @@ export function audiencePort(): AudiencePort {
       return fx.pages;
     },
     async shortcuts() {
-      return shortcuts;
+      return shortcuts();
     },
     async estimateEligibleDaily(allocation, audience) {
       return estimateEligibleDaily(allocation, audience);

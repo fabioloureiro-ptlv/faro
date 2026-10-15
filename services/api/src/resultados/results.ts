@@ -49,6 +49,11 @@ const METRIC_MAP: { col: string; metricId: string }[] = [
 
 let cache: { generatedAt: string; rows: ResultRow[] } | undefined;
 
+/** Id do catálogo correspondente à coluna de métrica do dy_results (ex.: norte). */
+export function metricIdFromColumn(col: string): string {
+  return METRIC_MAP.find((m) => m.col === col)?.metricId ?? 'receita_por_usuario';
+}
+
 export function hasRealResults(): boolean {
   return existsSync(RESULTS_PATH);
 }

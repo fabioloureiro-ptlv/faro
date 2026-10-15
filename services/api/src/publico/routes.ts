@@ -6,14 +6,16 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { AudienceRuleSchema, AudienceShortcutSchema, type AudienceShortcut } from '@faro/contracts';
-import audiences from '@faro/contracts/fixtures/audiences.json' with { type: 'json' };
+import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
+import { addCustomShortcut, allShortcuts, slugAudienceId } from './custom.ts';
 import { audienceRuleToSql, PROJECT } from './rule-sql.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
-const shortcuts: AudienceShortcut[] = (audiences as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
+// DECISAO-PENDENTE: base de clientes com public_id em 14/10 (dim_cliente), usada
+// para converter a volumetria contada em participação (share) do segmento novo.
+const BASE_CLIENTES = 15_270_545;
 
 function sqlFor(a: AudienceShortcut): { sql: string; source: 'rule' | 'sqlRef' } | undefined {
   if (a.sqlRef) {
@@ -31,7 +33,7 @@ function countable(sql: string): string {
 export async function publicoRoutes(app: FastifyInstance) {
   app.get<{ Params: { id: string } }>('/publico/audiences/:id/sql', async (req) => {
     requireActor(req);
-    const shortcut = shortcuts.find((s) => s.id === req.params.id);
+    const shortcut = allShortcuts().find((s) => s.id === req.params.id);
     if (!shortcut) throw new HttpError(404, 'publico_inexistente', 'Atalho de público não encontrado.');
     const built = sqlFor(shortcut);
     if (!built)
@@ -43,7 +45,7 @@ export async function publicoRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>('/publico/audiences/:id/estimate', async (req) => {
     requireActor(req);
     const { run } = EstimateInput.parse(req.body ?? {});
-    const shortcut = shortcuts.find((s) => s.id === req.params.id);
+    const shortcut = allShortcuts().find((s) => s.id === req.params.id);
     if (!shortcut) throw new HttpError(404, 'publico_inexistente', 'Atalho de público não encontrado.');
     const built = sqlFor(shortcut);
     if (!built)
@@ -60,6 +62,68 @@ export async function publicoRoutes(app: FastifyInstance) {
     } catch (e) {
       if (e instanceof HttpError) throw e;
       throw new HttpError(503, 'bigquery_indisponivel', `Não foi possível consultar o BigQuery: ${(e as Error).message}`);
+    }
+  });
+
+  // ---- Tela /segmento (ajuste de produto 15/10): catálogo + criação com volumetria ----
+
+  app.get('/publico/audiences', async (req) => {
+    requireActor(req);
+    return allShortcuts().map((s) => ({
+      ...s,
+      origem: s.sqlRef ? 'sql-versionado' : s.rule ? 'regra' : 'manual',
+    }));
+  });
+
+  const PreviewInput = z.object({ rule: AudienceRuleSchema, run: z.boolean().optional() });
+  app.post('/publico/audiences/preview', async (req) => {
+    requireActor(req);
+    const { rule, run } = PreviewInput.parse(req.body ?? {});
+    let sql: string;
+    try {
+      sql = audienceRuleToSql(rule);
+    } catch (e) {
+      throw new HttpError(422, 'regra_invalida', (e as Error).message);
+    }
+    try {
+      const { BigQuery } = await import('@google-cloud/bigquery');
+      const bq = new BigQuery({ projectId: PROJECT });
+      const [job] = await bq.createQueryJob({ query: sql, dryRun: true });
+      const gigabytes = Math.round((Number(job.metadata.statistics.totalBytesProcessed) / 1e9) * 10) / 10;
+      if (!run) return { sql, gigabytes };
+      const [rows] = await bq.query({ query: countable(sql) });
+      const clientes = Number((rows[0] as { clientes: number }).clientes);
+      return { sql, gigabytes, clientes, share: Math.round((clientes / BASE_CLIENTES) * 10000) / 10000 };
+    } catch (e) {
+      if (e instanceof HttpError) throw e;
+      throw new HttpError(503, 'bigquery_indisponivel', `Não foi possível consultar o BigQuery: ${(e as Error).message}`);
+    }
+  });
+
+  const CreateInput = z.object({
+    name: z.string().trim().min(4, 'Dê um nome com pelo menos 4 caracteres.').max(80),
+    rule: AudienceRuleSchema,
+    clientes: z.number().int().nonnegative().optional(),
+    share: z.number().min(0).max(1).optional(),
+  });
+  app.post('/publico/audiences', async (req, reply) => {
+    requireActor(req);
+    const input = CreateInput.parse(req.body ?? {});
+    const id = slugAudienceId(input.name);
+    const share = input.share ?? (input.clientes != null ? Math.round((input.clientes / BASE_CLIENTES) * 10000) / 10000 : 1);
+    const shortcut: AudienceShortcut = {
+      id,
+      name: input.name.trim(),
+      share: Math.min(1, Math.max(0.0001, share)),
+      dyAttribute: `faro_aud_${id.replaceAll('-', '_')}`,
+      rule: input.rule,
+    };
+    try {
+      reply.code(201);
+      // Aprovado: entra no catálogo e, por consequência, na etapa de Público do wizard.
+      return addCustomShortcut(shortcut);
+    } catch (e) {
+      throw new HttpError(409, 'segmento_existente', (e as Error).message);
     }
   });
 }
