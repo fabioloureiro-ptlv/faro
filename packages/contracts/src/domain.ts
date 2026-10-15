@@ -103,6 +103,15 @@ export interface Allocation {
   startDate: string;
   endDate: string;
   exclusionGroupId?: string; // exclusão mútua (frente 3)
+  /** Frente 4 (0.4.0): janela de leitura; padrão startDate..D-1. Dias de split instável ficam fora. */
+  readWindow?: ReadWindow;
+}
+
+/** Frente 4 (0.4.0): janela de leitura do teste, datas AAAA-MM-DD inclusivas. */
+export interface ReadWindow {
+  start: string;
+  end: string;
+  excludedDays?: string[];
 }
 
 export type DyCampaignType = 'custom_code' | 'api_custom' | 'recommendation';
@@ -164,6 +173,27 @@ export interface MetricResult {
   ci95?: { lower: number; upper: number };
   /** Frente 4: métrica com efeito tardio ainda maturando. */
   maturing?: boolean;
+  /** 0.4.0 (roadmap v3): papel da métrica na leitura (`papel_<m>`). */
+  role?: MetricRole;
+  /** 0.4.0: leitura confirmada pelo SQL (`confirmado_<m>`: mínimo de eventos/dias e significância). */
+  confirmed?: boolean;
+  /** 0.4.0: valor ajustado por CUPED (`cuped_<m>`). */
+  cuped?: boolean;
+  /** 0.4.0: mínimo de eventos por braço exigido para rotular (`eventos_min_<m>`). */
+  minEvents?: number;
+  /** 0.4.0: leitura bayesiana do roadmap (perda esperada e recomendação por métrica). */
+  bayes?: MetricBayes;
+}
+
+export type MetricRole = 'norte' | 'guarda' | 'exploratoria';
+
+/** 0.4.0 (roadmap v3): posterior por métrica, como a consulta entrega. */
+export interface MetricBayes {
+  expectedUplift: number; // uplift_esperado_<m>
+  probBetter: number; // chance_melhor_<m>, 0–1
+  lossSwitch: number; // perda_ligar_<m>
+  lossKeep: number; // perda_manter_<m>
+  recommendation: string; // recomendacao_<m>, texto do SQL
 }
 
 export interface OverlapDecision {

@@ -1,0 +1,38 @@
+[
+ {
+  "campanha": "Nexus | Nova Home do App",
+  "stream": "app",
+  "bu": "cross",
+  "estado": "decidido (rollout)",
+  "variantes": "home antiga|home nova",
+  "min_share_7d": 0.007,
+  "data_inicio_leitura_sugerida": "2026-08-31",
+  "data_fim_leitura_sugerida": "2026-10-12",
+  "novo_nos_7d": false,
+  "onde": "app"
+ },
+ {
+  "campanha": "Cupom de primeira compra no checkout",
+  "stream": "web",
+  "bu": "ecom",
+  "estado": "rodando",
+  "variantes": "Controle|Cupom aplicado automaticamente",
+  "min_share_7d": 0.499,
+  "data_inicio_leitura_sugerida": "2026-10-02",
+  "data_fim_leitura_sugerida": "2026-10-13",
+  "novo_nos_7d": false,
+  "onde": "checkout"
+ },
+ {
+  "campanha": "Teste Banner Home",
+  "stream": "app",
+  "bu": "servico",
+  "estado": "rodando",
+  "variantes": "Formato Antigo|Formato Novo",
+  "min_share_7d": 0.46,
+  "data_inicio_leitura_sugerida": "2026-09-24",
+  "data_fim_leitura_sugerida": "2026-10-13",
+  "novo_nos_7d": true,
+  "onde": "home"
+ }
+]

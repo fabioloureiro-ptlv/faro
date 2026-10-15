@@ -2,6 +2,28 @@
 
 Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o quê, por quê e frentes afetadas. Mudança incompatível exige ADR em `docs/adr/`.
 
+## 0.4.0 — 2026-10-15 (E8, fonte real via consultas do roadmap v3, frente 4)
+
+**O quê**
+
+- `MetricResult.role?` (`'norte' | 'guarda' | 'exploratoria'`, de `papel_<m>`), `confirmed?` (`confirmado_<m>`), `cuped?` (`cuped_<m>`), `minEvents?` (`eventos_min_<m>`) e `bayes?` (`MetricBayes`: `uplift_esperado_`, `chance_melhor_`, `perda_ligar_`, `perda_manter_`, `recomendacao_`).
+- `ResultsResponse.source` (`'roadmap' | 'fixtures'`) — **obrigatório**: quem monta a resposta diz de onde vieram os números. As fixtures (`nexus-results.json` e `simulados/*.json`) ganharam `"source": "fixtures"` e o schema exige o campo; é o único acréscimo não opcional.
+- `ResultsResponse.readWindow.origin?` (`'roadmap' | 'detectado' | 'periodo_inteiro'`, de `origem_datas`), `status?` (o `status` da linha na consulta) e `guardrailsWorse?` (`guardas_piora`, como `metricId`).
+- `Allocation.readWindow?: ReadWindow` (`start`, `end`, `excludedDays?`) — janela de leitura do teste, que o sync injeta no marcador `-- {overrides}`; atende em parte o pedido 14/10 da frente 4 à frente 1 (o wizard ainda não preenche).
+- `roadmap-map.ts`: `ROADMAP_METRIC_TO_FARO` / `FARO_METRIC_TO_ROADMAP` (nome da métrica no SQL ↔ `metricId` do catálogo; `margem2_por_unidade → margem_2_por_usuario`), `ROADMAP_METRICS`, `ROADMAP_STAT_PREFIXES`, `ROADMAP_SQL_VERSION`, `ROADMAP_SQL_REF`, `ROADMAP_SOURCE_TABLES`.
+
+**Por quê**
+
+- E8 (plano aprovado em 15/10): `GET /results/:faroId` passa a devolver o `ResultsResponse` do contrato a partir do snapshot das consultas do roadmap (`dy_results` v3, `dy_discovery`, `dy_daily` v3) com o cadastro do Faro injetado, mantendo as fixtures como alternativa (`FARO_SOURCE`).
+
+**Compatibilidade**
+
+- Aditivo, exceto `ResultsResponse.source`, agora obrigatório. Quem monta `ResultsResponse` fora deste pacote precisa preenchê-lo. Sem ADR: o único produtor é a frente 4 (API) e as fixtures foram atualizadas aqui.
+
+**Frentes afetadas**
+
+- 4 (produz), 2 (lê `ResultsResponse` e a NORTE real no painel), 5 (o template pode exibir `bayes`/`role`), 1 (`Allocation.readWindow` opcional; nada muda no wizard).
+
 ## 0.3.0 — 2026-10-15 (ajustes de produto do wizard, frente 1)
 
 **O quê**

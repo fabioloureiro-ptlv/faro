@@ -9,6 +9,7 @@ import {
   MetricResultSchema,
   PageCatalogSchema,
   TemplateSchema,
+  resultsResponseSchema,
   type Design,
   type Experiment,
   type MetricDefinition,
@@ -20,6 +21,12 @@ import metrics from '../fixtures/metrics-catalog.json' with { type: 'json' };
 import pages from '../fixtures/pages.json' with { type: 'json' };
 import audiences from '../fixtures/audiences.json' with { type: 'json' };
 import templates from '../fixtures/templates.json' with { type: 'json' };
+import nexusResults from '../fixtures/nexus-results.json' with { type: 'json' };
+import simAgendado from '../fixtures/simulados/agendado_sem_dados.json' with { type: 'json' };
+import simEncerrado from '../fixtures/simulados/encerrado_com_vencedor.json' with { type: 'json' };
+import simMelhora from '../fixtures/simulados/melhora_confirmada_amostra_incompleta.json' with { type: 'json' };
+import simSrm from '../fixtures/simulados/srm.json' with { type: 'json' };
+import simTendencia from '../fixtures/simulados/tendencia_sem_significancia.json' with { type: 'json' };
 
 describe('tipos inferidos dos schemas espelham as interfaces da seção 6', () => {
   it('Experiment, Design, MetricDefinition e MetricResult', () => {
@@ -70,6 +77,14 @@ describe('fixtures obrigatórias validam nos schemas', () => {
         expect(ids.has(id), `${e.faroId}: ${id}`).toBe(true);
     for (const t of templates)
       for (const id of [t.design.primaryMetricId!, ...t.design.secondaryMetricIds!]) expect(ids.has(id)).toBe(true);
+  });
+
+  it('ResultsResponse (frente 4): Nexus e os cinco simulados validam e declaram a fonte (0.4.0)', () => {
+    for (const r of [nexusResults, simAgendado, simEncerrado, simMelhora, simSrm, simTendencia]) {
+      const parsed = resultsResponseSchema.parse(r);
+      expect(parsed.source).toBe('fixtures');
+    }
+    expect(resultsResponseSchema.safeParse({ ...nexusResults, source: undefined }).success).toBe(false);
   });
 
   it('fixtures sem dado pessoal: só e-mails @example.com', () => {

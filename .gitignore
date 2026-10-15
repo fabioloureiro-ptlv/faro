@@ -9,3 +9,6 @@ coverage/
 # variáveis de ambiente locais
 .env
 .env.*
+
+# E8: snapshots das consultas do roadmap (dados de produção, gerados por npm run job:sync-roadmap)
+data/snapshots/

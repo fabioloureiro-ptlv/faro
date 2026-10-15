@@ -47,3 +47,25 @@ O fixture `nexus.json` traz valor e n por braço, delta, probBetter, rótulo e M
 ## Precisão numérica
 
 `phi` usa a aproximação de Abramowitz-Stegun (erro ≤ 1,5e-7); `phiInv`, Acklam (erro relativo ~1e-9); qui-quadrado via gama incompleta regularizada. Suficiente para rótulos e ICs; não usar para p-valores abaixo de 1e-6.
+
+## Fonte roadmap v3: o que vem pronto do SQL e o que o Faro ainda calcula (E8, 15/10/2026)
+
+Com a fonte roadmap, o motor não recalcula o que a consulta já entrega; a tela continua igual porque o rótulo é sempre o do Faro.
+
+| Número | Vem pronto do SQL (`dy_results` v3) | O Faro calcula |
+| --- | --- | --- |
+| Valor por variante, `n` | `<m>`, `unidades` | — |
+| Delta relativo, IC95, `probBetter`, MDE atual | `uplift_<m>`, `ic_lo_/ic_hi_<m>`, `p_vence_<m>`, `mde_<m>` (já com CUPED, Agresti-Caffo, Dunnett, Holm/BH e mínimo de eventos/dias, conforme o cabeçalho da consulta) | `label = significanceLabel(probBetter)` (regra do contexto, seção 6) |
+| Papel, confirmação, CUPED, mínimo de eventos, leitura bayesiana | `papel_`, `confirmado_`, `cuped_`, `eventos_min_`, `uplift_esperado_`, `chance_melhor_`, `perda_ligar_`, `perda_manter_`, `recomendacao_` → `MetricResult.role/confirmed/cuped/minEvents/bayes` | papel fora de norte/guarda vira `exploratoria` (nota no payload) |
+| SRM | `p_srm` (p-valor e alerta `p < 0,001`), `share_unidades` | `chiSquare` e `df` com `srm()` sobre as `unidades` e o split do cadastro; `unstableSplitDays` = dias do `dy_daily` com `usuarios_novos > 0` fora da janela de leitura (0 sem o daily) |
+| Contaminação | `usuarios_2_variantes` | `share = users ÷ (Σ unidades + users)` |
+| Janela de leitura | `data_inicio_leitura`, `data_fim_leitura`, `origem_datas` | — |
+| Recomendação | `recomendacao_<norte>` da variante | tradução para o código do Faro (`resultados/roadmap/recommend.ts`); texto nulo ou desconhecido → `recommend()` |
+| Síntese | — | `synthesize()` sobre os `MetricResult` montados |
+| Funil | — | derivado das taxas: expostos → carrinho (`unidades × conversao_carrinho`) → compra (`compradores`) → clube (`unidades × conversao_clube`) |
+| Saúde do teste | `usuarios_novos` por dia × variação × device (`dy_daily`) | NORTE acumulada (somas de `receita`, `compradores`, `transacoes` sobre `usuarios_leitura` acumulado) para receita por usuário, conversão, transações por usuário e ticket; demais NORTEs sem série |
+| Amostra planejada (`sample`) | — | não calculada nesta fonte (a consulta traz o mínimo de eventos, não a amostra do design) |
+
+Diferenças esperadas contra `fixtures/nexus-results.json`: rótulos podem mudar onde o visualizador aplicava correções (ex.: churn do clube com `p = 0,19` é "tendência de queda" pela regra do Faro); deltas de métricas `mean` seguem o método do roadmap (CUPED e controle pós-rollout), que é o documentado aqui. O teste `services/api/test/roadmap-parity.test.ts` compara valores (0,5%) e `probBetter` das proporções (0,02) quando há snapshot real.
+
+Sem snapshot, `GET /results/:faroId` monta o mesmo contrato a partir das fixtures (`source: 'fixtures'`): o Nexus completo de `nexus-results.json` e, para os demais, os `MetricResult` e a saúde das fixtures da frente 2 (sem volumes, série diária nem funil).

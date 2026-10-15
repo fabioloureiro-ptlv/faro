@@ -92,7 +92,7 @@ function build(s: Scenario): ResultsResponse {
     funnelRows.push({ platform: 'all', variantKey: V, stepId: st.stepId, users: i === steps.length - 1 ? buyersV : Math.round(s.nVariant * rateV) });
   });
   return resultsResponseSchema.parse({
-    faroId: s.faroId, asOf, readWindow: { start: health[0]?.date ?? asOf, end: asOf }, grain: 'user', availableGrains: ['user', 'session'], platforms: ['all'],
+    faroId: s.faroId, source: 'fixtures', asOf, readWindow: { start: health[0]?.date ?? asOf, end: asOf }, grain: 'user', availableGrains: ['user', 'session'], platforms: ['all'],
     variants, contamination: { users: s.noData ? 0 : Math.round((s.nControl + s.nVariant) * 0.012), share: s.noData ? 0 : 0.012 },
     volumes: s.noData ? [] : [
       { platform: 'all', variantKey: C, users: s.nControl, buyers: buyersC, transactions: Math.round(buyersC * 1.25), revenue: Math.round(buyersC * 1.25 * 232) },
