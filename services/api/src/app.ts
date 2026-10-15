@@ -8,18 +8,18 @@ import { experimentRoutes } from './experiments/routes.ts';
 import { createExperimentService } from './experiments/service.ts';
 import { painelRoutes } from './painel/routes.ts';
 import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
-import { mockAudience } from './mocks/audience.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
 import { mockMetricCatalog } from './mocks/metric-catalog.ts';
-import { mockOverlap } from './mocks/overlap.ts';
 import { mockTemplates } from './mocks/templates.ts';
+import { audiencePort, overlapPort } from './publico/engine.ts';
 import type { Ports } from './ports.ts';
 
 export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports {
   return {
     metrics: mockMetricCatalog(db, now),
-    audience: mockAudience(),
-    overlap: mockOverlap(),
+    // Frente 3 real (unificação): públicos e sobreposição saem de src/publico.
+    audience: audiencePort(),
+    overlap: overlapPort(),
     templates: mockTemplates(),
     // Export real quando o sync já rodou (npm run job:sync-dy); mock caso contrário.
     dyExport: hasDyExportFile() ? fileDyExport() : mockDyExport(),

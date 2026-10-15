@@ -42,7 +42,61 @@ export const DesignSchema = z.object({
   baselineOverride: z.number().positive().optional(),
 });
 
-export const AudienceRuleSchema = z.record(z.string(), z.unknown());
+// Frente 3 (03-segmentacao-e-sobreposicao.md § 8): regra estruturada de público.
+export const AudienceConditionSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('comprou'),
+    dimension: z.enum(['categoria', 'marca', 'item']),
+    values: z.array(z.string().min(1)).min(1),
+    windowDays: z.number().int().positive().max(730),
+  }),
+  z.object({
+    type: z.literal('evento'),
+    eventName: z.string().min(1),
+    windowDays: z.number().int().positive().max(730),
+    minCount: z.number().int().positive().optional(),
+  }),
+  z.object({
+    type: z.literal('propriedade'),
+    key: z.string().min(1),
+    op: z.enum(['eq', 'in', 'neq']),
+    values: z.array(z.string().min(1)).min(1),
+  }),
+  z.object({ type: z.literal('plataforma'), values: z.array(PlatformSchema).min(1) }),
+]);
+
+export interface AudienceRuleShape {
+  op: 'and' | 'or';
+  conditions: (z.infer<typeof AudienceConditionSchema> | AudienceRuleShape)[];
+}
+
+export const AudienceRuleSchema: z.ZodType<AudienceRuleShape> = z.lazy(() =>
+  z.object({
+    op: z.enum(['and', 'or']),
+    conditions: z.array(z.union([AudienceConditionSchema, AudienceRuleSchema])).min(1),
+  }),
+);
+
+export const ExclusionGroupSchema = z
+  .object({
+    id: z.string().min(1),
+    pages: z.array(z.string().min(1)).min(1),
+    platforms: z.array(PlatformSchema).min(1),
+    slices: z.array(z.object({ faroId: FaroIdSchema, percent: z.number().min(0).max(100) })).min(1),
+  })
+  .refine((g) => g.slices.reduce((s, x) => s + x.percent, 0) <= 100, {
+    message: 'a soma das fatias não pode passar de 100%',
+    path: ['slices'],
+  });
+
+export const ObservedOverlapSchema = z.object({
+  faroIdA: FaroIdSchema,
+  faroIdB: FaroIdSchema,
+  usersBoth: z.number().int().nonnegative(),
+  shareOfA: z.number().min(0).max(1),
+  shareOfB: z.number().min(0).max(1),
+  asOf: isoDate,
+});
 
 export const AudienceSchema = z.object({
   description: z.string(),

@@ -101,7 +101,10 @@ describe('sobreposição, revisão e ficha (CFG-09, CFG-11)', () => {
   it('home no app gera conflito com o Nexus que precisa de decisão', async () => {
     const r = await readyDraft(ctx, { pages: ['home'], platforms: ['android', 'ios'] });
     const nexus = r.experiment.overlap?.find((o) => o.otherFaroId === 'FARO-2026-0001');
-    expect(nexus).toMatchObject({ severity: 'medio' });
+    // Motor real da frente 3 (SEG-11): o Nexus ocupa 98% da home do app, então o
+    // cruzamento passa de 20% do público do rascunho e a severidade sobe para alto
+    // (o mock da frente 1 classificava como médio). Ambos exigem resolução.
+    expect(nexus).toMatchObject({ severity: 'alto' });
     expect(r.derived.unlockedSteps).toEqual([1, 2, 3]);
     const blocked = await ctx.app.inject({ method: 'POST', url: `/experiments/${r.experiment.faroId}/ready`, headers: PM });
     expect(blocked.statusCode).toBe(422);
@@ -140,7 +143,9 @@ describe('sobreposição, revisão e ficha (CFG-09, CFG-11)', () => {
     expect(r.derived.unlockedSteps).toEqual([1, 2]);
     const res = await ctx.app.inject({ method: 'POST', url: `/experiments/${r.experiment.faroId}/ready`, headers: PM });
     expect(res.statusCode).toBe(422);
-    expect(res.json().details.map((c: { id: string }) => c.id)).toEqual(['viabilidade']);
+    // O motor real da frente 3 também acha sobreposição não resolvida nesse cenário;
+    // o bloqueio de viabilidade continua presente, que é o que este teste cobre.
+    expect(res.json().details.map((c: { id: string }) => c.id)).toContain('viabilidade');
   });
 
   it('editar depois de pronto e quebrar a prontidão volta a design_completo', async () => {

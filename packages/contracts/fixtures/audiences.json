@@ -8,54 +8,78 @@
     "id": "novos",
     "name": "Novos clientes",
     "share": 0.28,
-    "dyAttribute": "faro_publico_novos"
+    "dyAttribute": "faro_publico_novos",
+    "disjointWith": ["recorrentes"]
   },
   {
     "id": "recorrentes",
     "name": "Clientes recorrentes",
     "share": 0.72,
-    "dyAttribute": "faro_publico_recorrentes"
+    "dyAttribute": "faro_publico_recorrentes",
+    "disjointWith": ["novos"]
   },
   {
     "id": "repet",
     "name": "Assinantes Repet",
     "share": 0.38,
-    "dyAttribute": "faro_publico_repet"
+    "dyAttribute": "faro_publico_repet",
+    "disjointWith": ["naorepet"]
   },
   {
     "id": "naorepet",
     "name": "Não assinantes Repet",
     "share": 0.62,
-    "dyAttribute": "faro_publico_naorepet"
+    "dyAttribute": "faro_publico_naorepet",
+    "disjointWith": ["repet"]
   },
   {
     "id": "caes",
     "name": "Tutores de cães",
     "share": 0.68,
-    "dyAttribute": "faro_publico_caes"
+    "dyAttribute": "faro_publico_caes",
+    "rule": { "op": "and", "conditions": [{ "type": "propriedade", "key": "especie_pet", "op": "eq", "values": ["cachorro"] }] }
   },
   {
     "id": "gatos",
     "name": "Tutores de gatos",
     "share": 0.44,
-    "dyAttribute": "faro_publico_gatos"
+    "dyAttribute": "faro_publico_gatos",
+    "rule": { "op": "and", "conditions": [{ "type": "propriedade", "key": "especie_pet", "op": "eq", "values": ["gato"] }] }
   },
   {
     "id": "tapete",
     "name": "Compradores de tapete higiênico",
     "share": 0.09,
-    "dyAttribute": "faro_publico_tapete"
+    "dyAttribute": "faro_publico_tapete",
+    "rule": { "op": "and", "conditions": [{ "type": "comprou", "dimension": "categoria", "values": ["tapetes-higienicos"], "windowDays": 90 }] }
   },
   {
     "id": "areia",
     "name": "Compradores de areia para gatos",
     "share": 0.14,
-    "dyAttribute": "faro_publico_areia"
+    "dyAttribute": "faro_publico_areia",
+    "rule": { "op": "and", "conditions": [{ "type": "comprou", "dimension": "categoria", "values": ["areia"], "windowDays": 90 }] }
   },
   {
     "id": "antipulgas",
     "name": "Compradores de antipulgas",
     "share": 0.12,
-    "dyAttribute": "faro_publico_antipulgas"
+    "dyAttribute": "faro_publico_antipulgas",
+    "rule": { "op": "and", "conditions": [{ "type": "comprou", "dimension": "categoria", "values": ["antipulgas"], "windowDays": 90 }] }
+  },
+  {
+    "id": "brinquedo-cao",
+    "name": "Compradores de brinquedo de cão (12 meses)",
+    "share": 0.09,
+    "dyAttribute": "faro_aud_brinquedo_cao_12m",
+    "rule": { "op": "and", "conditions": [{ "type": "comprou", "dimension": "categoria", "values": ["cachorro/brinquedos"], "windowDays": 365 }] },
+    "sqlRef": "data/models/audiences/seg_ecom_compradores_brinquedo_cao_12m.sql"
+  },
+  {
+    "id": "novos-saude-30d",
+    "name": "Clientes novos no plano de saúde (30 dias)",
+    "share": 0.004,
+    "dyAttribute": "faro_aud_saude_novos_30d",
+    "sqlRef": "data/models/audiences/seg_saude_clientes_novos_30d_ativacao_dy.sql"
   }
 ]

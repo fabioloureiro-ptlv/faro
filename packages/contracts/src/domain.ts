@@ -45,8 +45,35 @@ export interface Design {
   baselineOverride?: number; // ajuste manual da linha de base da NORTE
 }
 
-// Dono: frente 3. Placeholder opaco até a frente 3 publicar a estrutura da regra.
-export type AudienceRule = Record<string, unknown>;
+// Dono: frente 3 (03-segmentacao-e-sobreposicao.md, seção 8).
+export type AudienceCondition =
+  | { type: 'comprou'; dimension: 'categoria' | 'marca' | 'item'; values: string[]; windowDays: number }
+  | { type: 'evento'; eventName: string; windowDays: number; minCount?: number }
+  | { type: 'propriedade'; key: 'repet' | 'clube' | 'plano_saude' | 'especie_pet' | 'regiao' | (string & {}); op: 'eq' | 'in' | 'neq'; values: string[] }
+  | { type: 'plataforma'; values: Platform[] };
+
+export interface AudienceRule {
+  op: 'and' | 'or';
+  conditions: (AudienceCondition | AudienceRule)[];
+}
+
+/** Grupo de exclusão mútua (SEG-13): fatias de tráfego por teste numa página/plataforma. */
+export interface ExclusionGroup {
+  id: string;
+  pages: string[];
+  platforms: Platform[];
+  slices: { faroId: string; percent: number }[];
+}
+
+/** Sobreposição observada (SEG-14): usuários expostos a dois testes no período. */
+export interface ObservedOverlap {
+  faroIdA: string;
+  faroIdB: string;
+  usersBoth: number;
+  shareOfA: number;
+  shareOfB: number;
+  asOf: string;
+}
 
 export interface Audience {
   description: string; // texto livre, obrigatório

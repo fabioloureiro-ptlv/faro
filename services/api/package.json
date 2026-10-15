@@ -13,6 +13,7 @@
     "start": "node src/server.ts",
     "job:dy-consistency": "node src/jobs/dy-consistency.ts",
     "job:sync-dy": "node src/jobs/sync-dy-campaigns.ts",
+    "job:publish-audiences": "node src/publico/jobs/publish-audiences.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {

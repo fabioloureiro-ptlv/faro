@@ -1,7 +1,7 @@
 // Formas das fixtures de apoio (catálogo de páginas, atalhos de público e templates).
 // Provisórias: os donos (frentes 3 e 5) definem a forma final; ver docs/specs/PEDIDOS.md.
 import { z } from 'zod';
-import { AllocationSchema, BuSchema, DesignSchema, PlatformSchema } from './schemas.ts';
+import { AllocationSchema, AudienceRuleSchema, BuSchema, DesignSchema, PlatformSchema } from './schemas.ts';
 
 export const PageCatalogEntrySchema = z.object({
   id: z.string().regex(/^[a-z0-9_]+$/),
@@ -20,6 +20,12 @@ export const AudienceShortcutSchema = z.object({
   name: z.string(),
   share: z.number().min(0).max(1),
   dyAttribute: z.string().optional(),
+  /** Frente 3: regra estruturada do atalho (SEG-02/03), quando expressável no construtor. */
+  rule: AudienceRuleSchema.optional(),
+  /** Ids de atalhos declaradamente disjuntos deste (SEG-10), ex.: novos × recorrentes. */
+  disjointWith: z.array(z.string()).optional(),
+  /** SQL versionado em data/models/audiences quando a regra não cabe no construtor. */
+  sqlRef: z.string().optional(),
 });
 
 /** Visão consumida pela frente 1. Provisório até a frente 5 publicar `Template`. */
