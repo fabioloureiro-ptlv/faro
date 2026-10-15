@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Aba "Mapa temporal": uma barra por campanha da DY, por página. Só o que o DY mostra (snapshot de resultados,
-// a mesma base da lista); nenhum experimento cadastrado no Faro entra aqui. A área escolhida na Visão Geral
-// destaca os testes dela e esmaece os de outras áreas que cruzam algum deles na mesma página.
+// a mesma base da lista); nenhum experimento cadastrado no Faro entra aqui. Com uma área escolhida na Visão Geral,
+// só os testes dela aparecem (mais os de ecossistema, que valem para qualquer área); os outros somem do mapa.
 import { computed } from 'vue';
 import { useAsyncData } from '#imports';
 import type { Experiment } from '@faro/contracts';
@@ -33,10 +33,9 @@ const comoExperimento = (t: TesteNoMapa): Experiment =>
   }) as unknown as Experiment;
 
 const testes = computed(() => new Map((dy.value?.testes ?? []).map((t) => [t.key, t])));
-const semPagina = computed(() => (dy.value?.testes ?? []).filter((t) => !t.paginas.length).length);
+const semPagina = computed(() => visiveis.value.filter((t) => !t.paginas.length).length);
 
-// Sem página não há o que cruzar: na linha "não identificada" só entram os testes da área escolhida.
-const visiveis = computed(() => [...testes.value.values()].filter((t) => t.paginas.length || naArea(t.bu)));
+const visiveis = computed(() => [...testes.value.values()].filter((t) => naArea(t.bu)));
 const linkDe = (t: TesteNoMapa) =>
   `/visao-geral?aba=dy&stream=${t.stream}&campanha=${encodeURIComponent(t.campanha)}${bu.value === 'todas' ? '' : `&bu=${bu.value}`}`;
 
@@ -44,7 +43,8 @@ const linkDe = (t: TesteNoMapa) =>
 const map = computed(() =>
   dy.value
     ? buildTimeMap(visiveis.value.map(comoExperimento), dy.value.paginas, {
-        bu: bu.value,
+        // A área já filtrou a lista acima: nenhuma barra fica esmaecida.
+        bu: 'todas',
         today: addDays(dy.value.dadosAte, 1),
         extra: (e) => {
           const t = testes.value.get(e.faroId);
@@ -63,7 +63,7 @@ const map = computed(() =>
   <template v-else-if="map && dy">
     <p class="small muted ab-nota" style="margin-top: 0">
       Testes da DY por página de {{ formatDayMonth(map.start) }} a {{ formatDayMonth(map.end) }} (dados até {{ formatDayMonth(dy.dadosAte) }}). Clique numa barra para ver o teste.
-      <template v-if="bu !== 'todas'">Testes de outras áreas aparecem esmaecidos quando cruzam um teste de {{ BU_LABEL[bu] }} na mesma página.</template>
+      <template v-if="bu !== 'todas'">Só os testes de {{ BU_LABEL[bu] }} (e de ecossistema) aparecem.</template>
     </p>
     <p v-if="semPagina" class="small muted ab-nota">
       {{ semPagina }} {{ semPagina === 1 ? 'teste do DY não tem' : 'testes do DY não têm' }} página identificada no export e ficam na linha “Página não identificada”.
