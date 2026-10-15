@@ -41,3 +41,7 @@ export function audienceAttributeFor(
   const sufixo = parameters.map((p) => String(values[p.name] ?? p.default).replace(/[^0-9a-z]/gi, '_')).join('_');
   return `${base}_${sufixo}`;
 }
+
+// DECISAO-PENDENTE: base de clientes com public_id em 14/10 (dim_cliente). Converte participação (share)
+// em número de clientes quando o segmento ainda não foi contado no BigQuery.
+export const BASE_CLIENTES = 15_270_545;

@@ -3,11 +3,13 @@
 import { computed, reactive, ref } from 'vue';
 import { navigateTo, useAsyncData } from '#imports';
 import { fmtData, fmtDelta } from '../composables/format';
+import { useBuFiltro } from '../composables/useBuFiltro';
 import { mensagemDeErro, useTestesAbApi } from '../composables/useTestesAbApi';
 import type { StatusRoadmap, TesteRoadmap } from '../composables/types';
 
 const api = useTestesAbApi();
 const { data, error } = await useAsyncData('ab-roadmap', () => api.roadmap());
+const { naArea } = useBuFiltro();
 
 const GRUPOS: { status: StatusRoadmap; rotulo: string; contador: string }[] = [
   { status: 'rodando', rotulo: 'Rodando', contador: 'Rodando' },
@@ -22,8 +24,15 @@ const filtroStatus = ref<'todos' | StatusRoadmap>('todos');
 const filtroIndicador = ref('');
 const abertos = reactive(new Set<number>());
 
+// A área escolhida na Visão Geral vale aqui também; os contadores acompanham.
+const daArea = computed(() => (data.value?.testes ?? []).filter((t) => naArea(t.bu)));
+const contadores = computed(() => {
+  const c: Record<StatusRoadmap, number> = { desenhando: 0, pronto: 0, rodando: 0, concluido: 0 };
+  for (const t of daArea.value) c[t.status] += 1;
+  return c;
+});
 const testes = computed(() =>
-  (data.value?.testes ?? []).filter(
+  daArea.value.filter(
     (t) => (filtroStatus.value === 'todos' || t.status === filtroStatus.value) && (!filtroIndicador.value || t.indicador === filtroIndicador.value),
   ),
 );
@@ -54,7 +63,7 @@ function verNoDy(campanha: string, stream: string) {
   <template v-else-if="data">
     <div class="ab-contadores">
       <div v-for="g in GRUPOS" :key="g.status">
-        <b>{{ data.contadores[g.status] }}</b>
+        <b>{{ contadores[g.status] }}</b>
         <span class="ab-rotulo">{{ g.contador }}</span>
       </div>
     </div>

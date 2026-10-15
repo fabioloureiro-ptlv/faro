@@ -29,6 +29,15 @@ export interface ExperimentSummary {
   updatedAt: string;
 }
 
+/** Testes rodando na DY, por área (BU), que vêm junto da sugestão de datas. */
+export interface AreaRodando {
+  bu: string;
+  rotulo: string;
+  quantidade: number;
+  testes: { campanha: string; stream: 'web' | 'app'; status: string; inicio: string; fim: string; paginas: string[] }[];
+}
+export type DateSuggestionView = DateSuggestion & { rodandoPorArea?: AreaRodando[] };
+
 export interface DyCampaignRow {
   campaignId: string;
   campaignName: string;
@@ -93,7 +102,7 @@ export function useFaroApi() {
       call<ServerView>(`/experiments/${id}/dy-confirmation`, { method: 'POST', body }),
     duplicate: (id: string) => call<ServerView>(`/experiments/${id}/duplicate`, { method: 'POST', body: {} }),
     // Ajustes de produto 15/10: sugestão de datas (com testes interpostos) e de MDE (base histórica).
-    dateSuggestion: (id: string) => call<DateSuggestion>(`/experiments/${id}/date-suggestion`),
+    dateSuggestion: (id: string) => call<DateSuggestionView>(`/experiments/${id}/date-suggestion`),
     mdeSuggestion: (id: string) => call<MdeSuggestion>(`/experiments/${id}/mde-suggestion`),
     importLegacy: (body: { dyCampaignId: string; bu: string; ownerSquad: string }) =>
       call<ServerView>('/experiments/import-legacy', { method: 'POST', body }),

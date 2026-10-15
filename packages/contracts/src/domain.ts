@@ -85,6 +85,7 @@ export interface Audience {
   estimatedShare?: number; // 0–1 da base elegível
   dyAttribute?: string; // atributo publicado no DY via User Data API
   params?: Record<string, number>; // 0.5.0: valores dos parâmetros do segmento escolhido (ex.: dias_inadimplencia)
+  eligibleClients?: number; // 0.6.0: clientes do público, contados no BigQuery (base da amostra do experimento)
 }
 
 /** Acréscimo 0.3.0 (frente 1, ajuste de produto 15/10): onde exatamente a página fica. */

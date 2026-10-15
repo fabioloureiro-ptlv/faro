@@ -47,8 +47,23 @@ export async function testesAbRoutes(app: FastifyInstance) {
     requireActor(req);
     const q = ListaQuery.parse(req.query);
     const snap = snapshot();
-    const vinculos = vinculosPorCampanha(carregarRoadmap().testes);
-    return { ...listarDy(snap.results, { ...q, vinculos }), metricas: METRICAS.map((m) => ({ key: m.key, label: m.label })), dadosAte: snap.meta.dadosAte };
+    const cadastro = carregarRoadmap();
+    const catalogo = pagesFromCatalog();
+    // Squad de cada campanha atrelada ao roadmap.
+    const squads = new Map(cadastro.testes.flatMap((t) => (t.squad ? t.campanhasDy.map((c) => [c, t.squad!] as const) : [])));
+    const lista = listarDy(snap.results, {
+      ...q,
+      vinculos: vinculosPorCampanha(cadastro.testes),
+      paginas: paginasDoExportDy(),
+      paginasValidas: new Set(catalogo.map((p) => p.id)),
+      squads,
+    });
+    return {
+      ...lista,
+      metricas: METRICAS.map((m) => ({ key: m.key, label: m.label })),
+      paginasCatalogo: catalogo.map((p) => ({ id: p.id, name: p.name })),
+      dadosAte: snap.meta.dadosAte,
+    };
   });
 
   app.get('/testes-ab/dy/detalhe', async (req) => {

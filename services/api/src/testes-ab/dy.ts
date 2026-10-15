@@ -1,6 +1,8 @@
 // Aba Teste AB, "Rodando no DY": lista e detalhe dos testes a partir das linhas reais da consulta de
 // resultados (dy_results v3, o mesmo snapshot que o painel usa). A consulta traz uma linha por
 // teste × grão × device × variante; "Total" é o device consolidado.
+import type { Bu } from '@faro/contracts';
+import { BU_BY_COL } from '../resultados/roadmap/adapter.ts';
 import type { ResultsRow } from '../resultados/roadmap/types.ts';
 import {
   flag,
@@ -69,6 +71,8 @@ export interface LinhaDy {
   key: string;
   campanha: string;
   stream: 'web' | 'app';
+  /** BU como o painel usa (ecom, saude, ecossistema…). */
+  area: Bu;
   bu: string | null;
   cross: boolean;
   base: number;
@@ -81,6 +85,17 @@ export interface LinhaDy {
   cmp: Comparacao | null;
   /** Testes do roadmap atrelados (#id) e relacionados (entre parênteses na tela). */
   roadmap: { atrelados: number[]; relacionados: number[] };
+  /** Onde roda: plataformas pela origem (site ou app) e páginas do export da DY (ids do catálogo). */
+  plataformas: string[];
+  paginas: string[];
+  /** Janela de leitura da consulta. */
+  periodo: { inicio: string | null; fim: string | null; dias: number | null };
+  /** Métrica NORTE do teste e o resultado da melhor variante nela. */
+  norte: { key: string; label: string; formato: MetricaDef['formato']; cmp: Comparacao | null };
+  alertas: string[];
+  /** Outros testes rodando na mesma página com período que cruza este. */
+  mesmaPagina: number;
+  squad?: string;
 }
 
 export interface ListaDy {
@@ -92,7 +107,33 @@ export interface ListaDy {
   testes: LinhaDy[];
 }
 
-export function listarDy(rows: ResultsRow[], opts: { grao?: Grao; stream?: StreamFiltro; metrica?: string; vinculos?: Map<string, Vinculo> }): ListaDy {
+export interface OpcoesListaDy {
+  grao?: Grao;
+  stream?: StreamFiltro;
+  metrica?: string;
+  vinculos?: Map<string, Vinculo>;
+  /** Páginas por campanha (export da DY), chave = nome da campanha em minúsculas. */
+  paginas?: Map<string, { pages: string[] }>;
+  /** Ids de páginas que existem no catálogo; o resto é ignorado. */
+  paginasValidas?: Set<string>;
+  /** Squad por campanha, quando o teste está atrelado ao roadmap. */
+  squads?: Map<string, string>;
+}
+
+function alertasDe(controle: ResultsRow, status: StatusTeste): string[] {
+  const out: string[] = [];
+  if (status.key === 'split_desigual') out.push('Split desigual');
+  if (status.key === 'volume_baixo') out.push('Volume baixo');
+  if (status.key === 'decidido') out.push('Decidido, campanha ainda ligada');
+  const guardas = texto(controle, 'guardas_piora');
+  if (guardas) out.push(`Guarda piorando: ${guardas}`);
+  const dois = controle.usuarios_2_variantes ?? 0;
+  if (dois > 0) out.push(`${dois.toLocaleString('pt-BR')} usuários em 2 variantes (excluídos)`);
+  if (controle.dias_leitura != null && controle.dias_leitura < 7) out.push('Menos de 7 dias de leitura');
+  return out;
+}
+
+export function listarDy(rows: ResultsRow[], opts: OpcoesListaDy): ListaDy {
   const grao = opts.grao ?? 'usuario';
   const stream = opts.stream ?? 'todos';
   const m = metricaPorKey(opts.metrica);
@@ -114,10 +155,18 @@ export function listarDy(rows: ResultsRow[], opts: { grao?: Grao; stream?: Strea
     if (melhor?.cmp.confirmado && melhor.cmp.uplift > 0 && status.key === 'saudavel') confirmados += 1;
     const v = vinculos(opts.vinculos, controle.campanha);
 
+    const norteM = metricaPorColuna(texto(controle, 'metrica_norte')) ?? m;
+    const norteMelhor = comparavel ? melhorVariante(outras, norteM) : null;
+    const inicios = grupo.map((r) => r.data_inicio_leitura).filter((d): d is string => !!d).sort();
+    const fins = grupo.map((r) => r.data_fim_leitura).filter((d): d is string => !!d).sort();
+    const paginas = (opts.paginas?.get(controle.campanha.trim().toLowerCase())?.pages ?? []).filter((p) => !opts.paginasValidas || opts.paginasValidas.has(p));
+    const squad = opts.squads?.get(controle.campanha);
+
     testes.push({
       key: chaveTeste(controle),
       campanha: controle.campanha,
       stream: controle.stream,
+      area: BU_BY_COL(controle.bu ?? ''),
       bu: controle.bu ?? null,
       cross: controle.bu === 'cross',
       base: total.reduce((s, r) => s + (r.unidades ?? 0), 0),
@@ -129,7 +178,22 @@ export function listarDy(rows: ResultsRow[], opts: { grao?: Grao; stream?: Strea
       melhor: melhor ? { nome: melhor.row.variacao, valor: num(melhor.row, m.col) } : null,
       cmp: melhor?.cmp ?? null,
       roadmap: v,
+      plataformas: controle.stream === 'app' ? ['Android', 'iOS'] : ['Site'],
+      paginas,
+      periodo: { inicio: inicios[0] ?? null, fim: fins.at(-1) ?? null, dias: controle.dias_leitura ?? null },
+      norte: { key: norteM.key, label: norteM.label, formato: norteM.formato, cmp: norteMelhor?.cmp ?? null },
+      alertas: alertasDe(controle, status),
+      mesmaPagina: 0,
+      ...(squad ? { squad } : {}),
     });
+  }
+
+  // Sobreposição na DY: outros testes ainda rodando na mesma página, com janela que cruza a deste.
+  const rodando = testes.filter((t) => t.status.key !== 'decidido' && t.paginas.length && t.periodo.inicio && t.periodo.fim);
+  for (const t of rodando) {
+    t.mesmaPagina = rodando.filter(
+      (o) => o !== t && o.paginas.some((p) => t.paginas.includes(p)) && o.periodo.inicio! <= t.periodo.fim! && t.periodo.inicio! <= o.periodo.fim!,
+    ).length;
   }
 
   testes.sort((a, b) => b.base - a.base);

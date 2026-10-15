@@ -6,7 +6,7 @@ import type { ResultsRow } from '../src/resultados/roadmap/types.ts';
 import { createResultsSource } from '../src/resultados/roadmap/source.ts';
 import { detalharDy, listarDy, recomendar } from '../src/testes-ab/dy.ts';
 import { METRICAS, metricaPorKey, significancia, statusDe } from '../src/testes-ab/metricas.ts';
-import { mapaDy, PAGINA_SEM_ID } from '../src/testes-ab/mapa.ts';
+import { mapaDy, PAGINA_SEM_ID, rodandoPorArea } from '../src/testes-ab/mapa.ts';
 import { carregarRoadmap, vinculosPorCampanha } from '../src/testes-ab/roadmap.ts';
 import { PM, setup, type Ctx } from './helpers.ts';
 
@@ -94,6 +94,51 @@ describe('Rodando no DY — lista', () => {
   });
 });
 
+describe('Rodando no DY — variáveis da antiga Lista', () => {
+  const paginas = new Map([
+    [CAMPANHA.toLowerCase(), { pages: ['home', 'produto'] }],
+    ['teste web', { pages: ['home'] }],
+  ]);
+  const janela = (r: ResultsRow, inicio: string, fim: string) => ({ ...r, data_inicio_leitura: inicio, data_fim_leitura: fim }) as ResultsRow;
+  const datadas = rows.map((r) => janela(r, r.campanha === 'Teste web' ? '2026-10-01' : '2026-09-23', r.campanha === 'Teste web' ? '2026-10-14' : '2026-10-08'));
+
+  it('área, onde roda, período, NORTE e squad de cada teste', () => {
+    const l = listarDy(datadas, {
+      paginas,
+      paginasValidas: new Set(['home']),
+      squads: new Map([[CAMPANHA, 'Fidelidade']]),
+    });
+    const t = l.testes.find((x) => x.campanha === CAMPANHA)!;
+    expect(t).toMatchObject({ area: 'ecom', plataformas: ['Android', 'iOS'], paginas: ['home'], squad: 'Fidelidade' });
+    expect(t.periodo).toEqual({ inicio: '2026-09-23', fim: '2026-10-08', dias: 16 });
+    expect(t.norte).toMatchObject({ key: 'ticket', label: 'Ticket médio' });
+    expect(t.norte.cmp?.uplift).toBeCloseTo(0.008, 3);
+    expect(l.testes.find((x) => x.campanha.startsWith('Nexus'))).toMatchObject({ area: 'ecossistema', plataformas: ['Android', 'iOS'] });
+    const web = l.testes.find((x) => x.campanha === 'Teste web')!;
+    expect(web.plataformas).toEqual(['Site']);
+    expect(web).not.toHaveProperty('squad');
+  });
+
+  it('alertas vêm do status, dos guardas e de poucos dias; teste decidido avisa que ainda está ligado', () => {
+    const l = listarDy(datadas, { paginas });
+    expect(l.testes.find((x) => x.campanha === 'Teste web')!.alertas).toEqual(['Split desigual']);
+    expect(l.testes.find((x) => x.campanha.startsWith('Nexus'))!.alertas).toContain('Decidido, campanha ainda ligada');
+    const comGuarda = datadas.map((r) => (r.campanha === CAMPANHA ? ({ ...r, guardas_piora: 'conversao', dias_leitura: 5, usuarios_2_variantes: 9 } as ResultsRow) : r));
+    const a = listarDy(comGuarda, { paginas }).testes.find((x) => x.campanha === CAMPANHA)!.alertas;
+    expect(a).toEqual(['Guarda piorando: conversao', '9 usuários em 2 variantes (excluídos)', 'Menos de 7 dias de leitura']);
+  });
+
+  it('"na mesma página" conta os outros testes rodando na página com período que cruza; decidido e sem página não contam', () => {
+    const l = listarDy(datadas, { paginas });
+    // FIDE (home, 23/09–08/10) e Teste web (home, 01/10–14/10) se cruzam; Nexus está decidido
+    expect(l.testes.find((x) => x.campanha === CAMPANHA)!.mesmaPagina).toBe(1);
+    expect(l.testes.find((x) => x.campanha === 'Teste web')!.mesmaPagina).toBe(1);
+    expect(l.testes.find((x) => x.campanha.startsWith('Nexus'))!.mesmaPagina).toBe(0);
+    const separados = datadas.map((r) => (r.campanha === 'Teste web' ? janela(r, '2026-10-20', '2026-10-30') : r));
+    expect(listarDy(separados, { paginas }).testes.find((x) => x.campanha === CAMPANHA)!.mesmaPagina).toBe(0);
+  });
+});
+
 describe('Rodando no DY — detalhe', () => {
   it('traz variantes, síntese, recomendação, tabelas por device e MDE', () => {
     const cadastro = carregarRoadmap();
@@ -154,6 +199,14 @@ describe('Mapa temporal só com a DY', () => {
     expect(m.testes.find((t) => t.campanha === CAMPANHA)?.paginas).toEqual(['home']);
     const so = mapaDy(rows, '2026-10-14', new Map([[CAMPANHA.toLowerCase(), { pages: ['produto'] }]]), catalogo);
     expect(so.testes.find((t) => t.campanha === CAMPANHA)?.paginas).toEqual([]);
+  });
+
+  it('rodando por área: tudo que está no snapshot e não foi decidido, agrupado por BU', () => {
+    const m = mapaDy(rows, '2026-10-14', new Map(), catalogo);
+    const areas = rodandoPorArea(m.testes);
+    expect(areas.map((a) => [a.bu, a.quantidade])).toEqual([['ecom', 2], ['saude', 0], ['fintech', 0], ['servicos', 0], ['ecossistema', 0]]);
+    expect(areas[0]!.testes.map((t) => t.campanha).sort()).toEqual([CAMPANHA, 'Teste web'].sort());
+    expect(areas[0]!.testes.find((t) => t.stream === 'web')?.status).toBe('split desigual');
   });
 
   it('sem datas de leitura usa o último dia de dados', () => {

@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { useRoute } from '#imports';
 
-// Destinos, nesta ordem: acompanhar os testes (painel e mapa), montar um novo (frente 1), o catálogo de segmentos e a aba experimental Teste AB.
+// Três destinos, nesta ordem: a Visão Geral (testes do roadmap, o que roda no DY e o mapa), montar um novo (frente 1) e o catálogo de segmentos.
 const route = useRoute();
 const under = (base: string) => route.path === base || route.path.startsWith(`${base}/`);
+const geralAtivo = computed(() => under('/visao-geral') || under('/painel') || under('/testes-ab'));
 const novoAtivo = computed(() => under('/configuracao'));
-const painelAtivo = computed(() => under('/painel'));
 const segmentoAtivo = computed(() => under('/segmento'));
-const testeAbAtivo = computed(() => under('/testes-ab'));
 </script>
 
 <template>
   <div class="app">
     <aside>
-      <NuxtLink to="/painel" class="logo">
+      <NuxtLink to="/visao-geral" class="logo">
         <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
           <rect width="34" height="34" rx="10" fill="var(--brand)" />
           <circle cx="12" cy="13" r="3" fill="var(--gate)" />
@@ -23,15 +22,12 @@ const testeAbAtivo = computed(() => under('/testes-ab'));
         <span>Faro<small>Experimentos Petlove</small></span>
       </NuxtLink>
       <nav aria-label="Principal">
-        <NuxtLink to="/painel" :class="{ active: painelAtivo }" :aria-current="painelAtivo ? 'page' : undefined">
+        <NuxtLink to="/visao-geral" :class="{ active: geralAtivo }" :aria-current="geralAtivo ? 'page' : undefined">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <path d="M2 14.5V3.5M2 14.5h14" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
             <path d="M5.5 11l3-3.5 2.5 2 3.5-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span>
-            <span class="longo">Acompanhamento de Experimentos</span>
-            <span class="curto">Acompanhamento</span>
-          </span>
+          <span>Visão Geral</span>
         </NuxtLink>
         <NuxtLink to="/configuracao" :class="{ active: novoAtivo }" :aria-current="novoAtivo ? 'page' : undefined">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -47,13 +43,6 @@ const testeAbAtivo = computed(() => under('/testes-ab'));
             <path d="M1.8 14.5c.4-2.4 2.3-3.8 4.7-3.8s4.3 1.4 4.7 3.8M11.2 11c2.2-.2 4.4.8 5 3.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
           </svg>
           <span>Segmentos</span>
-        </NuxtLink>
-        <NuxtLink to="/testes-ab" :class="{ active: testeAbAtivo }" :aria-current="testeAbAtivo ? 'page' : undefined">
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-            <path d="M7 2.5h4M8 2.5v4.6L3.6 14a1.4 1.4 0 0 0 1.2 2.1h8.4a1.4 1.4 0 0 0 1.2-2.1L10 7.1V2.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M5.4 11.5h7.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-          </svg>
-          <span>Teste AB</span>
         </NuxtLink>
       </nav>
     </aside>
@@ -74,7 +63,6 @@ nav a svg { flex: none; margin-top: 1px; }
 nav a:hover, nav a.active { color: var(--ink); background: var(--brand-soft); }
 nav a.active { font-weight: 700; }
 nav a.active svg { color: var(--brand); }
-.curto { display: none; }
 main { padding: 36px clamp(16px, 4vw, 48px) 80px; max-width: 1180px; width: 100%; min-width: 0; }
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
@@ -82,7 +70,5 @@ main { padding: 36px clamp(16px, 4vw, 48px) 80px; max-width: 1180px; width: 100%
   .logo small { display: none; }
   nav { flex-direction: row; flex-wrap: wrap; }
   nav a { align-items: center; padding: 7px 10px; }
-  .longo { display: none; }
-  .curto { display: inline; }
 }
 </style>

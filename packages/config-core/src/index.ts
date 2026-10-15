@@ -2,6 +2,7 @@ export * from './faro-id.ts';
 export * from './figma.ts';
 export * from './design-gate.ts';
 export * from './sample-size.ts';
+export * from './audience-sample.ts';
 export * from './duration.ts';
 export * from './readiness.ts';
 export * from './dy-sheet.ts';

@@ -5,13 +5,13 @@
 //    estimativa real (BigQuery) e só então os elegíveis por dia.
 import { audienceAttributeFor, defaultAudienceParams } from '@faro/contracts';
 import type { PageTarget, Platform } from '@faro/contracts';
-import type { DateSuggestion, DateWindow } from '@faro/config-core';
-import { ApiError, useFaroApi } from '../composables/useFaroApi';
+import type { DateWindow } from '@faro/config-core';
+import { ApiError, type DateSuggestionView, useFaroApi } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
 import { PLATFORM_LABEL, fmtDate, fmtInt } from '../utils/labels';
 
 const emit = defineEmits<{ next: [] }>();
-const { experiment: exp, pageCatalog, shortcuts, nPerGroup, duration, dailyEstimate, audience, saveState, suggestDates } = useExperimentDraft();
+const { experiment: exp, pageCatalog, shortcuts, nPerGroup, duration, sample, dailyEstimate, audience, saveState, suggestDates } = useExperimentDraft();
 const api = useFaroApi();
 const e = computed(() => exp.value!);
 const a = computed(() => e.value.allocation);
@@ -98,7 +98,8 @@ function pickShortcut(id: string) {
 }
 
 // ---- Sugestão de datas (ajuste 15/10): pela duração mínima, com os testes interpostos.
-const dates = reactive({ data: null as DateSuggestion | null, busy: false, erro: '' });
+const dates = reactive({ data: null as DateSuggestionView | null, busy: false, erro: '' });
+const totalRodando = computed(() => (dates.data?.rodandoPorArea ?? []).reduce((n, x) => n + x.quantidade, 0));
 const canSuggest = computed(() => a.value.pages.length > 0);
 async function loadDates() {
   if (!canSuggest.value) return;
@@ -139,10 +140,15 @@ const splitSum = computed(() => Math.round(a.value.split.reduce((s, x) => s + x,
 const failing = computed(() => audience.value.filter((c) => !c.ok));
 // Amostra e usuários por dia são estimativas informativas: o texto diz o que falta para calculá-las, sem barrar o avanço.
 const estimateHint = computed(() => {
-  if (!duration.value?.totalSample) return 'Escolha a métrica primária (NORTE) no design para calcular a amostra.';
-  if (duration.value.periodDays == null) return 'Defina início e fim na aba Definição para estimar os usuários por dia.';
-  return `Estimativa: amostra total (${fmtInt(duration.value.totalSample)}) ÷ ${duration.value.periodDays} dias do período.`;
+  const s = sample.value;
+  if (!s) return temCodigo.value ? 'Processe a estimativa no BigQuery para calcular a amostra.' : 'Informe o tamanho do público para calcular a amostra.';
+  const origem = s.source === 'bigquery' ? 'Público contado no BigQuery' : `Estimativa pela participação do segmento (${sharePct.value.toLocaleString('pt-BR')}% da base)`;
+  const base = `${origem} × ${s.trafficPercent}% abordado.${s.source === 'estimado' && temCodigo.value ? ' Processe no BigQuery para o número real.' : ''}`;
+  if (duration.value?.periodDays == null) return `${base} Defina início e fim na aba Definição para estimar os usuários por dia.`;
+  return `${base} Usuários por dia: amostra total (${fmtInt(s.total)}) ÷ ${duration.value.periodDays} dias do período.`;
 });
+// Referência estatística (informativa): o menor grupo atinge a amostra necessária para o efeito mínimo?
+const menorGrupo = computed(() => (sample.value?.perGroup.length ? Math.min(...sample.value.perGroup.map((g) => g.size)) : null));
 
 // Pré-requisitos mínimos para montar o público-alvo (a viabilidade fica para a aba 2).
 const definicaoOk = computed(
@@ -168,6 +174,7 @@ function setParam(name: string, raw: string) {
   const attribute = audienceAttributeFor(s.dyAttribute, s.parameters, next);
   if (attribute) e.value.audience.dyAttribute = attribute;
   // A estimativa anterior era de outro valor.
+  delete e.value.audience.eligibleClients;
   seg.sql = '';
   seg.clientes = null;
   seg.erro = '';
@@ -198,6 +205,8 @@ async function processar() {
     seg.sql = r.sql;
     seg.gigabytes = r.gigabytes;
     seg.clientes = r.clientes ?? null;
+    // Guarda no rascunho: a amostra continua ali depois de recarregar, sem contar de novo.
+    if (r.clientes != null) e.value.audience.eligibleClients = r.clientes;
   } catch (err) {
     seg.erro = err instanceof ApiError ? err.message : 'Não foi possível processar a estimativa no BigQuery.';
   } finally {
@@ -377,6 +386,22 @@ async function processar() {
               {{ dates.data.dy.semPagina }} {{ dates.data.dy.semPagina === 1 ? 'teste ativo na DY não tem' : 'testes ativos na DY não têm' }} página identificada e não {{ dates.data.dy.semPagina === 1 ? 'entrou' : 'entraram' }} na conta.
             </template>
           </p>
+          <div v-if="dates.data.rodandoPorArea?.length" class="areas">
+            <p class="small" style="margin: 12px 0 4px"><b>Rodando agora na DY, por área</b> <span class="muted">({{ totalRodando }} {{ totalRodando === 1 ? 'teste' : 'testes' }}, fora os já decididos)</span></p>
+            <ul class="areas-lista">
+              <li v-for="ar in dates.data.rodandoPorArea" :key="ar.bu">
+                <details v-if="ar.quantidade">
+                  <summary><b>{{ ar.rotulo }}</b> · {{ ar.quantidade }} {{ ar.quantidade === 1 ? 'teste' : 'testes' }}</summary>
+                  <ul class="small">
+                    <li v-for="t in ar.testes" :key="t.stream + t.campanha">
+                      {{ t.campanha }} <span class="muted">· {{ t.stream === 'app' ? 'app' : 'web' }} · {{ t.status }} · {{ t.paginas.length ? t.paginas.map(pageName).join(', ') : 'página não identificada' }}</span>
+                    </li>
+                  </ul>
+                </details>
+                <span v-else><b>{{ ar.rotulo }}</b> · <span class="muted">nenhum teste rodando</span></span>
+              </li>
+            </ul>
+          </div>
         </template>
       </section>
 
@@ -410,8 +435,8 @@ async function processar() {
             <button type="button" class="btn" :disabled="seg.carregando" @click="processar">{{ seg.carregando ? 'Processando…' : 'Processar estimativa no BigQuery' }}</button>
           </div>
           <p v-if="seg.erro" class="err" role="alert">{{ seg.erro }}</p>
-          <p v-if="seg.clientes != null" class="callout okp" aria-live="polite">
-            <b>{{ fmtInt(seg.clientes) }}</b> clientes no público ({{ seg.gigabytes.toLocaleString('pt-BR') }} GB processados).
+          <p v-if="e.audience.eligibleClients != null" class="callout okp" aria-live="polite">
+            <b>{{ fmtInt(e.audience.eligibleClients) }}</b> clientes no público<template v-if="seg.clientes != null"> ({{ seg.gigabytes.toLocaleString('pt-BR') }} GB processados)</template>.
           </p>
           <pre v-if="seg.sql" class="sqlbox"><code>{{ seg.sql }}</code></pre>
         </template>
@@ -432,10 +457,25 @@ async function processar() {
       <div class="sticky">
         <section class="panel" aria-labelledby="est-title" aria-live="polite">
           <h2 id="est-title">Amostra e período</h2>
-          <div class="stat"><span class="small muted">Amostra por grupo</span><b>{{ nPerGroup ? fmtInt(nPerGroup) : '–' }}</b></div>
-          <div class="stat"><span class="small muted">Amostra total ({{ groups.length }} grupos)</span><b>{{ duration?.totalSample ? fmtInt(duration.totalSample) : '–' }}</b></div>
+          <div class="stat">
+            <span class="small muted">Público elegível<template v-if="sample"> ({{ sample.source === 'bigquery' ? 'contado no BigQuery' : 'estimado pela participação' }})</template></span>
+            <b>{{ sample ? fmtInt(sample.eligible) : '–' }}</b>
+          </div>
+          <div class="stat"><span class="small muted">Percentual do público abordado</span><b>{{ a.trafficPercent }}%</b><span class="small muted">escolhido na aba Definição</span></div>
+          <div class="stat"><span class="small muted">Amostra total ({{ groups.length }} grupos)</span><b>{{ sample ? fmtInt(sample.total) : '–' }}</b></div>
+          <div class="stat">
+            <span class="small muted">Amostra por grupo</span>
+            <ul v-if="sample" class="grupos">
+              <li v-for="(g, i) in sample.perGroup" :key="i"><span>{{ groups[i] }} · {{ splitPct(i).toLocaleString('pt-BR') }}%</span><b>{{ fmtInt(g.size) }}</b></li>
+            </ul>
+            <b v-else>–</b>
+          </div>
           <div class="stat"><span class="small muted">Usuários elegíveis por dia (estimativa)</span><b>{{ dailyEstimate ? fmtInt(dailyEstimate) : '–' }}</b><span v-if="saveState === 'saving'" class="small muted">atualizando…</span></div>
           <p class="small muted estimativa">{{ estimateHint }}</p>
+          <p v-if="nPerGroup && menorGrupo != null" class="small muted estimativa">
+            Para detectar o efeito mínimo escolhido são necessários {{ fmtInt(nPerGroup) }} por grupo: o menor grupo tem {{ fmtInt(menorGrupo) }}
+            ({{ menorGrupo >= nPerGroup ? 'suficiente' : 'abaixo do necessário' }}). Informativo, não impede avançar.
+          </p>
           <ul v-if="failing.length" class="todo small">
             <li v-for="c in failing" :key="c.id">{{ c.message }}</li>
           </ul>
@@ -449,6 +489,12 @@ async function processar() {
 
 <style scoped>
 .estimativa { margin: 8px 0 0; }
+.areas-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.areas-lista summary { cursor: pointer; }
+.areas-lista ul { margin: 4px 0 6px; padding-left: 18px; }
+.grupos { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 4px; }
+.grupos li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.grupos li b { font-size: 18px; }
 .param { max-width: 320px; margin-top: 12px; }
 .selecionado { margin-top: 14px; padding: 16px; border: 1px solid var(--brand); border-radius: 14px; background: var(--brand-soft); }
 .selecionado h3 { margin: 6px 0 0; font-size: 17px; }

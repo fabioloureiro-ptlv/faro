@@ -2,6 +2,7 @@
 export type Formato = 'brl' | 'pct' | 'num' | 'num4' | 'int';
 export type TomSig = 'good' | 'good-outline' | 'neutral' | 'warn' | 'bad';
 export type Grao = 'usuario' | 'sessao';
+export type Area = 'ecom' | 'saude' | 'fintech' | 'servicos' | 'ecossistema';
 export type StreamFiltro = 'todos' | 'web' | 'app';
 
 export interface Sig {
@@ -44,6 +45,7 @@ export interface TesteRoadmap {
   dataInicio?: string;
   indicador?: string;
   squad?: string;
+  bu: Area;
   iniciativa?: string;
   campanhasDy: string[];
   campanhasRelacionadas?: string[];
@@ -69,6 +71,7 @@ export interface LinhaDy {
   key: string;
   campanha: string;
   stream: 'web' | 'app';
+  area: Area;
   bu: string | null;
   cross: boolean;
   base: number;
@@ -80,6 +83,13 @@ export interface LinhaDy {
   melhor: { nome: string; valor: number | null } | null;
   cmp: Comparacao | null;
   roadmap: { atrelados: number[]; relacionados: number[] };
+  plataformas: string[];
+  paginas: string[];
+  periodo: { inicio: string | null; fim: string | null; dias: number | null };
+  norte: { key: string; label: string; formato: Formato; cmp: Comparacao | null };
+  alertas: string[];
+  mesmaPagina: number;
+  squad?: string;
 }
 
 export interface ListaDy {
@@ -90,6 +100,7 @@ export interface ListaDy {
   statusContagem: Record<StatusDy['key'], number>;
   testes: LinhaDy[];
   metricas: { key: string; label: string }[];
+  paginasCatalogo: { id: string; name: string }[];
   dadosAte: string;
 }
 

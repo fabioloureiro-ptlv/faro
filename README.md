@@ -19,7 +19,7 @@ Node 22.12+ (testado em 24).
 ```bash
 npm install
 npm run dev:api   # http://127.0.0.1:4000 — PGlite em services/api/.data, semeado com as fixtures
-npm run dev:web   # http://localhost:3000/configuracao (wizard) e /painel
+npm run dev:web   # http://localhost:3000/visao-geral (Visão Geral) e /configuracao (wizard)
 ```
 
 ## Verificar
@@ -38,7 +38,7 @@ npm test && npm run typecheck && npm run lint
 | `npm run job:sync-results -w @faro/api` | Interino: só a `dy_results.sql`, com o cadastro do próprio roadmap (~10 GB/45 dias) → `.data/results.json`; a mesma fonte lê esse arquivo como snapshot sem discovery nem daily |
 | `npm run job:publish-audiences -w @faro/api -- --dry-run` | Públicos da frente 3: valida/gera listas `chv_cliente,cuid` em `.data/audiences/` (subida na User Data API ainda manual) |
 
-`job:sync-dy` e `job:sync-results` também rodam pelo botão **Atualizar da DY** da Lista do Painel (`POST /painel/dy-refresh`, ~1 min); a API segue no ar e relê os arquivos ao terminar.
+`job:sync-dy` e `job:sync-results` também rodam pelo botão **Atualizar da DY** da Visão Geral (`POST /painel/dy-refresh`, ~1 min); a API segue no ar e relê os arquivos ao terminar.
 
 **Fonte de resultados (E8).** `GET /results/:faroId?grain=user|session&platform=all|site|android|ios` devolve o `ResultsResponse` do contrato. `FARO_SOURCE=roadmap|fixtures` escolhe a fonte; sem a variável, roadmap quando existe `data/snapshots/roadmap/latest.json` ou `services/api/.data/results.json`, senão fixtures. `GET /health` diz a fonte em uso e cada resposta traz `source`, `readWindow.origin` e `status`. Testes ativos no DY sem cadastro aparecem como `FARO-0000-NNNN` na API e no painel.
 

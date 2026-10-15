@@ -18,6 +18,8 @@ const testeSchema = z.object({
   indicador: z.string().optional(),
   metricaNorte: z.string().optional(),
   squad: z.string().optional(),
+  /** DECISAO-PENDENTE: o roadmap Digital é todo de eCom (squads Fidelidade e Aquisição); sem BU no cadastro, vale ecom. */
+  bu: z.enum(['ecom', 'saude', 'fintech', 'servicos', 'ecossistema']).default('ecom'),
   iniciativa: z.string().optional(),
   campanhasDy: z.array(z.string()).default([]),
   campanhasRelacionadas: z.array(z.string()).optional(),

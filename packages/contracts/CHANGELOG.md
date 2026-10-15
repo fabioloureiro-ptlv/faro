@@ -2,6 +2,25 @@
 
 Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o quê, por quê e frentes afetadas. Mudança incompatível exige ADR em `docs/adr/`.
 
+## 0.6.0 — 2026-10-15 (amostra a partir do público contado)
+
+**O quê**
+
+- `Audience.eligibleClients?` — clientes do público contados na query do BigQuery, guardados no rascunho. Base da amostra total (× o tráfego escolhido na Definição).
+- `BASE_CLIENTES` — base de clientes com `public_id`, usada para estimar o público quando só há a participação (share) do segmento.
+
+**Por quê**
+
+- Pedido de produto de 15/10: o painel "Amostra e período" passa a partir do número que a query devolve, multiplicado pelo percentual do público abordado, e não só da amostra estatística.
+
+**Compatibilidade**
+
+- Aditivo: o campo é opcional.
+
+**Frentes afetadas**
+
+- 1 (wizard e rascunho), 3 (a contagem vem da estimativa do segmento).
+
 ## 0.5.0 — 2026-10-15 (segmentos com query e parâmetros)
 
 **O quê**

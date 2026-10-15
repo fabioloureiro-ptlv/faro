@@ -69,3 +69,35 @@ export function mapaDy(
     testes,
   };
 }
+
+const AREAS = [
+  { bu: 'ecom', rotulo: 'Ecom' },
+  { bu: 'saude', rotulo: 'Saúde' },
+  { bu: 'fintech', rotulo: 'Fintech' },
+  { bu: 'servicos', rotulo: 'Serviços' },
+  { bu: 'ecossistema', rotulo: 'Ecossistema' },
+] as const;
+
+export interface RodandoPorArea {
+  bu: (typeof AREAS)[number]['bu'];
+  rotulo: string;
+  quantidade: number;
+  testes: { campanha: string; stream: 'web' | 'app'; status: string; inicio: string; fim: string; paginas: string[] }[];
+}
+
+/**
+ * Testes que estão rodando na DY, agrupados por área (BU). "Rodando" = no snapshot e ainda não decidido:
+ * o teste decidido segue ligado, mas já não ocupa o tráfego com leitura.
+ */
+export function rodandoPorArea(testes: TesteNoMapa[]): RodandoPorArea[] {
+  const rodando = testes.filter((t) => t.status.key !== 'decidido');
+  return AREAS.map((a) => {
+    const da = rodando.filter((t) => t.bu === a.bu);
+    return {
+      bu: a.bu,
+      rotulo: a.rotulo,
+      quantidade: da.length,
+      testes: da.map((t) => ({ campanha: t.campanha, stream: t.stream, status: t.status.rotulo, inicio: t.inicio, fim: t.fim, paginas: t.paginas })),
+    };
+  });
+}

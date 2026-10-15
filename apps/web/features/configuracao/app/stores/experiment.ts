@@ -1,8 +1,9 @@
 // Store do wizard (padrão CAL: componentes falam com useExperimentDraft, não com a store).
 import { defineStore } from 'pinia';
-import type { AudienceShortcut, Experiment, MetricDefinition, PageCatalog } from '@faro/contracts';
+import { BASE_CLIENTES, type AudienceShortcut, type Experiment, type MetricDefinition, type PageCatalog } from '@faro/contracts';
 import {
   audienceChecks,
+  audienceSample,
   dailyUsersNeeded,
   effectiveBaseline,
   estimateDuration,
@@ -47,10 +48,22 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
     if (!a) return null;
     return estimateDuration({ nPerGroup: nPerGroup.value, eligibleDaily: eligibleDaily.value, split: a.split, startDate: a.startDate, endDate: a.endDate });
   });
+  // Amostra do público: número da query (ou a participação do segmento) × % abordado, dividido pelo split.
+  const sample = computed(() => {
+    const e = experiment.value;
+    if (!e) return null;
+    return audienceSample({
+      eligibleClients: e.audience.eligibleClients ?? null,
+      estimatedShare: e.audience.estimatedShare ?? null,
+      baseClients: BASE_CLIENTES,
+      trafficPercent: e.allocation.trafficPercent,
+      split: e.allocation.split,
+    });
+  });
   // Usuários por dia que o período escolhido precisa entregar para atingir a amostra total (informativo).
   const dailyEstimate = computed(() => {
     const a = experiment.value?.allocation;
-    return a ? dailyUsersNeeded(duration.value?.totalSample ?? null, a.startDate, a.endDate) : null;
+    return a ? dailyUsersNeeded(sample.value?.total ?? null, a.startDate, a.endDate) : null;
   });
   // Amostra, usuários por dia e duração não entram nos pré-requisitos: nunca impedem avançar.
   const audience = computed(() => (experiment.value ? audienceChecks(experiment.value) : []));
@@ -163,7 +176,7 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
   return {
     experiment, catalog, pageCatalog, shortcuts, others, eligibleDaily, designRegistered,
     saveState, savedAt, saveError,
-    gate, primaryMetric, nPerGroup, baseline, duration, dailyEstimate, audience, overlap, unlocked,
+    gate, primaryMetric, nPerGroup, baseline, duration, sample, dailyEstimate, audience, overlap, unlocked,
     load, save, resolveOverlap, setCampaignType, markReady, confirm, addMetric, suggestDates, suggestMde,
   };
 });

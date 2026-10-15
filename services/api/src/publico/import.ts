@@ -3,14 +3,13 @@
 // uma regra do construtor, o SQL é regenerado pelo gerador do Faro (fonte única); se vier
 // SQL livre, ele passa pela guarda estática e por um dry run que confere a coluna `cuid`.
 import { z } from 'zod';
-import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
+import { AudienceRuleSchema, BASE_CLIENTES, type AudienceShortcut } from '@faro/contracts';
 import { slugAudienceId } from './custom.ts';
 import { audienceRuleToSql } from './rule-sql.ts';
 import { guardAudienceSql } from './sql-guard.ts';
 
-// DECISAO-PENDENTE: base de clientes com public_id em 14/10 (dim_cliente), usada
-// para converter a volumetria contada em participação (share) do segmento novo.
-export const BASE_CLIENTES = 15_270_545;
+// A base de clientes mora nos contratos (o wizard também a usa para estimar a amostra).
+export { BASE_CLIENTES };
 
 export const ImportItemSchema = z
   .object({
