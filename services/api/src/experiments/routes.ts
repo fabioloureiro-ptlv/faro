@@ -35,6 +35,10 @@ export async function experimentRoutes(app: FastifyInstance, svc: ExperimentServ
     return svc.ready(req.params.faroId);
   });
 
+  // Ajustes de produto 15/10: sugestões de datas (com testes interpostos) e de MDE (base histórica).
+  app.get<{ Params: Params }>('/experiments/:faroId/date-suggestion', async (req) => svc.suggestDates(req.params.faroId));
+  app.get<{ Params: Params }>('/experiments/:faroId/mde-suggestion', async (req) => svc.suggestMde(req.params.faroId));
+
   app.get<{ Params: Params; Querystring: { format?: string } }>('/experiments/:faroId/dy-sheet', async (req, reply) => {
     const sheet = await svc.dySheet(req.params.faroId);
     if (req.query.format === 'md') {

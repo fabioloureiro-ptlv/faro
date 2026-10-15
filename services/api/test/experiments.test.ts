@@ -285,3 +285,62 @@ describe('catálogo de métricas (CFG-05)', () => {
     expect(mean.json().details[0].message).toBe('Informe o desvio padrão.');
   });
 });
+
+describe('sugestões de datas e de MDE (ajustes de produto 15/10)', () => {
+  beforeEach(async () => (ctx = await setup({ seed: true })));
+
+  it('sugere datas a partir da duração e lista os testes interpostos', async () => {
+    // Home no app cruza com o Nexus (FARO-2026-0001, até 30/11) e o Exemplo de saúde (FARO-2026-0004, 01/10 → 29/10).
+    const { experiment } = await readyDraft(ctx, { pages: ['home'], platforms: ['android', 'ios'], startDate: '', endDate: '' });
+    const res = await ctx.app.inject({ url: `/experiments/${experiment.faroId}/date-suggestion`, headers: PM });
+    expect(res.statusCode).toBe(200);
+    const s = res.json();
+    expect(s.startDate).toBe('2026-10-15'); // dia seguinte ao relógio do teste (14/10)
+    expect(s.days % 7).toBe(0);
+    expect(s.basedOn).toBe('amostra');
+    expect(s.overlapping.map((b: { faroId: string }) => b.faroId)).toEqual(expect.arrayContaining(['FARO-2026-0001', 'FARO-2026-0004']));
+    expect(s.freeWindow.startDate > '2026-11-30').toBe(true);
+  });
+
+  it('sugere o MDE pela base histórica da NORTE', async () => {
+    const { experiment } = await readyDraft(ctx);
+    // NORTE conversão: com o seed enxuto, só o Exemplo 0006 (encerrado, checkout) tem leitura dessa métrica.
+    const r1 = await patch(ctx.app, experiment.faroId, { design: { ...completeDesign, primaryMetricId: 'conversao', secondaryMetricIds: ['receita_por_usuario'] } });
+    expect(r1.statusCode).toBe(200);
+    const res = await ctx.app.inject({ url: `/experiments/${experiment.faroId}/mde-suggestion`, headers: PM });
+    expect(res.statusCode).toBe(200);
+    const s = res.json();
+    expect(s.metricId).toBe('conversao');
+    expect(s.sampleCount).toBeGreaterThanOrEqual(1);
+    expect(s.basis.map((b: { faroId: string }) => b.faroId)).toContain('FARO-2026-0006');
+    expect(s.suggested).toBeGreaterThanOrEqual(0.01);
+    expect(s.suggested).toBeLessThanOrEqual(0.3);
+    expect(s.basis[0]).toHaveProperty('similarity');
+    expect(s.basis.every((b: { faroId: string }) => b.faroId !== experiment.faroId)).toBe(true);
+  });
+
+  it('sem NORTE, a sugestão de MDE explica o que falta', async () => {
+    const { experiment } = await createDraft(ctx.app);
+    const res = await ctx.app.inject({ url: `/experiments/${experiment.faroId}/mde-suggestion`, headers: PM });
+    expect(res.statusCode).toBe(422);
+    expect(res.json().error).toBe('sem_norte');
+  });
+
+  it('alvo da página (URL e caminho do app) persiste e aparece na ficha', async () => {
+    const { experiment } = await readyDraft(ctx, {
+      pages: ['busca'],
+      pageTargets: [{ pageId: 'busca', urlPattern: '/busca?q=', appPath: 'SearchScreen' }],
+    });
+    expect(experiment.allocation.pageTargets).toEqual([{ pageId: 'busca', urlPattern: '/busca?q=', appPath: 'SearchScreen' }]);
+    const ready = await ctx.app.inject({ method: 'POST', url: `/experiments/${experiment.faroId}/ready`, headers: PM, payload: {} });
+    expect(ready.statusCode).toBe(200);
+    const sheet = (await ctx.app.inject({ url: `/experiments/${experiment.faroId}/dy-sheet`, headers: PM })).json();
+    expect(sheet.blocks.find((b: { key: string }) => b.key === 'pages').value).toBe('Busca (busca) · site: /busca?q= · app: SearchScreen');
+  });
+
+  it('cria métrica rascunho na área Retenção', async () => {
+    const res = await ctx.app.inject({ method: 'POST', url: '/catalog/metrics', headers: PM, payload: { name: 'Retenção 30 dias', kind: 'proportion', section: 'Retenção', definition: 'Usuários ativos em D+30 ÷ usuários expostos', baseline: 0.41 } });
+    expect(res.statusCode).toBe(201);
+    expect(res.json().section).toBe('Retenção');
+  });
+});

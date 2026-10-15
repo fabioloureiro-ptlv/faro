@@ -2,6 +2,26 @@
 
 Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o quê, por quê e frentes afetadas. Mudança incompatível exige ADR em `docs/adr/`.
 
+## 0.3.0 — 2026-10-15 (ajustes de produto do wizard, frente 1)
+
+**O quê**
+
+- `PageTarget` e `Allocation.pageTargets?` — URL (site) e caminho (app) por página escolhida. A ficha do DY passa a levar o alvo exato de cada página.
+- `PageCatalogEntry.urlPattern?` / `appPath?` — valores canônicos por página do catálogo, pré-preenchidos no wizard quando existirem (dono: frente 3; ver `PEDIDOS.md`).
+- `AudienceOrigin` e `AudienceShortcut.origin?` — de onde o público pré-segmentado vem (`bigquery`, `dy`, `faro`, `manual`) com rótulo para a UI. Fixture `audiences.json` anotada.
+
+**Por quê**
+
+- Feedback de produto de 15/10 (Marina): páginas mais precisas (URL ou caminho do app), públicos pré-segmentados com a origem visível.
+
+**Compatibilidade**
+
+- Aditivo: todos os campos são opcionais. Experimentos e fixtures existentes continuam válidos.
+
+**Frentes afetadas**
+
+- 1 (produz e consome), 3 (dona do catálogo de páginas e dos atalhos), 2 (lê `Allocation`).
+
 ## 0.2.0 — 2026-10-15 (unificação frentes 1 + 2)
 
 **O quê**

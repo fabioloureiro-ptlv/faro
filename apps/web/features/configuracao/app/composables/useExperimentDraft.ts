@@ -16,6 +16,8 @@ export function useExperimentDraft() {
     markReady: store.markReady,
     confirm: store.confirm,
     addMetric: store.addMetric,
+    suggestDates: store.suggestDates,
+    suggestMde: store.suggestMde,
   };
 }
 

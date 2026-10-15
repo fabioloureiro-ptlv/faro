@@ -12,7 +12,7 @@ const DraftMetricSchema = z
     name: z.string().trim().min(3, 'Dê um nome com pelo menos 3 caracteres.').max(80),
     kind: z.enum(['proportion', 'mean']),
     section: z
-      .enum(['Engajamento', 'eCom', 'Clube', 'Saúde', 'Fintech', 'Serviços', 'Atendimento', 'Operação'])
+      .enum(['Engajamento', 'eCom', 'Clube', 'Saúde', 'Fintech', 'Serviços', 'Atendimento', 'Operação', 'Retenção'])
       .optional(),
     definition: z.string().trim().min(10, 'Explique como a métrica é calculada.').max(400),
     baseline: z.number().positive('Informe a linha de base atual.'),

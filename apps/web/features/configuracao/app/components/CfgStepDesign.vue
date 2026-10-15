@@ -1,14 +1,18 @@
 <script setup lang="ts">
 // Etapa 1 — Design (CFG-02 a CFG-07).
 import type { Bu } from '@faro/contracts';
-import { isFigmaUrl } from '@faro/config-core';
+import type { MetricDefinition, SignificanceLabel } from '@faro/contracts';
+import { isFigmaUrl, type MdeSuggestion } from '@faro/config-core';
+import { ApiError } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
-import { BU_LABEL, fmtInt } from '../utils/labels';
+import { BU_LABEL, fmtInt, fmtPct } from '../utils/labels';
 
 const emit = defineEmits<{ next: [] }>();
-const { experiment: exp, catalog, gate, nPerGroup, primaryMetric, baseline, designRegistered } = useExperimentDraft();
+const { experiment: exp, catalog, gate, nPerGroup, primaryMetric, baseline, designRegistered, suggestMde } = useExperimentDraft();
 // Criar métrica abre com a área já escolhida no picker (ajuste de produto 14/10).
 const creatingMetric = ref<'' | string>('');
+// Ajuste 15/10: guardrail também pode ser criada na hora.
+const creatingGuardrail = ref<'' | string>('');
 const e = computed(() => exp.value!);
 const d = computed(() => e.value.design);
 const err = (id: string) => gate.value?.checks.find((c) => c.id === id && !c.ok)?.message;
@@ -25,6 +29,52 @@ function toggleIn(list: 'secondaryMetricIds' | 'guardrailMetricIds', id: string)
   const arr = d.value[list];
   d.value[list] = arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
 }
+// Ajuste 15/10: métrica criada entra selecionada na hora, no campo em que foi criada.
+function onPrimaryCreated(m: MetricDefinition) {
+  creatingMetric.value = '';
+  d.value.primaryMetricId = m.id;
+  d.value.secondaryMetricIds = d.value.secondaryMetricIds.filter((x) => x !== m.id);
+  d.value.guardrailMetricIds = d.value.guardrailMetricIds.filter((x) => x !== m.id);
+  delete d.value.baselineOverride;
+}
+function onGuardrailCreated(m: MetricDefinition) {
+  creatingGuardrail.value = '';
+  if (!d.value.guardrailMetricIds.includes(m.id)) d.value.guardrailMetricIds = [...d.value.guardrailMetricIds, m.id];
+}
+
+// Ajuste 15/10: base histórica — testes parecidos com a mesma NORTE sugerem o MDE.
+const mde = reactive({ data: null as MdeSuggestion | null, busy: false, erro: '' });
+const LABEL: Record<SignificanceLabel, string> = {
+  melhora_confirmada: 'melhora confirmada',
+  tendencia_de_melhora: 'tendência de melhora',
+  sem_tendencia: 'sem tendência',
+  tendencia_de_queda: 'tendência de queda',
+  queda_confirmada: 'queda confirmada',
+};
+const signed = (x: number) => `${x > 0 ? '+' : ''}${fmtPct(x)}`;
+async function loadMde() {
+  if (!d.value.primaryMetricId) return;
+  mde.busy = true;
+  mde.erro = '';
+  try {
+    mde.data = await suggestMde();
+  } catch (err) {
+    mde.erro = err instanceof ApiError ? err.message : 'Não foi possível consultar a base histórica.';
+  } finally {
+    mde.busy = false;
+  }
+}
+let mdeTimer: ReturnType<typeof setTimeout> | undefined;
+watch(
+  () => d.value.primaryMetricId,
+  (id) => {
+    mde.data = null;
+    clearTimeout(mdeTimer);
+    if (id) mdeTimer = setTimeout(() => void loadMde(), 800);
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => clearTimeout(mdeTimer));
 function addVariant() {
   const key = String.fromCharCode(97 + d.value.variants.length);
   d.value.variants.push({ key, name: `Variante ${key.toUpperCase()}`, description: '' });
@@ -173,9 +223,9 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
           :metrics="catalog"
           :selected="d.primaryMetricId ? [d.primaryMetricId] : []"
           @toggle="togglePrimary"
-          @create="(area) => (creatingMetric = area)"
+          @create="(area) => { creatingMetric = area; creatingGuardrail = ''; }"
         />
-        <CfgMetricForm v-if="creatingMetric" :section="creatingMetric" @cancel="creatingMetric = ''" @created="(m) => { creatingMetric = ''; if (!d.primaryMetricId) togglePrimary(m.id); }" />
+        <CfgMetricForm v-if="creatingMetric" :section="creatingMetric" @cancel="creatingMetric = ''" @created="onPrimaryCreated" />
         <div v-if="primaryMetric" class="basebox">
           <div>
             <label for="f-base" class="sub">{{ isRate ? 'Valor de referência atual (%)' : 'Variabilidade (desvio ÷ média)' }}</label>
@@ -196,8 +246,18 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
 
       <div class="field">
         <span class="lbl">Guardrails (GUARDA, opcional)</span>
-        <p class="hint">Métricas que não podem piorar. Escolha por área, como nas secundárias.</p>
-        <CfgMetricPicker label="Guardrails" multiple :metrics="catalog" :selected="d.guardrailMetricIds" :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []" @toggle="(id) => toggleIn('guardrailMetricIds', id)" />
+        <p class="hint">Métricas que não podem piorar. Escolha por área, como nas secundárias, ou crie uma na hora.</p>
+        <CfgMetricPicker
+          label="Guardrails"
+          multiple
+          allow-create
+          :metrics="catalog"
+          :selected="d.guardrailMetricIds"
+          :disabled-ids="d.primaryMetricId ? [d.primaryMetricId] : []"
+          @toggle="(id) => toggleIn('guardrailMetricIds', id)"
+          @create="(area) => { creatingGuardrail = area; creatingMetric = ''; }"
+        />
+        <CfgMetricForm v-if="creatingGuardrail" :section="creatingGuardrail" @cancel="creatingGuardrail = ''" @created="onGuardrailCreated" />
       </div>
 
       <div class="field">
@@ -211,6 +271,39 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
           <template v-if="nPerGroup">Amostra necessária: <b>{{ fmtInt(nPerGroup) }}</b> usuários por grupo (α 5%, poder 80%).</template>
           <template v-else>Escolha a métrica primária para calcular a amostra.</template>
         </p>
+
+        <section class="histbox" aria-labelledby="hist-title" aria-live="polite">
+          <div class="spread">
+            <b id="hist-title" class="small">Base histórica</b>
+            <button type="button" class="btn ghost small" :disabled="!d.primaryMetricId || mde.busy" @click="loadMde">
+              {{ mde.busy ? 'Buscando…' : 'Sugerir pelo histórico' }}
+            </button>
+          </div>
+          <p v-if="mde.erro" class="err" role="alert">{{ mde.erro }}</p>
+          <template v-else-if="mde.data">
+            <p v-if="mde.data.suggested == null || mde.data.medianAbsEffect == null" class="small muted" style="margin: 6px 0 0">
+              Nenhum teste anterior com {{ primaryMetric?.name ?? 'essa métrica' }} como NORTE. Sem base para sugerir.
+            </p>
+            <template v-else>
+              <p class="small" style="margin: 6px 0 0">
+                <b>{{ mde.data.sampleCount }}</b> {{ mde.data.sampleCount === 1 ? 'teste parecido' : 'testes parecidos' }} com NORTE {{ primaryMetric?.name }}:
+                efeito típico de <b>{{ fmtPct(mde.data.medianAbsEffect) }}</b> (mediana do efeito observado, sem sinal);
+                {{ mde.data.improved }} {{ mde.data.improved === 1 ? 'melhorou' : 'melhoraram' }} e {{ mde.data.worsened }} {{ mde.data.worsened === 1 ? 'piorou' : 'pioraram' }}.
+              </p>
+              <button type="button" class="chip add" style="margin-top: 8px" @click="mdePct = Math.round(mde.data!.suggested! * 1000) / 10">
+                Usar {{ fmtPct(mde.data.suggested) }} como efeito mínimo
+              </button>
+              <ul class="basis small muted">
+                <li v-for="b in mde.data.basis" :key="b.faroId">
+                  {{ b.name }} · {{ signed(b.deltaRelative) }}<template v-if="b.label"> · {{ LABEL[b.label] }}</template>
+                </li>
+              </ul>
+            </template>
+          </template>
+          <p v-else class="small muted" style="margin: 6px 0 0">
+            Testes anteriores com a mesma NORTE mostram que tamanho de efeito é realista para este teste.
+          </p>
+        </section>
       </div>
     </div>
     <div class="sticky">
@@ -220,6 +313,8 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
 </template>
 
 <style scoped>
+.histbox { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.basis { margin: 8px 0 0; padding-left: 18px; }
 .hyp { display: grid; grid-template-columns: 80px 1fr; gap: 8px 10px; align-items: center; }
 .hyp label { font-weight: 600; color: var(--muted); }
 .fig { margin-top: 8px; font-size: 14px; }

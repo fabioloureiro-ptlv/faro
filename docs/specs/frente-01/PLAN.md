@@ -102,6 +102,22 @@ Substitui o mock `mocks/dy-export.ts` por dados reais da DY para a importação 
 
 **Riscos/limites:** labels não existem no export (ficam `[]`); % de tráfego continua 100% (DECISAO-PENDENTE 9); plataformas inferidas, não declaradas; o JSON envelhece — rodar o sync antes da checagem D+1.
 
+### Etapa 9 — Ajustes de produto de 15/10 (feedback de Marina Bonafé, canal de revisão do wizard)
+
+Sete pedidos sobre o wizard, implementados sem mudar o fluxo de quatro etapas:
+
+| # | Pedido | Onde | Como |
+|---|---|---|---|
+| 1 | Métrica criada entra selecionada na hora | `CfgStepDesign.vue`, `CfgMetricPicker.vue` | A métrica recém-criada vira a NORTE (ou entra nos guardrails) e o dropdown muda para a área dela |
+| 2 | Criar métrica também nos guardrails | `CfgStepDesign.vue`; `catalog/routes.ts` aceita a área Retenção | Mesmo formulário (CFG-05), com a área escolhida no picker |
+| 3 | Páginas mais precisas (URL ou caminho do app) | `contracts` (`PageTarget`, `Allocation.pageTargets`), `dy-sheet.ts`, `CfgStepAudience.vue`, `CfgStepReview.vue` | Por página escolhida: URL no site e rota/tela no app, opcionais; vão para o bloco "Páginas" da ficha do DY. O catálogo pode trazer valores canônicos (`PageCatalogEntry.urlPattern/appPath`, pedido à frente 3) |
+| 4 | Públicos pré-segmentados, com a origem | `contracts` (`AudienceOrigin`), `fixtures/audiences.json`, `CfgStepAudience.vue` | Atalhos agrupados por origem (BigQuery, Faro, DY) com a fonte visível, e formulário "usar público já criado no DY" (nome + atributo + % da base → `Audience.dyAttribute`) |
+| 5 | Sugestão de datas com os testes interpostos | `config-core/suggest-dates.ts`, `GET /experiments/:id/date-suggestion`, `CfgStepAudience.vue` | Período = duração mínima (CFG-08) em semanas inteiras a partir de amanhã; lista testes ativos/agendados nas mesmas páginas e plataformas e a próxima janela livre |
+| 6 | MDE sugerido pela base histórica | `config-core/suggest-mde.ts`, `GET /experiments/:id/mde-suggestion`, `CfgStepDesign.vue` | Testes com a mesma NORTE (dataset da frente 4): mediana do efeito observado, arredondada a 0,5 p.p., com os mais parecidos (página, BU, plataforma) listados |
+| 7 | Confirmação no DY faseada | `CfgDySheet.vue`, `CfgStepReview.vue` | 1) copiar/exportar a ficha → 2) declarar que colou no console → 3) só então o formulário de confirmação (CFG-12). Progresso guardado no navegador por `faroId` |
+
+Verificação: testes unitários das duas funções novas e da ficha com alvo de página; testes de API dos dois endpoints, da persistência de `pageTargets` e da área Retenção; fluxo no navegador.
+
 ## Contratos
 
 - **Expõe:** `Experiment` (`design`, `allocation`, `dy`), endpoint da ficha do DY, eventos `experiment.created`, `.design_completed`, `.configured`, `.config_divergence`.

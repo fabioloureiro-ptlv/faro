@@ -32,6 +32,16 @@ describe('ficha do DY (CFG-11)', () => {
     expect(variationNames(e)).toEqual(['home antiga', 'home nova']);
   });
 
+  it('página com URL e caminho do app vai para a ficha', () => {
+    const e = completeExperiment();
+    e.allocation.pages = ['busca', 'carrinho'];
+    e.allocation.pageTargets = [{ pageId: 'busca', urlPattern: '/busca?q=', appPath: 'SearchScreen' }, { pageId: 'carrinho' }];
+    const sheet = buildDySheet(e, ctx);
+    const pages = sheet.blocks.find((b) => b.key === 'pages')!;
+    expect(pages.value).toBe('Busca (busca) · site: /busca?q= · app: SearchScreen\nCarrinho (carrinho)');
+    expect(pages.hint).toMatch(/condição de página/);
+  });
+
   it('snapshot JSON e Markdown', () => {
     const sheet = buildDySheet(
       completeExperiment({ audience: { description: 'Tutores de cães', source: 'atalho', estimatedShare: 0.68, dyAttribute: 'faro_publico_caes' }, allocation: { platforms: ['android', 'ios'], pages: ['home', 'busca'], trafficPercent: 30, split: [0.5, 0.5], startDate: '2026-10-19', endDate: '2026-11-09' } }),
