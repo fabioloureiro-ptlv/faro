@@ -25,6 +25,21 @@ export const AudienceOriginSchema = z.object({
   label: z.string(),
 });
 
+/**
+ * 0.4.0 (ajuste de produto 15/10): parâmetro numérico de um segmento. O nome é o parâmetro nomeado
+ * da query (`@dias_inadimplencia`); o BigQuery recebe o valor sem interpolação de texto.
+ */
+export const AudienceParameterSchema = z.object({
+  name: z.string().regex(/^[a-z][a-z0-9_]*$/, 'nome em snake_case'),
+  label: z.string().min(1),
+  type: z.enum(['integer', 'number']),
+  default: z.number(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  unit: z.string().optional(),
+  description: z.string().optional(),
+});
+
 export const AudienceShortcutSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -39,6 +54,8 @@ export const AudienceShortcutSchema = z.object({
   sqlRef: z.string().optional(),
   /** SQL livre guardado no catálogo (segmento aprovado fora do construtor). Sempre 1 linha por cliente, com `cuid`. */
   sql: z.string().optional(),
+  /** Parâmetros da query (`@nome`) com valor padrão; o experimento guarda o valor escolhido em `Audience.params`. */
+  parameters: z.array(AudienceParameterSchema).optional(),
 });
 
 /** Visão consumida pela frente 1. Provisório até a frente 5 publicar `Template`. */
@@ -54,5 +71,6 @@ export const TemplateSchema = z.object({
 export type PageCatalogEntry = z.infer<typeof PageCatalogEntrySchema>;
 export type PageCatalog = z.infer<typeof PageCatalogSchema>;
 export type AudienceOrigin = z.infer<typeof AudienceOriginSchema>;
+export type AudienceParameter = z.infer<typeof AudienceParameterSchema>;
 export type AudienceShortcut = z.infer<typeof AudienceShortcutSchema>;
 export type Template = z.infer<typeof TemplateSchema>;

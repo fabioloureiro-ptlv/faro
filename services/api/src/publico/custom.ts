@@ -1,16 +1,27 @@
-// Frente 3 — catálogo de segmentos com acréscimos aprovados pelo produto.
-// Os atalhos base vivem na fixture (dados versionados); os criados pela tela
-// /segmento são gravados em services/api/.data/audiences-custom.json e entram
-// na mesma lista — inclusive na etapa de Público do wizard (porta da frente 1).
+// Frente 3 — catálogo de segmentos.
+// O catálogo oficial é um arquivo versionado (data/models/audiences/catalog.json): cada segmento
+// aponta para a sua query (.sql, com parâmetros nomeados como @dias_inadimplencia). O arquivo é lido
+// a cada chamada, então editar o catálogo não exige reiniciar a API. Segmentos importados por
+// POST /publico/audiences/import ficam à parte, em services/api/.data/audiences-custom.json.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AudienceShortcutSchema, type AudienceShortcut } from '@faro/contracts';
-import audiences from '@faro/contracts/fixtures/audiences.json' with { type: 'json' };
 
-const CUSTOM_PATH = fileURLToPath(new URL('../../.data/audiences-custom.json', import.meta.url));
+const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
+// Os caminhos têm override por variável de ambiente para os testes não dependerem dos arquivos da máquina.
+const CATALOG_PATH = process.env.FARO_AUDIENCES_CATALOG_PATH ?? join(REPO_ROOT, 'data/models/audiences/catalog.json');
+const CUSTOM_PATH = process.env.FARO_AUDIENCES_CUSTOM_PATH ?? fileURLToPath(new URL('../../.data/audiences-custom.json', import.meta.url));
 
-const fixture: AudienceShortcut[] = (audiences as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
+export function listCatalogShortcuts(): AudienceShortcut[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(CATALOG_PATH, 'utf-8'));
+  } catch (e) {
+    throw new Error(`Catálogo de segmentos ilegível (${CATALOG_PATH}): ${(e as Error).message}`);
+  }
+  return (raw as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
+}
 
 export function listCustomShortcuts(): AudienceShortcut[] {
   if (!existsSync(CUSTOM_PATH)) return [];
@@ -22,7 +33,7 @@ export function listCustomShortcuts(): AudienceShortcut[] {
 }
 
 export function allShortcuts(): AudienceShortcut[] {
-  return [...fixture, ...listCustomShortcuts()];
+  return [...listCatalogShortcuts(), ...listCustomShortcuts()];
 }
 
 export function slugAudienceId(name: string): string {

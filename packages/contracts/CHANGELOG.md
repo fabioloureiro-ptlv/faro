@@ -2,6 +2,27 @@
 
 Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o quê, por quê e frentes afetadas. Mudança incompatível exige ADR em `docs/adr/`.
 
+## 0.4.0 — 2026-10-15 (segmentos com query e parâmetros)
+
+**O quê**
+
+- `AudienceParameter` e `AudienceShortcut.parameters?` — parâmetro numérico do segmento (nome, rótulo, tipo, padrão, mínimo, máximo, unidade). O nome é o parâmetro nomeado da query (`@dias_inadimplencia`).
+- `AudienceShortcut.sql?` — SQL guardado no próprio atalho (além de `sqlRef` e `rule`).
+- `Audience.params?` — valores escolhidos no experimento para os parâmetros do segmento.
+- `defaultAudienceParams`, `resolveAudienceParams`, `audienceAttributeFor` — validação dos valores e nome do atributo no DY por valor (`faro_aud_inadimplentes_60`).
+
+**Por quê**
+
+- Pedido de produto de 15/10: todo segmento tem uma query e parâmetros; o catálogo começa com "Todos os clientes" e "Clientes inadimplentes" (tempo de inadimplência como parâmetro).
+
+**Compatibilidade**
+
+- Aditivo: todos os campos são opcionais.
+
+**Frentes afetadas**
+
+- 3 (dona do catálogo e da execução das queries), 1 (guarda o valor escolhido e mostra os parâmetros no wizard).
+
 ## 0.3.0 — 2026-10-15 (ajustes de produto do wizard, frente 1)
 
 **O quê**

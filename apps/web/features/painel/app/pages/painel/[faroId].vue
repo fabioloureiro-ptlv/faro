@@ -16,7 +16,7 @@ const faroId = computed(() => String(route.params.faroId ?? ''));
 const { data, error, refresh, tags, missingDesign, norte, timeline, metric } = useExperimento(faroId);
 
 useHead(() => ({
-  title: data.value ? `Acompanhamento de Experimentos · ${data.value.experiment.name}` : 'Acompanhamento de Experimentos',
+  title: data.value ? `Acompanhamento · ${data.value.experiment.name}` : 'Acompanhamento',
 }));
 
 const painelStore = usePainelStore();

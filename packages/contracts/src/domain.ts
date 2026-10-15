@@ -84,6 +84,7 @@ export interface Audience {
   rule?: AudienceRule; // frente 3
   estimatedShare?: number; // 0–1 da base elegível
   dyAttribute?: string; // atributo publicado no DY via User Data API
+  params?: Record<string, number>; // 0.4.0: valores dos parâmetros do segmento escolhido (ex.: dias_inadimplencia)
 }
 
 /** Acréscimo 0.3.0 (frente 1, ajuste de produto 15/10): onde exatamente a página fica. */

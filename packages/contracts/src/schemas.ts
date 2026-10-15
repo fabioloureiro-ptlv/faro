@@ -109,6 +109,7 @@ export const AudienceSchema = z.object({
   rule: AudienceRuleSchema.optional(),
   estimatedShare: z.number().min(0).max(1).optional(),
   dyAttribute: z.string().optional(),
+  params: z.record(z.string(), z.number()).optional(),
 });
 
 export const PageTargetSchema = z.object({

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "todos",
+    "name": "Todos os clientes",
+    "share": 1,
+    "origin": { "system": "faro", "label": "sem query: toda a base elegível" }
+  },
+  {
+    "id": "inadimplentes",
+    "name": "Clientes inadimplentes",
+    "share": 0.003,
+    "dyAttribute": "faro_aud_inadimplentes",
+    "sqlRef": "data/models/audiences/seg_saude_clientes_inadimplentes.sql",
+    "parameters": [
+      {
+        "name": "dias_inadimplencia",
+        "label": "Dias de inadimplência (mais de)",
+        "type": "integer",
+        "default": 60,
+        "min": 1,
+        "max": 1825,
+        "unit": "dias",
+        "description": "Entram os clientes cuja fatura mais atrasada passou deste número de dias."
+      }
+    ],
+    "origin": { "system": "bigquery", "label": "SQL versionado · seg_saude_clientes_inadimplentes.sql" }
+  }
+]
