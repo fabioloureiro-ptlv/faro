@@ -1,0 +1,409 @@
+{
+  "faroId": "FARO-2026-0103",
+  "asOf": "2026-10-13",
+  "readWindow": {
+    "start": "2026-10-01",
+    "end": "2026-10-13"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user",
+    "session"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "variants": [
+    {
+      "key": "controle",
+      "name": "Controle",
+      "isControl": true,
+      "plannedShare": 0.5,
+      "observedShare": 0.5145843871185297
+    },
+    {
+      "key": "variante_a",
+      "name": "Onboarding em 3 passos",
+      "isControl": false,
+      "plannedShare": 0.5,
+      "observedShare": 0.4854156128814702
+    }
+  ],
+  "contamination": {
+    "users": 712,
+    "share": 0.012
+  },
+  "volumes": [
+    {
+      "platform": "all",
+      "variantKey": "controle",
+      "users": 30520,
+      "buyers": 458,
+      "transactions": 573,
+      "revenue": 132820
+    },
+    {
+      "platform": "all",
+      "variantKey": "variante_a",
+      "users": 28790,
+      "buyers": 492,
+      "transactions": 615,
+      "revenue": 140220
+    }
+  ],
+  "results": [
+    {
+      "faroId": "FARO-2026-0103",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.016055045871559634,
+      "n": 30520,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0103",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.01764501563042723,
+      "n": 28790,
+      "deltaRelative": 0.0990324021237532,
+      "probBetter": 0.9337867776512538,
+      "label": "tendencia_de_melhora",
+      "mde": 0.18280060505847057,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.030143909683965187,
+        "upper": 0.22820871393147157
+      }
+    },
+    {
+      "faroId": "FARO-2026-0103",
+      "metricId": "chamados_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.005832241153342071,
+      "n": 30520,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0103",
+      "metricId": "chamados_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.005835359499826329,
+      "n": 28790,
+      "deltaRelative": 0.000534673790446903,
+      "probBetter": 0.49801170464829597,
+      "label": "sem_tendencia",
+      "mde": 0.3048667799180147,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.209731999259192,
+        "upper": 0.2108013468400858
+      }
+    }
+  ],
+  "srm": {
+    "chiSquare": 50.46197943011297,
+    "degreesOfFreedom": 1,
+    "pValue": 1.2149591015824825e-12,
+    "alert": true,
+    "plannedShares": [
+      0.5,
+      0.5
+    ],
+    "observedShares": [
+      0.5145843871185297,
+      0.4854156128814702
+    ]
+  },
+  "sample": {
+    "requiredPerArm": 412328,
+    "minPerArm": 28790,
+    "progress": 0.0698230534913952,
+    "earlySignificanceAlert": false
+  },
+  "mde": [
+    {
+      "metricId": "conversao_saude",
+      "mdeCurrent": 0.18280060505847057,
+      "mdeDesign": 0.05
+    },
+    {
+      "metricId": "chamados_por_usuario",
+      "mdeCurrent": 0.3048667799180147
+    }
+  ],
+  "health": [
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2348
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2215
+    }
+  ],
+  "funnel": {
+    "steps": [
+      {
+        "stepId": "expostos",
+        "name": "Expostos",
+        "order": 0
+      },
+      {
+        "stepId": "passo_1",
+        "name": "Iniciou cadastro",
+        "order": 1
+      },
+      {
+        "stepId": "passo_2",
+        "name": "Cadastrou o pet",
+        "order": 2
+      },
+      {
+        "stepId": "conversao",
+        "name": "Conversão em saúde",
+        "order": 3,
+        "metricId": "conversao_saude"
+      }
+    ],
+    "rows": [
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "expostos",
+        "users": 30520
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "expostos",
+        "users": 28790
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_1",
+        "users": 2747
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_1",
+        "users": 2712
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_2",
+        "users": 1190
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_2",
+        "users": 1228
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "conversao",
+        "users": 458
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "conversao",
+        "users": 492
+      }
+    ]
+  },
+  "recommendation": {
+    "code": "investigar_srm",
+    "title": "Investigar a alocação antes de decidir",
+    "body": "Os grupos estão em 51% × 49%, fora do split planejado (SRM). Qualquer leitura agora pode estar enviesada. Verifique regras de exibição e gatilhos no DY.",
+    "severity": "risk"
+  },
+  "synthesis": {
+    "variantKey": "variante_a",
+    "variantName": "Variante A",
+    "platform": "all",
+    "text": "Variante A (consolidado): NORTE conversão em saúde +9,9% (tendência de melhora, 93%).",
+    "parts": [
+      {
+        "metricId": "conversao_saude",
+        "name": "Conversão em saúde",
+        "role": "norte",
+        "deltaRelative": 0.0990324021237532,
+        "probBetter": 0.9337867776512538,
+        "label": "tendencia_de_melhora"
+      }
+    ]
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "sintético (packages/stats/generator)",
+      "sqlRef": "scripts/build-simulados.ts",
+      "sqlVersion": "0.1.0"
+    }
+  ],
+  "notes": [
+    "Dados sintéticos seedados, gerados pelo motor estatístico do Faro para os casos de borda da seção 10 do contexto."
+  ]
+}

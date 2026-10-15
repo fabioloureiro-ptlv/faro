@@ -1,0 +1,614 @@
+{
+  "faroId": "FARO-2026-0104",
+  "asOf": "2026-10-13",
+  "readWindow": {
+    "start": "2026-09-16",
+    "end": "2026-10-13"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user",
+    "session"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "variants": [
+    {
+      "key": "controle",
+      "name": "Controle",
+      "isControl": true,
+      "plannedShare": 0.5,
+      "observedShare": 0.5009855453350854
+    },
+    {
+      "key": "variante_a",
+      "name": "Cupom aplicado automaticamente",
+      "isControl": false,
+      "plannedShare": 0.5,
+      "observedShare": 0.49901445466491456
+    }
+  ],
+  "contamination": {
+    "users": 731,
+    "share": 0.012
+  },
+  "volumes": [
+    {
+      "platform": "all",
+      "variantKey": "controle",
+      "users": 30500,
+      "buyers": 1211,
+      "transactions": 1514,
+      "revenue": 351190
+    },
+    {
+      "platform": "all",
+      "variantKey": "variante_a",
+      "users": 30380,
+      "buyers": 1342,
+      "transactions": 1678,
+      "revenue": 382470
+    }
+  ],
+  "results": [
+    {
+      "faroId": "FARO-2026-0104",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.04157377049180328,
+      "n": 30500,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0104",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.044502962475312706,
+      "n": 30380,
+      "deltaRelative": 0.07045769360965097,
+      "probBetter": 0.9625200889583565,
+      "label": "melhora_confirmada",
+      "mde": 0.10914267372335591,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.007095546758617155,
+        "upper": 0.14801093397791912
+      }
+    },
+    {
+      "faroId": "FARO-2026-0104",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 230.91600868742535,
+      "n": 30500,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0104",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 223.23466339623417,
+      "n": 30380,
+      "deltaRelative": -0.033264672011496924,
+      "probBetter": 8.928004890940144e-8,
+      "label": "queda_confirmada",
+      "mde": 0.018262586008467533,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.045752865551429975,
+        "upper": -0.020776478471563865
+      }
+    }
+  ],
+  "srm": {
+    "chiSquare": 0.23653088042049936,
+    "degreesOfFreedom": 1,
+    "pValue": 0.626723000590879,
+    "alert": false,
+    "plannedShares": [
+      0.5,
+      0.5
+    ],
+    "observedShares": [
+      0.5009855453350854,
+      0.49901445466491456
+    ]
+  },
+  "sample": {
+    "requiredPerArm": 151885,
+    "minPerArm": 30380,
+    "progress": 0.20001975178589065,
+    "earlySignificanceAlert": true
+  },
+  "mde": [
+    {
+      "metricId": "conversao",
+      "mdeCurrent": 0.10914267372335591,
+      "mdeDesign": 0.05
+    },
+    {
+      "metricId": "ticket_medio",
+      "mdeCurrent": 0.018262586008467533
+    }
+  ],
+  "health": [
+    {
+      "date": "2026-09-16",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1089
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1085
+    }
+  ],
+  "funnel": {
+    "steps": [
+      {
+        "stepId": "expostos",
+        "name": "Expostos",
+        "order": 0
+      },
+      {
+        "stepId": "passo_1",
+        "name": "Viu produto",
+        "order": 1
+      },
+      {
+        "stepId": "passo_2",
+        "name": "Adicionou ao carrinho",
+        "order": 2
+      },
+      {
+        "stepId": "passo_3",
+        "name": "Iniciou checkout",
+        "order": 3
+      },
+      {
+        "stepId": "conversao",
+        "name": "Conversão",
+        "order": 4,
+        "metricId": "conversao"
+      }
+    ],
+    "rows": [
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "expostos",
+        "users": 30500
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "expostos",
+        "users": 30380
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_1",
+        "users": 9081
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_1",
+        "users": 9301
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_2",
+        "users": 4117
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_2",
+        "users": 4332
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_3",
+        "users": 2180
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_3",
+        "users": 2355
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "conversao",
+        "users": 1211
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "conversao",
+        "users": 1342
+      }
+    ]
+  },
+  "recommendation": {
+    "code": "encerrado",
+    "title": "Vencedor: Variante A. Implementado em 06/10.",
+    "body": "Teste encerrado. Campanha desligada no DY.",
+    "severity": "ok"
+  },
+  "synthesis": {
+    "variantKey": "variante_a",
+    "variantName": "Variante A",
+    "platform": "all",
+    "text": "Variante A (consolidado): NORTE conversão +7,0% (melhora confirmada, 96%) · ticket médio −3,3% (queda confirmada, 0%).",
+    "parts": [
+      {
+        "metricId": "conversao",
+        "name": "Conversão",
+        "role": "norte",
+        "deltaRelative": 0.07045769360965097,
+        "probBetter": 0.9625200889583565,
+        "label": "melhora_confirmada"
+      },
+      {
+        "metricId": "ticket_medio",
+        "name": "Ticket médio",
+        "role": "secundaria",
+        "deltaRelative": -0.033264672011496924,
+        "probBetter": 8.928004890940144e-8,
+        "label": "queda_confirmada"
+      }
+    ]
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "sintético (packages/stats/generator)",
+      "sqlRef": "scripts/build-simulados.ts",
+      "sqlVersion": "0.1.0"
+    }
+  ],
+  "notes": [
+    "Dados sintéticos seedados, gerados pelo motor estatístico do Faro para os casos de borda da seção 10 do contexto."
+  ]
+}

@@ -173,7 +173,7 @@ export const ExperimentSchema = z.object({
 export const MetricDefinitionSchema = z.object({
   id: z.string().regex(/^[a-z0-9_]+$/, 'id em snake_case'),
   name: z.string().min(1),
-  section: z.enum(['Engajamento', 'eCom', 'Clube', 'Saúde', 'Fintech', 'Serviços', 'Atendimento', 'Operação']),
+  section: z.enum(['Engajamento', 'eCom', 'Clube', 'Saúde', 'Fintech', 'Serviços', 'Atendimento', 'Operação', 'Retenção']),
   kind: z.enum(['proportion', 'mean', 'ratio']),
   direction: z.enum(['higher_better', 'lower_better']),
   unit: z.enum(['percent', 'brl', 'count', 'seconds', 'score']),
@@ -184,6 +184,7 @@ export const MetricDefinitionSchema = z.object({
   cv: z.number().positive().optional(),
   owner: z.string(),
   status: z.enum(['ativa', 'rascunho', 'depreciada']),
+  maturationDays: z.number().int().nonnegative().optional(),
 });
 
 export const SignificanceLabelSchema = z.enum([
@@ -207,6 +208,8 @@ export const MetricResultSchema = z.object({
   label: SignificanceLabelSchema.optional(),
   mde: z.number().optional(),
   asOf: isoDate,
+  ci95: z.object({ lower: z.number(), upper: z.number() }).optional(),
+  maturing: z.boolean().optional(),
 });
 
 export const ConfigDivergenceSchema = z.object({

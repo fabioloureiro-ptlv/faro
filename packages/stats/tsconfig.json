@@ -1,4 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Código numérico vindo do repo original da frente 4, escrito sem
+    // noUncheckedIndexedAccess (índices controlados e cobertos por 64 testes).
+    "noUncheckedIndexedAccess": false
+  },
   "include": ["src", "test", "scripts"]
 }

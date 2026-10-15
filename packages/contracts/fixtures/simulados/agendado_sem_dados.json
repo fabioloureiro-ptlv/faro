@@ -1,0 +1,80 @@
+{
+  "faroId": "FARO-2026-0105",
+  "asOf": "2026-10-13",
+  "readWindow": {
+    "start": "2026-10-13",
+    "end": "2026-10-13"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user",
+    "session"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "variants": [
+    {
+      "key": "controle",
+      "name": "Controle",
+      "isControl": true,
+      "plannedShare": 0.5
+    },
+    {
+      "key": "variante_a",
+      "name": "Carrossel por raça e porte",
+      "isControl": false,
+      "plannedShare": 0.5
+    }
+  ],
+  "contamination": {
+    "users": 0,
+    "share": 0
+  },
+  "volumes": [],
+  "results": [],
+  "srm": {
+    "chiSquare": 0,
+    "degreesOfFreedom": 1,
+    "pValue": 1,
+    "alert": false,
+    "plannedShares": [
+      0.5,
+      0.5
+    ],
+    "observedShares": [
+      0,
+      0
+    ]
+  },
+  "sample": {
+    "requiredPerArm": 98373,
+    "minPerArm": 0,
+    "progress": 0,
+    "earlySignificanceAlert": false
+  },
+  "mde": [
+    {
+      "metricId": "cliques_recomendacao",
+      "mdeCurrent": null
+    }
+  ],
+  "health": [],
+  "recommendation": {
+    "code": "aguardando_dados",
+    "title": "Aguardando início",
+    "body": "Os dados aparecem assim que a primeira exposição for registrada.",
+    "severity": "info"
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "sintético (packages/stats/generator)",
+      "sqlRef": "scripts/build-simulados.ts",
+      "sqlVersion": "0.1.0"
+    }
+  ],
+  "notes": [
+    "Dados sintéticos seedados, gerados pelo motor estatístico do Faro para os casos de borda da seção 10 do contexto."
+  ]
+}

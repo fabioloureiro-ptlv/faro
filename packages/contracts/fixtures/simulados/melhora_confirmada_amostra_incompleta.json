@@ -1,0 +1,454 @@
+{
+  "faroId": "FARO-2026-0101",
+  "asOf": "2026-10-13",
+  "readWindow": {
+    "start": "2026-10-02",
+    "end": "2026-10-13"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user",
+    "session"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "variants": [
+    {
+      "key": "controle",
+      "name": "Controle",
+      "isControl": true,
+      "plannedShare": 0.5,
+      "observedShare": 0.5009306909011277
+    },
+    {
+      "key": "variante_a",
+      "name": "Cupom aplicado automaticamente",
+      "isControl": false,
+      "plannedShare": 0.5,
+      "observedShare": 0.4990693090988722
+    }
+  ],
+  "contamination": {
+    "users": 438,
+    "share": 0.012
+  },
+  "volumes": [
+    {
+      "platform": "all",
+      "variantKey": "controle",
+      "users": 18300,
+      "buyers": 727,
+      "transactions": 909,
+      "revenue": 210830
+    },
+    {
+      "platform": "all",
+      "variantKey": "variante_a",
+      "users": 18232,
+      "buyers": 825,
+      "transactions": 1031,
+      "revenue": 235125
+    }
+  ],
+  "results": [
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.04185792349726776,
+      "n": 18300,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.04514041246160597,
+      "n": 18232,
+      "deltaRelative": 0.07841977551878483,
+      "probBetter": 0.937968886162353,
+      "label": "tendencia_de_melhora",
+      "mde": 0.14038729156420202,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.021522235654924775,
+        "upper": 0.17836178669249445
+      }
+    },
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 231.65766515605736,
+      "n": 18300,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 226.32541664540645,
+      "n": 18232,
+      "deltaRelative": -0.023017794412538938,
+      "probBetter": 0.0026259956415793373,
+      "label": "queda_confirmada",
+      "mde": 0.023659257487004162,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.0391809559986047,
+        "upper": -0.006854632826473176
+      }
+    },
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "taxa_devolucao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.01907103825136612,
+      "n": 18300,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0101",
+      "metricId": "taxa_devolucao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.018867924528301886,
+      "n": 18232,
+      "deltaRelative": -0.010650375736606007,
+      "probBetter": 0.5565745197066729,
+      "label": "sem_tendencia",
+      "mde": 0.21044242086058182,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.1573518651422984,
+        "upper": 0.1360511136690864
+      }
+    }
+  ],
+  "srm": {
+    "chiSquare": 0.12657396255337786,
+    "degreesOfFreedom": 1,
+    "pValue": 0.7220110601481253,
+    "alert": false,
+    "plannedShares": [
+      0.5,
+      0.5
+    ],
+    "observedShares": [
+      0.5009306909011277,
+      0.4990693090988722
+    ]
+  },
+  "sample": {
+    "requiredPerArm": 151885,
+    "minPerArm": 18232,
+    "progress": 0.12003818678605524,
+    "earlySignificanceAlert": false
+  },
+  "mde": [
+    {
+      "metricId": "conversao",
+      "mdeCurrent": 0.14038729156420202,
+      "mdeDesign": 0.05
+    },
+    {
+      "metricId": "ticket_medio",
+      "mdeCurrent": 0.023659257487004162
+    },
+    {
+      "metricId": "taxa_devolucao",
+      "mdeCurrent": 0.21044242086058182
+    }
+  ],
+  "health": [
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 1525
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 1519
+    }
+  ],
+  "funnel": {
+    "steps": [
+      {
+        "stepId": "expostos",
+        "name": "Expostos",
+        "order": 0
+      },
+      {
+        "stepId": "passo_1",
+        "name": "Viu produto",
+        "order": 1
+      },
+      {
+        "stepId": "passo_2",
+        "name": "Adicionou ao carrinho",
+        "order": 2
+      },
+      {
+        "stepId": "passo_3",
+        "name": "Iniciou checkout",
+        "order": 3
+      },
+      {
+        "stepId": "conversao",
+        "name": "Conversão",
+        "order": 4,
+        "metricId": "conversao"
+      }
+    ],
+    "rows": [
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "expostos",
+        "users": 18300
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "expostos",
+        "users": 18232
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_1",
+        "users": 5449
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_1",
+        "users": 5619
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_2",
+        "users": 2470
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_2",
+        "users": 2633
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_3",
+        "users": 1308
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_3",
+        "users": 1440
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "conversao",
+        "users": 727
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "conversao",
+        "users": 825
+      }
+    ]
+  },
+  "recommendation": {
+    "code": "manter_rodando",
+    "title": "Manter rodando",
+    "body": "Ainda sem leitura conclusiva na conversão. 12% da amostra planejada coletada.",
+    "severity": "warn"
+  },
+  "synthesis": {
+    "variantKey": "variante_a",
+    "variantName": "Variante A",
+    "platform": "all",
+    "text": "Variante A (consolidado): NORTE conversão +7,8% (tendência de melhora, 94%) · ticket médio −2,3% (queda confirmada, 0%).",
+    "parts": [
+      {
+        "metricId": "conversao",
+        "name": "Conversão",
+        "role": "norte",
+        "deltaRelative": 0.07841977551878483,
+        "probBetter": 0.937968886162353,
+        "label": "tendencia_de_melhora"
+      },
+      {
+        "metricId": "ticket_medio",
+        "name": "Ticket médio",
+        "role": "secundaria",
+        "deltaRelative": -0.023017794412538938,
+        "probBetter": 0.0026259956415793373,
+        "label": "queda_confirmada"
+      }
+    ]
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "sintético (packages/stats/generator)",
+      "sqlRef": "scripts/build-simulados.ts",
+      "sqlVersion": "0.1.0"
+    }
+  ],
+  "notes": [
+    "Dados sintéticos seedados, gerados pelo motor estatístico do Faro para os casos de borda da seção 10 do contexto."
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "faroId": "FARO-2026-0102",
+  "asOf": "2026-10-13",
+  "readWindow": {
+    "start": "2026-10-05",
+    "end": "2026-10-13"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user",
+    "session"
+  ],
+  "platforms": [
+    "all"
+  ],
+  "variants": [
+    {
+      "key": "controle",
+      "name": "Controle",
+      "isControl": true,
+      "plannedShare": 0.5,
+      "observedShare": 0.5014985014985015
+    },
+    {
+      "key": "variante_a",
+      "name": "Barra de frete grátis no carrinho",
+      "isControl": false,
+      "plannedShare": 0.5,
+      "observedShare": 0.4985014985014985
+    }
+  ],
+  "contamination": {
+    "users": 601,
+    "share": 0.012
+  },
+  "volumes": [
+    {
+      "platform": "all",
+      "variantKey": "controle",
+      "users": 25100,
+      "buyers": 803,
+      "transactions": 1004,
+      "revenue": 232870
+    },
+    {
+      "platform": "all",
+      "variantKey": "variante_a",
+      "users": 24950,
+      "buyers": 826,
+      "transactions": 1033,
+      "revenue": 235410
+    }
+  ],
+  "results": [
+    {
+      "faroId": "FARO-2026-0102",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.033227091633466134,
+      "n": 25100,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0102",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 0.03342685370741483,
+      "n": 24950,
+      "deltaRelative": 0.006012024048096173,
+      "probBetter": 0.5495378347200677,
+      "label": "sem_tendencia",
+      "mde": 0.13530057166930123,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.08863897806955046,
+        "upper": 0.10066302616574281
+      }
+    },
+    {
+      "faroId": "FARO-2026-0102",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 21.736169993508934,
+      "n": 25100,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0102",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "variante_a",
+      "value": 25.333131775175005,
+      "n": 24950,
+      "deltaRelative": 0.16548277745068382,
+      "probBetter": 0.896248197450679,
+      "label": "tendencia_de_melhora",
+      "mde": 0.3549141431964667,
+      "asOf": "2026-10-13",
+      "ci95": {
+        "lower": -0.09183620389354628,
+        "upper": 0.422801758794914
+      }
+    }
+  ],
+  "srm": {
+    "chiSquare": 0.44955044955044954,
+    "degreesOfFreedom": 1,
+    "pValue": 0.5025485160298531,
+    "alert": false,
+    "plannedShares": [
+      0.5,
+      0.5
+    ],
+    "observedShares": [
+      0.5014985014985015,
+      0.4985014985014985
+    ]
+  },
+  "sample": {
+    "requiredPerArm": 189943,
+    "minPerArm": 24950,
+    "progress": 0.13135519603249396,
+    "earlySignificanceAlert": false
+  },
+  "mde": [
+    {
+      "metricId": "conversao",
+      "mdeCurrent": 0.13530057166930123,
+      "mdeDesign": 0.05
+    },
+    {
+      "metricId": "receita_por_usuario",
+      "mdeCurrent": 0.3549141431964667
+    }
+  ],
+  "health": [
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "controle",
+      "exposedUsers": 2789
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "variante_a",
+      "exposedUsers": 2772
+    }
+  ],
+  "funnel": {
+    "steps": [
+      {
+        "stepId": "expostos",
+        "name": "Expostos",
+        "order": 0
+      },
+      {
+        "stepId": "passo_1",
+        "name": "Viu produto",
+        "order": 1
+      },
+      {
+        "stepId": "passo_2",
+        "name": "Adicionou ao carrinho",
+        "order": 2
+      },
+      {
+        "stepId": "passo_3",
+        "name": "Iniciou checkout",
+        "order": 3
+      },
+      {
+        "stepId": "conversao",
+        "name": "Conversão",
+        "order": 4,
+        "metricId": "conversao"
+      }
+    ],
+    "rows": [
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "expostos",
+        "users": 25100
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "expostos",
+        "users": 24950
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_1",
+        "users": 6024
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_1",
+        "users": 6040
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_2",
+        "users": 2731
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_2",
+        "users": 2762
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "passo_3",
+        "users": 1446
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "passo_3",
+        "users": 1475
+      },
+      {
+        "platform": "all",
+        "variantKey": "controle",
+        "stepId": "conversao",
+        "users": 803
+      },
+      {
+        "platform": "all",
+        "variantKey": "variante_a",
+        "stepId": "conversao",
+        "users": 826
+      }
+    ]
+  },
+  "recommendation": {
+    "code": "manter_rodando",
+    "title": "Manter rodando",
+    "body": "Ainda sem leitura conclusiva na conversão. 13% da amostra planejada coletada.",
+    "severity": "warn"
+  },
+  "synthesis": {
+    "variantKey": "variante_a",
+    "variantName": "Variante A",
+    "platform": "all",
+    "text": "Variante A (consolidado): NORTE conversão +0,6% (sem tendência, 55%).",
+    "parts": [
+      {
+        "metricId": "conversao",
+        "name": "Conversão",
+        "role": "norte",
+        "deltaRelative": 0.006012024048096173,
+        "probBetter": 0.5495378347200677,
+        "label": "sem_tendencia"
+      }
+    ]
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "sintético (packages/stats/generator)",
+      "sqlRef": "scripts/build-simulados.ts",
+      "sqlVersion": "0.1.0"
+    }
+  ],
+  "notes": [
+    "Dados sintéticos seedados, gerados pelo motor estatístico do Faro para os casos de borda da seção 10 do contexto."
+  ]
+}

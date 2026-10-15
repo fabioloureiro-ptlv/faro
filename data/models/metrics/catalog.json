@@ -1,0 +1,430 @@
+[
+  {
+    "id": "receita_por_usuario",
+    "name": "Receita por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita de pedidos (curated_ga.itd_transactions_ga4) ÷ usuários expostos. NORTE padrão.",
+    "sqlTemplateRef": "metrics/receita_por_usuario.sql",
+    "baseline": 24.5,
+    "cv": 6,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "conversao",
+    "name": "Conversão",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos com ao menos um pedido (curated_ga.itd_transactions_ga4) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/conversao.sql",
+    "baseline": 0.032,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "transacoes_por_usuario",
+    "name": "Transações por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "count",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Pedidos (curated_ga.itd_transactions_ga4) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/transacoes_por_usuario.sql",
+    "baseline": 0.092,
+    "cv": 4,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "ticket_medio",
+    "name": "Ticket médio",
+    "section": "eCom",
+    "kind": "ratio",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user"
+    ],
+    "definition": "Receita ÷ pedidos (razão de médias por usuário; só compradores; curated_ga.itd_transactions_ga4).",
+    "sqlTemplateRef": "metrics/ticket_medio.sql",
+    "baseline": 232,
+    "cv": 0.8,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "receita_faturada_por_usuario",
+    "name": "Receita faturada por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita faturada (dw_corporativo.ft_pedido_faturado / op_digital_analytics.dts_transacoes_faturado) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/receita_faturada_por_usuario.sql",
+    "baseline": 29.4,
+    "cv": 6,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "margem2_por_usuario",
+    "name": "Margem 2 por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Margem 2 dos pedidos faturados (cadeia de dw_corporativo.ft_pedido_faturado; ver dts_teste_ab.vlr_margem2_ecom) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/margem2_por_usuario.sql",
+    "baseline": 4.1,
+    "cv": 7,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "conversao_carrinho",
+    "name": "Conversão para o carrinho",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos com etapa de carrinho (curated_ga.itd_caminho_compra_ga4) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/conversao_carrinho.sql",
+    "baseline": 0.11,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "conversao_repet_nova",
+    "name": "Conversão em Repet nova",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos com transação de novo cliente Repet (dw_corporativo.ft_transacoes_marketing; regra em dts_teste_ab.num_transacao_novos_repet) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/conversao_repet_nova.sql",
+    "baseline": 0.021,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "cliques_recomendacao",
+    "name": "Cliques na recomendação",
+    "section": "Engajamento",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos com clique na variação (DY Activity Stream) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/cliques_recomendacao.sql",
+    "baseline": 0.06,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "conversao_clube",
+    "name": "Conversão no clube",
+    "section": "Clube",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos que aderiram ao Clube (op_clube_descontos.dts_planos_por_membro) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/conversao_clube.sql",
+    "baseline": 0.0042,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "receita_clube_por_usuario",
+    "name": "Receita do clube por usuário",
+    "section": "Clube",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita de assinaturas do Clube (op_clube_descontos.dts_planos_por_membro / dw_corporativo.ft_planos_por_membro) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/receita_clube_por_usuario.sql",
+    "baseline": 0.71,
+    "cv": 12,
+    "owner": "Marketing Data",
+    "status": "rascunho"
+  },
+  {
+    "id": "churn_clube",
+    "name": "Churn do clube",
+    "section": "Clube",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Assinantes do Clube expostos que cancelaram após a primeira exposição ÷ assinantes expostos (op_mkt_cross.dts_churn_teste_ab, op_clube_descontos.ft_cancelamentos_clube_descontos).",
+    "sqlTemplateRef": "metrics/churn_clube.sql",
+    "baseline": 0.031,
+    "owner": "Marketing Data",
+    "status": "rascunho",
+    "maturationDays": 30
+  },
+  {
+    "id": "conversao_saude",
+    "name": "Conversão em saúde",
+    "section": "Saúde",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos que contrataram um plano de saúde (op_health.beneficiarios / curated_health.health_user_pet.dt_purchased) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/conversao_saude.sql",
+    "baseline": 0.015,
+    "owner": "Dados Saúde",
+    "status": "rascunho"
+  },
+  {
+    "id": "vidas_por_usuario",
+    "name": "Vidas por usuário",
+    "section": "Saúde",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "count",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Pets com plano contratado após a exposição (curated_health.health_user_pet) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/vidas_por_usuario.sql",
+    "baseline": 0.021,
+    "cv": 8,
+    "owner": "Dados Saúde",
+    "status": "rascunho"
+  },
+  {
+    "id": "receita_saude_por_usuario",
+    "name": "Receita de saúde por usuário",
+    "section": "Saúde",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita de planos de saúde (op_health.faturamento_pet_nofaro.valor_total_faturado) ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/receita_saude_por_usuario.sql",
+    "baseline": 1.12,
+    "cv": 10,
+    "owner": "Dados Saúde",
+    "status": "rascunho"
+  },
+  {
+    "id": "ticket_saude",
+    "name": "Ticket de saúde",
+    "section": "Saúde",
+    "kind": "ratio",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user"
+    ],
+    "definition": "Receita de saúde ÷ contratos (só contratantes; op_health.faturamento_pet_nofaro).",
+    "sqlTemplateRef": "metrics/ticket_saude.sql",
+    "baseline": 150,
+    "cv": 0.8,
+    "owner": "Dados Saúde",
+    "status": "rascunho"
+  },
+  {
+    "id": "churn_saude",
+    "name": "Churn de saúde",
+    "section": "Saúde",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Clientes de saúde expostos com cancelamento após a primeira exposição ÷ clientes de saúde expostos (op_mkt_cross.dts_churn_teste_ab; curated_health.health_user_pet.dt_canceled/cancel_type; dw_corporativo.ft_desligamento_plano_saude).",
+    "sqlTemplateRef": "metrics/churn_saude.sql",
+    "baseline": 0.02,
+    "owner": "Dados Saúde",
+    "status": "rascunho",
+    "maturationDays": 30
+  },
+  {
+    "id": "inadimplencia",
+    "name": "Inadimplência",
+    "section": "Fintech",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "DECISAO-PENDENTE: usuários expostos com cobrança vencida há mais de 30 dias ÷ usuários expostos com cobrança (curated_health.health_vindi_charge status/due_at/paid_at; health_vindi_subscription.overdue_since; dw_corporativo.ft_inadimplencia_*).",
+    "sqlTemplateRef": "metrics/inadimplencia.sql",
+    "owner": "Fintech",
+    "status": "rascunho",
+    "maturationDays": 60
+  },
+  {
+    "id": "uso_cashback",
+    "name": "Uso de cashback",
+    "section": "Fintech",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Usuários expostos que usaram cashback/petcoins após a exposição ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/uso_cashback.sql",
+    "owner": "Fintech",
+    "status": "rascunho"
+  },
+  {
+    "id": "retencao_30d",
+    "name": "Retenção em 30 dias",
+    "section": "Retenção",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Compradores expostos que recompraram em até 30 dias ÷ compradores expostos (curated_ga.itd_transactions_ga4 / dw_corporativo.ft_transacoes_marketing).",
+    "sqlTemplateRef": "metrics/retencao_30d.sql",
+    "baseline": 0.41,
+    "owner": "Marketing Data",
+    "status": "rascunho",
+    "maturationDays": 30
+  },
+  {
+    "id": "csat_medio",
+    "name": "CSAT médio",
+    "section": "Atendimento",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "score",
+    "grains": [
+      "user"
+    ],
+    "definition": "Média de average_rating das avaliações de usuários expostos após a exposição (curated_health.health_clinic_rating_user; CSAT de atendimento Zendesk/Droz ainda sem tabela confirmada).",
+    "sqlTemplateRef": "metrics/csat_medio.sql",
+    "owner": "Atendimento",
+    "status": "rascunho"
+  },
+  {
+    "id": "chamados_por_usuario",
+    "name": "Chamados no SAC",
+    "section": "Atendimento",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários expostos que abriram chamado após a exposição ÷ usuários expostos.",
+    "sqlTemplateRef": "metrics/chamados_por_usuario.sql",
+    "baseline": 0.006,
+    "owner": "Atendimento",
+    "status": "rascunho"
+  },
+  {
+    "id": "taxa_devolucao",
+    "name": "Taxa de devolução",
+    "section": "Operação",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Compradores expostos com devolução ÷ compradores expostos.",
+    "sqlTemplateRef": "metrics/taxa_devolucao.sql",
+    "baseline": 0.018,
+    "owner": "Marketing Data",
+    "status": "rascunho",
+    "maturationDays": 14
+  },
+  {
+    "id": "cancelamento_repet",
+    "name": "Cancelamento de Repet",
+    "section": "Operação",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Assinantes Repet expostos que cancelaram após a exposição ÷ assinantes expostos.",
+    "sqlTemplateRef": "metrics/cancelamento_repet.sql",
+    "baseline": 0.042,
+    "owner": "Marketing Data",
+    "status": "rascunho",
+    "maturationDays": 30
+  },
+  {
+    "id": "tempo_carregamento",
+    "name": "Tempo de carregamento",
+    "section": "Operação",
+    "kind": "mean",
+    "direction": "lower_better",
+    "unit": "seconds",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Tempo médio de carregamento da página do teste (GA4/observabilidade).",
+    "sqlTemplateRef": "metrics/tempo_carregamento.sql",
+    "baseline": 1.82,
+    "cv": 0.45,
+    "owner": "Plataforma",
+    "status": "rascunho"
+  }
+]

@@ -1,0 +1,3710 @@
+{
+  "faroId": "FARO-2026-0001",
+  "asOf": "2026-10-13",
+  "fetchedAt": "2026-10-14T09:40:00-03:00",
+  "readWindow": {
+    "start": "2026-08-31",
+    "end": "2026-10-12"
+  },
+  "grain": "user",
+  "availableGrains": [
+    "user"
+  ],
+  "platforms": [
+    "all",
+    "android",
+    "ios"
+  ],
+  "variants": [
+    {
+      "key": "home_antiga",
+      "name": "home antiga",
+      "isControl": true,
+      "plannedShare": 0.02,
+      "observedShare": 0.0191
+    },
+    {
+      "key": "home_nova",
+      "name": "home nova",
+      "isControl": false,
+      "plannedShare": 0.98,
+      "observedShare": 0.9809
+    }
+  ],
+  "contamination": {
+    "users": 26016,
+    "share": 0.023
+  },
+  "volumes": [
+    {
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "users": 21379,
+      "buyers": 1596,
+      "transactions": 1995,
+      "revenue": 467283
+    },
+    {
+      "platform": "all",
+      "variantKey": "home_nova",
+      "users": 1100094,
+      "buyers": 280454,
+      "transactions": 464349,
+      "revenue": 97333314
+    },
+    {
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "users": 8415,
+      "buyers": 399,
+      "transactions": 501,
+      "revenue": 111736
+    },
+    {
+      "platform": "android",
+      "variantKey": "home_nova",
+      "users": 592676,
+      "buyers": 140372,
+      "transactions": 232990,
+      "revenue": 47714272
+    },
+    {
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "users": 12964,
+      "buyers": 1197,
+      "transactions": 1494,
+      "revenue": 355547
+    },
+    {
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "users": 507418,
+      "buyers": 140082,
+      "transactions": 231359,
+      "revenue": 49619042
+    }
+  ],
+  "results": [
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 21.83,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 88.2,
+      "n": 1100094,
+      "deltaRelative": 1.081,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.045
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0746,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.2549,
+      "n": 1100094,
+      "deltaRelative": 2.4130000000000003,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.068
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0933,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.4221,
+      "n": 1100094,
+      "deltaRelative": 1.105,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.034
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 233.95,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 208.97,
+      "n": 1100094,
+      "deltaRelative": -0.107,
+      "probBetter": 0,
+      "label": "queda_confirmada",
+      "mde": 0.055999999999999994
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 29.18,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 111.85,
+      "n": 1100094,
+      "deltaRelative": 0.922,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.054000000000000006
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 3.99,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 13.08,
+      "n": 1100094,
+      "deltaRelative": 0.767,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.068
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.1013,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.3062,
+      "n": 1100094,
+      "deltaRelative": 2.022,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.057
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0002,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0022,
+      "n": 1100094,
+      "deltaRelative": 6.816,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "mde": 1.1440000000000001
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.003,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0112,
+      "n": 1100094,
+      "deltaRelative": 2.673,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.348
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.66,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 2.57,
+      "n": 1100094,
+      "deltaRelative": 2.886,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.42
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0363,
+      "n": 1100094,
+      "deltaRelative": 1.3980000000000001,
+      "probBetter": 0.19,
+      "label": "sem_tendencia",
+      "mde": 2.782
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 1100094,
+      "deltaRelative": -0.747,
+      "probBetter": 0.09,
+      "label": "tendencia_de_queda",
+      "mde": 2.906
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 1100094
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 1100094
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": null,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 158.59,
+      "n": 1100094
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": null,
+      "n": 21379
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "all",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 1100094
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 13.28,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 80.23,
+      "n": 592676,
+      "deltaRelative": 1.383,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0474,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.2368,
+      "n": 592676,
+      "deltaRelative": 3.984,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0595,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.3931,
+      "n": 592676,
+      "deltaRelative": 1.3619999999999999,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 223.03,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 204.1,
+      "n": 592676,
+      "deltaRelative": -0.085,
+      "probBetter": 0.02,
+      "label": "queda_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 17.69,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 103.35,
+      "n": 592676,
+      "deltaRelative": 1.228,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 2.29,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 11.67,
+      "n": 592676,
+      "deltaRelative": 1.063,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0778,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.2922,
+      "n": 592676,
+      "deltaRelative": 2.7489999999999997,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0001,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0021,
+      "n": 592676,
+      "deltaRelative": 7.791,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0012,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0108,
+      "n": 592676,
+      "deltaRelative": 7.277,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.22,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 2.42,
+      "n": 592676,
+      "deltaRelative": 10.099,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0395,
+      "n": 592676,
+      "deltaRelative": -0.524,
+      "probBetter": 0.78,
+      "label": "sem_tendencia"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 592676,
+      "deltaRelative": -0.986,
+      "probBetter": 0,
+      "label": "tendencia_de_queda"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 592676
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 8415
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 592676
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 27.38,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 97.51,
+      "n": 507418,
+      "deltaRelative": 1.008,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0923,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.2761,
+      "n": 507418,
+      "deltaRelative": 1.9880000000000002,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.1152,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.456,
+      "n": 507418,
+      "deltaRelative": 1.03,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 237.62,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 213.87,
+      "n": 507418,
+      "deltaRelative": -0.1,
+      "probBetter": 0,
+      "label": "queda_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 36.65,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 121.77,
+      "n": 507418,
+      "deltaRelative": 0.826,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 5.09,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem2_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 14.72,
+      "n": 507418,
+      "deltaRelative": 0.705,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.1165,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.3225,
+      "n": 507418,
+      "deltaRelative": 1.768,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0003,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0023,
+      "n": 507418,
+      "deltaRelative": 5.01,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.0042,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0116,
+      "n": 507418,
+      "deltaRelative": 1.73,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0.95,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 2.75,
+      "n": 507418,
+      "deltaRelative": 1.895,
+      "probBetter": 1,
+      "label": "melhora_confirmada"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0.0327,
+      "n": 507418,
+      "deltaRelative": 0.841,
+      "probBetter": 0.27,
+      "label": "sem_tendencia"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 507418,
+      "deltaRelative": -0.6679999999999999,
+      "probBetter": 0.14,
+      "label": "tendencia_de_queda"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 507418
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": 0,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 507418
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": null,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 158.59,
+      "n": 507418
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_antiga",
+      "value": null,
+      "n": 12964
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "ios",
+      "grain": "user",
+      "asOf": "2026-10-13",
+      "variantKey": "home_nova",
+      "value": 0,
+      "n": 507418
+    }
+  ],
+  "srm": {
+    "chiSquare": 0,
+    "degreesOfFreedom": 1,
+    "pValue": 1,
+    "alert": false,
+    "plannedShares": [
+      0.02,
+      0.98
+    ],
+    "observedShares": [
+      0.0191,
+      0.9809
+    ],
+    "unstableSplitDays": 6
+  },
+  "mde": [
+    {
+      "metricId": "receita_por_usuario",
+      "mdeCurrent": 0.045,
+      "mdeDesign": 0.05
+    },
+    {
+      "metricId": "conversao",
+      "mdeCurrent": 0.068
+    },
+    {
+      "metricId": "transacoes_por_usuario",
+      "mdeCurrent": 0.034
+    },
+    {
+      "metricId": "ticket_medio",
+      "mdeCurrent": 0.055999999999999994
+    },
+    {
+      "metricId": "receita_faturada_por_usuario",
+      "mdeCurrent": 0.054000000000000006
+    },
+    {
+      "metricId": "margem2_por_usuario",
+      "mdeCurrent": 0.068
+    },
+    {
+      "metricId": "conversao_carrinho",
+      "mdeCurrent": 0.057
+    },
+    {
+      "metricId": "conversao_repet_nova",
+      "mdeCurrent": 1.1440000000000001
+    },
+    {
+      "metricId": "conversao_clube",
+      "mdeCurrent": 0.348
+    },
+    {
+      "metricId": "receita_clube_por_usuario",
+      "mdeCurrent": 0.42
+    },
+    {
+      "metricId": "churn_clube",
+      "mdeCurrent": 2.782
+    },
+    {
+      "metricId": "conversao_saude",
+      "mdeCurrent": 2.906
+    },
+    {
+      "metricId": "vidas_por_usuario",
+      "mdeCurrent": null
+    },
+    {
+      "metricId": "receita_saude_por_usuario",
+      "mdeCurrent": null
+    },
+    {
+      "metricId": "ticket_saude",
+      "mdeCurrent": null
+    },
+    {
+      "metricId": "churn_saude",
+      "mdeCurrent": null
+    }
+  ],
+  "health": [
+    {
+      "date": "2026-08-12",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 5505
+    },
+    {
+      "date": "2026-08-12",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 135744
+    },
+    {
+      "date": "2026-08-12",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1773
+    },
+    {
+      "date": "2026-08-12",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 73048
+    },
+    {
+      "date": "2026-08-12",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3732
+    },
+    {
+      "date": "2026-08-12",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62696
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 5291
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 130781
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1650
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 70488
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3641
+    },
+    {
+      "date": "2026-08-13",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 60293
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 4917
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 135053
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1638
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 72836
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3279
+    },
+    {
+      "date": "2026-08-14",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62217
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 4495
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 117721
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1420
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 64752
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3075
+    },
+    {
+      "date": "2026-08-15",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 52969
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3940
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 96788
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1259
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 53235
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2681
+    },
+    {
+      "date": "2026-08-16",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 43553
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 4683
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 153219
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1674
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 81734
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3009
+    },
+    {
+      "date": "2026-08-17",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 71485
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 4345
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 149045
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1427
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 80775
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2918
+    },
+    {
+      "date": "2026-08-18",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 68270
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 4004
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 144210
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1295
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 78414
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2709
+    },
+    {
+      "date": "2026-08-19",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 65796
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3976
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 147040
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1328
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 79567
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2648
+    },
+    {
+      "date": "2026-08-20",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 67473
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3396
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 137415
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1196
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 75276
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2200
+    },
+    {
+      "date": "2026-08-21",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62139
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2917
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 115341
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 980
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 61614
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1937
+    },
+    {
+      "date": "2026-08-22",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 53727
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2581
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 95869
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 788
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 51023
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1793
+    },
+    {
+      "date": "2026-08-23",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 44846
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3199
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 147135
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1035
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 77507
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2164
+    },
+    {
+      "date": "2026-08-24",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 69628
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 3165
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 151568
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1037
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 80766
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2128
+    },
+    {
+      "date": "2026-08-25",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 70802
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2826
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 147855
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1024
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 79316
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1802
+    },
+    {
+      "date": "2026-08-26",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 68539
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2546
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 145557
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 942
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 78486
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1604
+    },
+    {
+      "date": "2026-08-27",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 67071
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2581
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 141861
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 903
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 76848
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1678
+    },
+    {
+      "date": "2026-08-28",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 65013
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2420
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 128279
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 909
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 70978
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1511
+    },
+    {
+      "date": "2026-08-29",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 57301
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2192
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 110838
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 756
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 60998
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1436
+    },
+    {
+      "date": "2026-08-30",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 49840
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2678
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 164543
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 957
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 88611
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1721
+    },
+    {
+      "date": "2026-08-31",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 75932
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2495
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 167122
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 853
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 90184
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1642
+    },
+    {
+      "date": "2026-09-01",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 76938
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2439
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 160350
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 908
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 86748
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1531
+    },
+    {
+      "date": "2026-09-02",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 73602
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2187
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 157244
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 823
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 85353
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1364
+    },
+    {
+      "date": "2026-09-03",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 71891
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2123
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 153187
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 767
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 82831
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1356
+    },
+    {
+      "date": "2026-09-04",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 70356
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1987
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 137617
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 704
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 75101
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1283
+    },
+    {
+      "date": "2026-09-05",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62516
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1635
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 110290
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 600
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 60772
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1035
+    },
+    {
+      "date": "2026-09-06",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 49518
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1666
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 123585
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 608
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 66981
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1058
+    },
+    {
+      "date": "2026-09-07",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 56604
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 2070
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 163980
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 699
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 86879
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1371
+    },
+    {
+      "date": "2026-09-08",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 77101
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1854
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 164470
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 624
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 86681
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1230
+    },
+    {
+      "date": "2026-09-09",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 77789
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1784
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 159115
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 630
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 84026
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1154
+    },
+    {
+      "date": "2026-09-10",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 75089
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1575
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 144449
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 575
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 76556
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1000
+    },
+    {
+      "date": "2026-09-11",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 67893
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1504
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 130218
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 542
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 70256
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 962
+    },
+    {
+      "date": "2026-09-12",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 59962
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1376
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 108041
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 493
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 58576
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 883
+    },
+    {
+      "date": "2026-09-13",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 49465
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1462
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 155889
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 529
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 81796
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 933
+    },
+    {
+      "date": "2026-09-14",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 74093
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1487
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 154186
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 491
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 80106
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 996
+    },
+    {
+      "date": "2026-09-15",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 74080
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1351
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 144266
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 481
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 74720
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 870
+    },
+    {
+      "date": "2026-09-16",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 69546
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1254
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 142127
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 435
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 72999
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 819
+    },
+    {
+      "date": "2026-09-17",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 69128
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1304
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 146653
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 468
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 76194
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 836
+    },
+    {
+      "date": "2026-09-18",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 70459
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1169
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 123976
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 406
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 64944
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 763
+    },
+    {
+      "date": "2026-09-19",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 59032
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1037
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 105521
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 377
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 55137
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 660
+    },
+    {
+      "date": "2026-09-20",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 50384
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1199
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 147561
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 427
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 75058
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 772
+    },
+    {
+      "date": "2026-09-21",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 72503
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1126
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 143050
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 388
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 72552
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 738
+    },
+    {
+      "date": "2026-09-22",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 70498
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1129
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 138093
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 420
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 70240
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 709
+    },
+    {
+      "date": "2026-09-23",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 67853
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1040
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 139123
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 383
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 71561
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 657
+    },
+    {
+      "date": "2026-09-24",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 67562
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 939
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 128617
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 340
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 66541
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 599
+    },
+    {
+      "date": "2026-09-25",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62076
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 948
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 117569
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 348
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 61514
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 600
+    },
+    {
+      "date": "2026-09-26",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 56055
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 875
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 103150
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 331
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 54325
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 544
+    },
+    {
+      "date": "2026-09-27",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 48825
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1084
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 151192
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 396
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 76471
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 688
+    },
+    {
+      "date": "2026-09-28",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 74721
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 974
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 145833
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 343
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 73803
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 631
+    },
+    {
+      "date": "2026-09-29",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 72030
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 1006
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 150799
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 380
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 77097
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 626
+    },
+    {
+      "date": "2026-09-30",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 73702
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 992
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 153215
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 351
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 79231
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 641
+    },
+    {
+      "date": "2026-10-01",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 73984
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 875
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 142011
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 296
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 73509
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 579
+    },
+    {
+      "date": "2026-10-02",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 68502
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 794
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 125694
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 282
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 66064
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 512
+    },
+    {
+      "date": "2026-10-03",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 59630
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 669
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 93050
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 239
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 48680
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 430
+    },
+    {
+      "date": "2026-10-04",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 44370
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 903
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 161802
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 369
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 84805
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 534
+    },
+    {
+      "date": "2026-10-05",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 76997
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 826
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 157003
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 332
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 85077
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 494
+    },
+    {
+      "date": "2026-10-06",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 71926
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 798
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 151269
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 365
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 84373
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 433
+    },
+    {
+      "date": "2026-10-07",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 66896
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 734
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 144912
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 301
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 82799
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 433
+    },
+    {
+      "date": "2026-10-08",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 62113
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 756
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 135396
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 328
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 79731
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 428
+    },
+    {
+      "date": "2026-10-09",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 55665
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 655
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 123260
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 320
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 76582
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 335
+    },
+    {
+      "date": "2026-10-10",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 46678
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 482
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 76996
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 255
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 49233
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 227
+    },
+    {
+      "date": "2026-10-11",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 27763
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 413
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 58267
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 236
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 40974
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 177
+    },
+    {
+      "date": "2026-10-12",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 17293
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "home_antiga",
+      "exposedUsers": 387
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "all",
+      "variantKey": "home_nova",
+      "exposedUsers": 35669
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "android",
+      "variantKey": "home_antiga",
+      "exposedUsers": 250
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "android",
+      "variantKey": "home_nova",
+      "exposedUsers": 26893
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "ios",
+      "variantKey": "home_antiga",
+      "exposedUsers": 137
+    },
+    {
+      "date": "2026-10-13",
+      "platform": "ios",
+      "variantKey": "home_nova",
+      "exposedUsers": 8776
+    }
+  ],
+  "funnel": {
+    "steps": [
+      {
+        "stepId": "expostos",
+        "name": "Expostos",
+        "order": 0
+      },
+      {
+        "stepId": "carrinho",
+        "name": "Adicionou ao carrinho",
+        "order": 1,
+        "metricId": "conversao_carrinho"
+      },
+      {
+        "stepId": "compra",
+        "name": "Comprou",
+        "order": 2,
+        "metricId": "conversao"
+      },
+      {
+        "stepId": "clube",
+        "name": "Assinou o Clube",
+        "order": 3,
+        "metricId": "conversao_clube"
+      }
+    ],
+    "rows": [
+      {
+        "platform": "all",
+        "variantKey": "home_antiga",
+        "stepId": "expostos",
+        "users": 21379
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_antiga",
+        "stepId": "carrinho",
+        "users": 2166
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_antiga",
+        "stepId": "compra",
+        "users": 1596
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_antiga",
+        "stepId": "clube",
+        "users": 64
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_nova",
+        "stepId": "expostos",
+        "users": 1100094
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_nova",
+        "stepId": "carrinho",
+        "users": 336849
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_nova",
+        "stepId": "compra",
+        "users": 280454
+      },
+      {
+        "platform": "all",
+        "variantKey": "home_nova",
+        "stepId": "clube",
+        "users": 12321
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_antiga",
+        "stepId": "expostos",
+        "users": 8415
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_antiga",
+        "stepId": "carrinho",
+        "users": 655
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_antiga",
+        "stepId": "compra",
+        "users": 399
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_antiga",
+        "stepId": "clube",
+        "users": 10
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_nova",
+        "stepId": "expostos",
+        "users": 592676
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_nova",
+        "stepId": "carrinho",
+        "users": 173180
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_nova",
+        "stepId": "compra",
+        "users": 140372
+      },
+      {
+        "platform": "android",
+        "variantKey": "home_nova",
+        "stepId": "clube",
+        "users": 6401
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_antiga",
+        "stepId": "expostos",
+        "users": 12964
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_antiga",
+        "stepId": "carrinho",
+        "users": 1510
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_antiga",
+        "stepId": "compra",
+        "users": 1197
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_antiga",
+        "stepId": "clube",
+        "users": 54
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_nova",
+        "stepId": "expostos",
+        "users": 507418
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_nova",
+        "stepId": "carrinho",
+        "users": 163642
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_nova",
+        "stepId": "compra",
+        "users": 140082
+      },
+      {
+        "platform": "ios",
+        "variantKey": "home_nova",
+        "stepId": "clube",
+        "users": 5886
+      }
+    ]
+  },
+  "recommendation": {
+    "code": "desligar_campanha",
+    "title": "Desligar a campanha no Dynamic Yield",
+    "body": "Uma variante já está com ~100% do tráfego. O teste não produz mais leitura e o controle residual só gera ruído.",
+    "severity": "warn"
+  },
+  "synthesis": {
+    "variantKey": "home_nova",
+    "variantName": "home nova",
+    "platform": "all",
+    "text": "home nova (consolidado): NORTE receita por usuário +108,1% (melhora confirmada, 100%) · conversão +241,3% (melhora confirmada, 100%) · conversão em saúde −74,7% (tendência de queda, 9%).",
+    "parts": [
+      {
+        "metricId": "receita_por_usuario",
+        "name": "Receita por usuário",
+        "role": "norte",
+        "deltaRelative": 1.081,
+        "probBetter": 1,
+        "label": "melhora_confirmada"
+      },
+      {
+        "metricId": "conversao",
+        "name": "Conversão",
+        "role": "guarda",
+        "deltaRelative": 2.413,
+        "probBetter": 1,
+        "label": "melhora_confirmada"
+      },
+      {
+        "metricId": "conversao_saude",
+        "name": "Conversão em saúde",
+        "role": "outra",
+        "deltaRelative": -0.747,
+        "probBetter": 0.09,
+        "label": "tendencia_de_queda"
+      }
+    ]
+  },
+  "lineage": [
+    {
+      "metricId": "*",
+      "sourceTable": "export D-1 do visualizador (Dynamic Yield), 13/10/2026",
+      "sqlRef": "a confirmar: roadmap dy_results v3",
+      "sqlVersion": "export-2026-10-13"
+    }
+  ],
+  "notes": [
+    "Valores copiados do protótipo do Faro (tela de resultados do Nexus), que os leu do export de 13/10 do visualizador.",
+    "Os deltas não são a razão simples dos valores exibidos: o visualizador aplica o próprio método (provavelmente CUPED 28 dias e correção do controle pós-rollout). Ver PLAN.md, pergunta 2.",
+    "Rótulos vêm do visualizador e nem sempre seguem a regra de rótulo do contexto (ex.: tendência de melhora com 100%). A paridade compara valores, não rótulos, até o método estar documentado.",
+    "SRM: o split planejado é 2% × 98%; chiSquare e pValue aqui são placeholders até o cálculo ser reproduzido com os dias de split instável excluídos.",
+    "Reconciliação de 14/10 com op_dashs_interativos.dts_teste_ab (grão sessão, sem exclusões): variante −5% em transações; controle 2,5× transações e 4× receita acima destes valores; receita por sessão −29%. Ver docs/specs/frente-04/FONTES.md.",
+    "Saúde do teste: sessões por dia e plataforma de op_dashs_interativos.dts_teste_ab (12/08 a 13/10), não usuários; o campo exposedUsers carrega sessões até o modelo de exposição existir.",
+    "Funil derivado das taxas do visualizador (conversão para o carrinho, conversão, conversão no clube) sobre os usuários expostos de cada variante e plataforma; não é uma contagem independente."
+  ]
+}

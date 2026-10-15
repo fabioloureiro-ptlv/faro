@@ -3,6 +3,7 @@
 
 export type Bu = 'ecom' | 'saude' | 'fintech' | 'servicos' | 'ecossistema';
 export type Platform = 'site' | 'android' | 'ios';
+export type Grain = 'user' | 'session';
 
 export type ExperimentStatus =
   | 'rascunho' // design incompleto
@@ -50,7 +51,8 @@ export interface Design {
 export type AudienceCondition =
   | { type: 'comprou'; dimension: 'categoria' | 'marca' | 'item'; values: string[]; windowDays: number }
   | { type: 'evento'; eventName: string; windowDays: number; minCount?: number }
-  | { type: 'propriedade'; key: 'repet' | 'clube' | 'plano_saude' | 'especie_pet' | 'regiao' | (string & {}); op: 'eq' | 'in' | 'neq'; values: string[] }
+  // key: propriedades conhecidas hoje: repet, clube, plano_saude, especie_pet, regiao.
+  | { type: 'propriedade'; key: string; op: 'eq' | 'in' | 'neq'; values: string[] }
   | { type: 'plataforma'; values: Platform[] };
 
 export interface AudienceRule {
@@ -110,7 +112,7 @@ export interface MetricDefinition {
   // dono: frente 4
   id: string; // ex.: "receita_por_usuario"
   name: string;
-  section: 'Engajamento' | 'eCom' | 'Clube' | 'Saúde' | 'Fintech' | 'Serviços' | 'Atendimento' | 'Operação';
+  section: 'Engajamento' | 'eCom' | 'Clube' | 'Saúde' | 'Fintech' | 'Serviços' | 'Atendimento' | 'Operação' | 'Retenção';
   kind: 'proportion' | 'mean' | 'ratio';
   direction: 'higher_better' | 'lower_better';
   unit: 'percent' | 'brl' | 'count' | 'seconds' | 'score';
@@ -121,7 +123,12 @@ export interface MetricDefinition {
   cv?: number; // para cálculo de amostra
   owner: string;
   status: 'ativa' | 'rascunho' | 'depreciada';
+  /** Frente 4: dias até a métrica maturar (inadimplência, retenção). */
+  maturationDays?: number;
 }
+
+export type MetricKind = MetricDefinition['kind'];
+export type MetricDirection = MetricDefinition['direction'];
 
 export type SignificanceLabel =
   | 'melhora_confirmada' // P(melhor) ≥ 95%
@@ -144,6 +151,10 @@ export interface MetricResult {
   label?: SignificanceLabel;
   mde?: number;
   asOf: string; // data dos dados (D-1)
+  /** Frente 4: intervalo de confiança 95% do delta relativo. */
+  ci95?: { lower: number; upper: number };
+  /** Frente 4: métrica com efeito tardio ainda maturando. */
+  maturing?: boolean;
 }
 
 export interface OverlapDecision {

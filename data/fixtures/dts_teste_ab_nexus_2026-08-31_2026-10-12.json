@@ -1,0 +1,18 @@
+{
+  "source": "petlove-dataeng-prod-01.op_dashs_interativos.dts_teste_ab",
+  "query": "data/queries/reconciliacao_dts_teste_ab.sql (consulta 2)",
+  "window": { "start": "2026-08-31", "end": "2026-10-12", "days": 43 },
+  "extractedAt": "2026-10-14",
+  "grain": "sessão × dia, somado na janela (sem exclusão de contaminados nem de dias de split instável)",
+  "rows": [
+    { "campaign": "Nexus | Nova Home do App", "variant": "home antiga", "platform": "ANDROID", "sessions": 20400, "transactions": 1302, "transactionsEcom": 1245, "grossRevenueEcom": 440514.41, "capturedRevenueEcom": 482941.16, "margin2Ecom": 54129.23, "newRepetTransactions": 74, "clubTransactions": 0, "healthTransactions": 0, "healthPets": 0, "healthChurn": 0 },
+    { "campaign": "Nexus | Nova Home do App", "variant": "home antiga", "platform": "IOS", "sessions": 35254, "transactions": 3784, "transactionsEcom": 3619, "grossRevenueEcom": 1439809.45, "capturedRevenueEcom": 1580314.23, "margin2Ecom": 182423.54, "newRepetTransactions": 197, "clubTransactions": 0, "healthTransactions": 0, "healthPets": 14, "healthChurn": 0 },
+    { "campaign": "Nexus | Nova Home do App", "variant": "home nova", "platform": "ANDROID", "sessions": 3155671, "transactions": 249429, "transactionsEcom": 242615, "grossRevenueEcom": 71675234.13, "capturedRevenueEcom": 78418414.02, "margin2Ecom": 7652696.04, "newRepetTransactions": 7884, "clubTransactions": 0, "healthTransactions": 0, "healthPets": 0, "healthChurn": 0 },
+    { "campaign": "Nexus | Nova Home do App", "variant": "home nova", "platform": "IOS", "sessions": 2749020, "transactions": 240880, "transactionsEcom": 234597, "grossRevenueEcom": 69382628.31, "capturedRevenueEcom": 76885806.33, "margin2Ecom": 8053494.99, "newRepetTransactions": 8722, "clubTransactions": 0, "healthTransactions": 11, "healthPets": 1591, "healthRevenue": 2359.72, "healthBilled": 71.92, "healthChurn": 26 }
+  ],
+  "notes": [
+    "Linha 'home nova' com plataforma vazia (1 sessão) descartada.",
+    "num_carrinho veio vazio para campanhas de app: a etapa de carrinho não é capturada para app nessa cadeia.",
+    "Volumes do protótipo (fixtures/nexus.json), grão usuário: controle 21.379 usuários / 1.995 transações / R$ 467.283; variante 1.100.094 / 464.349 / R$ 97.333.314."
+  ]
+}
