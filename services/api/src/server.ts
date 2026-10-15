@@ -1,4 +1,4 @@
-import { mkdirSync, renameSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { buildApp, defaultPorts } from './app.ts';
 import { createDb } from './db/client.ts';
@@ -9,29 +9,45 @@ const port = Number(process.env.FARO_API_PORT ?? 4000);
 const dataDir = process.env.FARO_DATA_DIR ?? fileURLToPath(new URL('../.data/pglite', import.meta.url));
 mkdirSync(dataDir, { recursive: true });
 
-// Encerrar o processo à força (dev com --watch, parar o servidor) deixa o `postmaster.pid`
-// da execução anterior na pasta, e o PGlite se recusa a abrir com ele ("failed to initialize").
-// Só este processo usa a pasta, então a trava velha é removida antes de abrir: os dados estão
-// íntegros. Se a API foi parada e subida em seguida, o processo antigo pode ainda estar
-// morrendo e recriar a trava; por isso a abertura é tentada algumas vezes. Só se mesmo assim
-// o banco não abrir, a pasta é guardada ao lado e recriada das fixtures (aí os rascunhos
-// locais ficam na pasta guardada, fora do banco em uso).
+// O PGlite em disco pode se recusar a abrir ("failed to initialize") depois que o processo é morto à
+// força (dev com --watch, parar o servidor), mesmo com os dados íntegros: sobra o `postmaster.pid` da
+// execução anterior e, às vezes, a pasta só abre depois de copiada. Por isso, nesta ordem:
+//   1. abre no lugar, sem a trava velha;
+//   2. se falhar, abre uma CÓPIA da pasta e, se a cópia abrir, ela passa a ser o banco (a original
+//      fica guardada em *-corrompido-*), sem perder os rascunhos locais;
+//   3. só se a cópia também não abrir, guarda a pasta e recria das fixtures.
+const agora = () => new Date().toISOString().replace(/\D/g, '').slice(0, 14);
+
+async function abrir(dir: string) {
+  rmSync(`${dir}/postmaster.pid`, { force: true });
+  return createDb(dir);
+}
+
 async function openDb() {
-  let erro: unknown;
-  for (let tentativa = 0; tentativa < 4; tentativa++) {
-    if (tentativa) await new Promise((r) => setTimeout(r, 2000));
-    rmSync(`${dataDir}/postmaster.pid`, { force: true });
-    try {
-      return await createDb(dataDir);
-    } catch (e) {
-      erro = e;
-    }
+  try {
+    return await abrir(dataDir);
+  } catch (e) {
+    console.warn(`Banco local não abriu (${(e as Error).message}). Tentando uma cópia da pasta.`);
   }
-  const aside = `${dataDir}-corrompido-${new Date().toISOString().replace(/\D/g, '').slice(0, 14)}`;
-  console.warn(`Banco local ilegível (${(erro as Error).message}). Guardando em ${aside} e recriando das fixtures.`);
-  renameSync(dataDir, aside);
-  mkdirSync(dataDir, { recursive: true });
-  return await createDb(dataDir);
+
+  const copia = `${dataDir}-copia`;
+  const aside = `${dataDir}-corrompido-${agora()}`;
+  rmSync(copia, { recursive: true, force: true });
+  try {
+    cpSync(dataDir, copia, { recursive: true });
+    const teste = await abrir(copia);
+    await teste.close();
+    renameSync(dataDir, aside);
+    renameSync(copia, dataDir);
+    console.warn(`Banco recuperado a partir de uma cópia; a pasta original ficou em ${aside}.`);
+    return await abrir(dataDir);
+  } catch (e) {
+    console.warn(`A cópia também não abriu (${(e as Error).message}). Guardando em ${aside} e recriando das fixtures; rascunhos locais ficam na pasta guardada.`);
+    rmSync(copia, { recursive: true, force: true });
+    if (existsSync(dataDir)) renameSync(dataDir, aside);
+    mkdirSync(dataDir, { recursive: true });
+    return await abrir(dataDir);
+  }
 }
 
 const { db } = await openDb();
