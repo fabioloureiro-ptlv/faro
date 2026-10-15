@@ -4,6 +4,7 @@ import { useHead, useRoute } from '#imports';
 import ExperimentoCabecalho from '~~/features/painel/app/components/detalhe/ExperimentoCabecalho.vue';
 import ExperimentoDesign from '~~/features/painel/app/components/detalhe/ExperimentoDesign.vue';
 import ExperimentoResultado from '~~/features/painel/app/components/detalhe/ExperimentoResultado.vue';
+import ResultadoBigNumbers from '~~/features/resultados/app/components/ResultadoBigNumbers.vue';
 import ExperimentoAcoes from '~~/features/painel/app/components/detalhe/ExperimentoAcoes.vue';
 import ExperimentoGovernanca from '~~/features/painel/app/components/detalhe/ExperimentoGovernanca.vue';
 import ExperimentoLinhaDoTempo from '~~/features/painel/app/components/detalhe/ExperimentoLinhaDoTempo.vue';
@@ -46,6 +47,8 @@ const notFound = computed(() => error.value?.statusCode === 404 || error.value?.
       <div class="grade">
         <div class="principal">
           <ExperimentoDesign :experiment="data.experiment" :missing="missingDesign" :metric="metric" />
+          <!-- Frente 4: números-chave sobre GET /results/:faroId (PEDIDOS #14). -->
+          <ResultadoBigNumbers :experiment="data.experiment" :metric="metric" />
           <ExperimentoResultado
             :experiment="data.experiment"
             :rows="norte"

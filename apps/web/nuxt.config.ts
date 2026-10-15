@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   devtools: { enabled: false },
-  extends: ['./features/configuracao', './features/painel'],
+  extends: ['./features/configuracao', './features/painel', './features/resultados'],
   modules: ['@pinia/nuxt'],
   css: ['~/assets/css/tokens.css'],
   ssr: false,
