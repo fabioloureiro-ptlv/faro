@@ -102,6 +102,42 @@ Testes: limites dos rótulos (79,9%, 80%, 95%, 5%, 20%); inversão para `lower_b
 - Linhagem: cada `MetricResult` carrega `lineage: { sourceTable, sqlRef, sqlVersion }`; a UI mostra em "Fonte dos dados".
 - Alertas: dia D-1 ausente no Activity Stream; significância antes da amostra (MET-10); custo diário acima do orçamento (meta inicial: igual ou abaixo dos ~30 GB/dia do roadmap v4, com medição por experimento).
 
+### E8 — Fonte real via roadmap (consultas v3 do Digital) — aprovada em 15/10/2026, portada para o repo unificado
+
+> Pedido de Marina (15/10): trocar as fixtures pela saída real das três consultas do roadmap, sem refatorar o motor estatístico e sem alterar as consultas além dos marcadores. Implementada primeiro sobre o zip `faro-hackathon` (API Node pura); este é o port para a estrutura unificada (API Fastify em `services/api/src/resultados`, painel Nuxt).
+
+#### E8.0 — Achados no repo unificado
+
+- A consulta de resultados **já está versionada** em `data/models/results/dy_results.sql` (v3), com os quatro marcadores e, abaixo de cada um, o cadastro do próprio roadmap em linhas `, STRUCT(...)` / `, '<campanha>'`. Isso fecha a dúvida E8.7-1: o injetor troca a linha do marcador por linhas **com vírgula à frente** e descarta as linhas do cadastro do roadmap; a consulta versionada não muda. `dy_discovery.sql` e `dy_daily_v3.sql` continuam faltando (PEDIDOS #12).
+- `npm run job:sync-results` (interino da unificação) já roda a `dy_results.sql` como está e grava `services/api/.data/results.json`. A fonte roadmap lê esse arquivo como snapshot **só de resultados** (sem discovery nem daily), então o caminho atual continua funcionando e ganha o contrato novo.
+- O painel já exibe testes ativos no DY sem cadastro como `FARO-0000-NNNN` (PNL-07). Fecha a dúvida E8.7-2: os descobertos do roadmap usam a mesma convenção (`FaroIdSchema` continua estrito), numerados pela ordem alfabética da campanha; o hash estável `DY-…` do original fica como `// DECISAO-PENDENTE:` no adapter.
+- O catálogo que os experimentos referenciam é `fixtures/metrics-catalog.json` (`margem_2_por_usuario`); `data/models/metrics/catalog.json` (`margem2_por_usuario`) segue como pendência de convergência já registrada. O mapa do roadmap traduz para o id do wizard.
+- `@google-cloud/bigquery` já é dependência da API (jobs de export e resultados): não há workspace `services/sync`; o sync vive em `services/api/src/resultados/roadmap/` e só o job importa o cliente.
+
+#### E8.1 — Contrato (`CHANGELOG.md` 0.4.0)
+
+`MetricResult.role/confirmed/cuped/minEvents/bayes`; `ResultsResponse.source` (obrigatório; fixtures atualizadas), `readWindow.origin`, `status`, `guardrailsWorse`; `Allocation.readWindow?` (o que o sync injeta em `-- {overrides}`); `roadmap-map.ts`. Mesmas tabelas da proposta original; `origem_datas` do SQL é normalizada (`roadmap`, `detectado`, demais → `periodo_inteiro`).
+
+#### E8.2 — Sync `services/api/src/resultados/roadmap/` + `jobs/sync-roadmap.ts`
+
+`npm run job:sync-roadmap -- [--campanha "<nome>"] [--dry-run]`: lê o cadastro do PGlite local (`listExperiments`), monta as três consultas (`inject.ts`, puro; forma das linhas em `markers.ts`), estima bytes (`--dry-run`), executa com ADC, recusa gravar com identificador (`privacy.ts`) e grava `data/snapshots/roadmap/<dados_ate>/{results,discovery,daily}.json` + `latest.json` (gitignored). Sem agendamento. Templates: results de `data/models/results/`, discovery e daily de `data/queries/roadmap/` (README da pasta).
+
+#### E8.3 — Adapter e fonte
+
+`adapter.ts` (snapshot → `Experiment[]` descobertos e `ResultsResponse` por `faroId × platform × grain`, conforme o mapeamento da proposta), `source.ts` (`FARO_SOURCE=roadmap|fixtures`; padrão roadmap se houver `latest.json` ou `.data/results.json`, senão fixtures; singleton trocável nos testes), `fixtures.ts` (mesmo contrato a partir das fixtures: Nexus completo e, para os demais, `MetricResult` e saúde da frente 2). `GET /results/:faroId?grain=&platform=` passa a devolver `ResultsResponse`; `GET /health` informa a fonte. O painel (`painel/dataset.ts`) passa a descobrir os `FARO-0000-…` pelo adapter e a ler a NORTE real do mesmo snapshot.
+
+#### E8.4 — Testes
+
+`roadmap-inject.test.ts` (template mínimo e a **consulta real**: marcadores trocados, cadastro do roadmap descartado, blocos `cfg_*` íntegros, `--campanha`), `roadmap-privacy.test.ts`, `roadmap-adapter.test.ts` (fixture sintética das três consultas; mapeamento, rótulo do Faro, SRM, contaminação, MDE, recomendação traduzida e fallback, síntese, funil, saúde, descobertos, seleção de fonte, snapshot só de resultados), `results-route.test.ts` (rota nas duas fontes, painel com descobertos), `roadmap-parity.test.ts` (skip sem snapshot real), contratos (fixtures `ResultsResponse` com `source`).
+
+#### E8.5 — Documentação
+
+`FONTES.md`, `METODO.md`, README raiz, `data/queries/roadmap/README.md`, `STATUS.md`, `PEDIDOS.md` (#12, #13), `CHANGELOG.md` 0.4.0.
+
+#### E8.6 — Fora do escopo e próximos passos
+
+Tela `features/resultados` (a E5 original mostrava fonte, origem da janela e status; no unificado fica para o port da tela), agendamento, sync completo sem pedido, refatoração do motor. Próximo: salvar as duas consultas que faltam, rodar `--dry-run` e `--campanha "Nexus | Nova Home do App"` com credencial, e ligar a paridade (MET-17).
+
 ## 4. Contratos
 
 **Consome:** `Experiment` (design, alocação, janela de leitura, `DyLink.labels`, `legacy`), templates de relatório e de métricas por tipo de teste (frente 5, mockados até existirem).

@@ -3,12 +3,15 @@ import type { Experiment } from '@faro/contracts';
 import { buildApp, defaultPorts } from '../src/app.ts';
 import { createDb, type Db } from '../src/db/client.ts';
 import { mockDyExport } from '../src/mocks/dy-export.ts';
+import { createResultsSource, setResultsSource } from '../src/resultados/roadmap/source.ts';
 import { seedFixtures } from '../src/seed.ts';
 import type { Ports } from '../src/ports.ts';
 
 export const PM = { 'x-faro-user': 'pm@example.com' };
 
-export async function setup(opts: { seed?: boolean } = {}) {
+export async function setup(opts: { seed?: boolean; resultsSource?: ReturnType<typeof createResultsSource> } = {}) {
+  // Resultados: fixtures por padrão, para o teste não depender de snapshot local (.data/results.json).
+  setResultsSource(opts.resultsSource ?? createResultsSource({ source: 'fixtures' }));
   const { db, close } = await createDb();
   if (opts.seed) await seedFixtures(db);
   const dyExport = mockDyExport();

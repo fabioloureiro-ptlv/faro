@@ -1,7 +1,7 @@
 // Dataset do painel (frente 2) no repo unificado: experimentos e eventos vêm do banco
-// da frente 1; métricas, resultados e saúde vêm das fixtures (até a frente 4 produzir
-// com data/models/results/dy_results.sql); campanhas vêm do export real do DY quando
-// o sync já rodou (npm run job:sync-dy), senão da fixture.
+// da frente 1; métricas e saúde vêm das fixtures; a NORTE real e os testes descobertos no DY
+// vêm do snapshot das consultas do roadmap (frente 4, resultados/roadmap) quando ele existe;
+// campanhas vêm do export real do DY quando o sync já rodou (npm run job:sync-dy), senão da fixture.
 import {
   DyCampaignStatusSchema,
   ExperimentHealthSchema,
@@ -27,7 +27,9 @@ import { DY_EXPORT_PATH, fileDyExport, hasDyExportFile } from '../adapters/dy-ex
 import { readFileSync } from 'node:fs';
 import type { Db } from '../db/client.ts';
 import { listAudit, listEvents, listExperiments } from '../experiments/repository.ts';
-import { hasRealResults, loadRows, metricIdFromColumn, realMetricResults, type ResultRow } from '../resultados/results.ts';
+import { realMetricResults } from '../resultados/results.ts';
+import { DISCOVERED_PREFIX, discoverExperiments } from '../resultados/roadmap/adapter.ts';
+import { getResultsSource } from '../resultados/roadmap/source.ts';
 import { evaluateGovernance } from './governance/index.ts';
 
 // DECISAO-PENDENTE: dono dos alertas sem squad (órfãs) até o time definir.
@@ -128,16 +130,8 @@ const addDays = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** Prefixo dos testes sintetizados do DY (não cadastrados no Faro). */
-export const DY_PSEUDO_PREFIX = 'FARO-0000-';
-
-const BU_MAP: Record<string, Experiment['bu']> = {
-  ecom: 'ecom',
-  saude: 'saude',
-  servico: 'servicos',
-  fintech: 'fintech',
-  cross: 'ecossistema',
-};
+/** Prefixo dos testes descobertos no DY (não cadastrados no Faro): convenção compartilhada com a frente 4. */
+export const DY_PSEUDO_PREFIX = DISCOVERED_PREFIX;
 
 /** Mapeia o primeiro segmento da URL do export para o catálogo de páginas. */
 function pageFromSegment(seg: string): string | undefined {
@@ -153,17 +147,18 @@ function pageFromSegment(seg: string): string | undefined {
 }
 
 /**
- * Ajuste de produto (15/10): os testes A/B realmente ativos no DY (saída do
- * dy_results, 2–6 variantes, com exposição recente) aparecem na Lista e no Mapa
- * temporal como experimentos sintéticos `FARO-0000-NNNN`, marcados como não
- * cadastrados. "Programados para o futuro" não existe no export (DECISAO-PENDENTE:
- * depende do cadastro no Faro ou de agenda externa).
+ * Ajuste de produto (15/10): os testes A/B realmente ativos no DY (snapshot das consultas do
+ * roadmap, 2–6 variantes, com exposição recente) aparecem na Lista e no Mapa temporal como
+ * experimentos `FARO-0000-NNNN`, marcados como não cadastrados. A descoberta é da frente 4
+ * (resultados/roadmap/adapter.ts); aqui só entram páginas e campaignId do export do DY.
+ * "Programados para o futuro" não existe no export (DECISAO-PENDENTE: depende do cadastro no
+ * Faro ou de agenda externa).
  */
-function dyActiveExperiments(existing: Experiment[], campaigns: DyCampaignStatus[], asOf: string): Experiment[] {
-  if (!hasRealResults()) return [];
-  const known = new Set(
-    existing.flatMap((e) => [e.dy?.campaignName, e.name]).filter((n): n is string => !!n).map((n) => n.trim().toLowerCase()),
-  );
+function dyActiveExperiments(existing: Experiment[]): Experiment[] {
+  const snap = getResultsSource().snapshot();
+  if (!snap) return [];
+  const found = discoverExperiments(snap, existing, { ownerEmail: EXPERIMENTATION_TEAM });
+  if (!found.length) return found;
   const exportPages = new Map<string, { campaignId: string; pages: string[] }>();
   try {
     const raw = JSON.parse(readFileSync(DY_EXPORT_PATH, 'utf-8')) as {
@@ -173,60 +168,11 @@ function dyActiveExperiments(existing: Experiment[], campaigns: DyCampaignStatus
   } catch {
     /* sem export: segue sem páginas */
   }
-
-  const byCampaign = new Map<string, ResultRow[]>();
-  for (const r of loadRows()) {
-    if (r.grao !== 'usuario' || r.device !== 'Total') continue;
-    const list = byCampaign.get(r.campanha) ?? [];
-    list.push(r);
-    byCampaign.set(r.campanha, list);
-  }
-
-  const names = [...byCampaign.keys()].filter((n) => !known.has(n.trim().toLowerCase())).sort();
-  return names.flatMap((campanha, i) => {
-    const rows = byCampaign.get(campanha)!;
-    const control = rows.find((r) => r.is_controle) ?? rows[0];
-    const variants = rows.filter((r) => r !== control);
-    if (!control || !variants.length) return [];
-    const exp = exportPages.get(campanha.trim().toLowerCase());
-    const pages = [...new Set((exp?.pages ?? []).map(pageFromSegment).filter((p): p is string => !!p))];
-    const platforms: Experiment['allocation']['platforms'] = rows[0]!.stream === 'web' ? ['site'] : ['android', 'ios'];
-    const total = rows.reduce((s, r) => s + (r.unidades ?? 0), 0) || 1;
-    const norteId = metricIdFromColumn(String(control.metrica_norte ?? 'receita_por_unidade'));
-    const faroId = `${DY_PSEUDO_PREFIX}${String(i + 1).padStart(4, '0')}`;
-    return [
-      {
-        faroId,
-        name: campanha,
-        bu: BU_MAP[rows[0]!.bu] ?? 'ecom',
-        ownerSquad: 'DY · não cadastrado',
-        ownerEmail: EXPERIMENTATION_TEAM,
-        status: 'rodando',
-        design: {
-          context: '',
-          hypothesis: { change: '', expectedEffect: '', because: '' },
-          control: { name: control.variacao, description: control.variacao },
-          variants: variants.map((v, j) => ({ key: String.fromCharCode(97 + j), name: v.variacao, description: v.variacao })),
-          primaryMetricId: norteId,
-          secondaryMetricIds: [],
-          guardrailMetricIds: [],
-          mdeRelative: 0.05,
-        },
-        audience: { description: 'Não registrado (teste criado direto no DY)', source: 'manual' },
-        allocation: {
-          platforms,
-          pages,
-          trafficPercent: 100,
-          split: [control, ...variants].map((r) => Math.round((r.unidades / total) * 10000) / 10000),
-          startDate: String(control.data_inicio_leitura),
-          endDate: String(control.data_fim_leitura),
-        },
-        dy: { campaignName: campanha, ...(exp ? { campaignId: exp.campaignId } : {}), labels: [] },
-        legacy: true,
-        createdAt: String(control.data_inicio_leitura),
-        updatedAt: asOf,
-      } satisfies Experiment,
-    ];
+  return found.map((e) => {
+    const exp = exportPages.get(e.name.trim().toLowerCase());
+    if (!exp) return e;
+    const pages = [...new Set(exp.pages.map(pageFromSegment).filter((p): p is string => !!p))];
+    return { ...e, allocation: { ...e.allocation, pages }, dy: { campaignName: e.name, labels: [], ...e.dy, campaignId: exp.campaignId } };
   });
 }
 
@@ -244,15 +190,16 @@ export async function buildDataset(db: Db): Promise<PainelDataset> {
   const base = loadStatic();
   const registered = await listExperiments(db);
   // Testes ativos no DY sem cadastro aparecem na Lista e no Mapa (FARO-0000-…).
-  const dyActive = dyActiveExperiments(registered, base.campaigns, base.asOf);
+  const dyActive = dyActiveExperiments(registered);
   const experiments = [...registered, ...dyActive];
   const linkedCampaigns = linkCampaigns(base.campaigns, experiments);
   const today = addDays(base.asOf, 1);
   // Frente 4: quando o sync de resultados já rodou, os números reais substituem a
   // fixture para os testes vinculáveis; os demais seguem com a fixture.
   let metricResults = base.metricResults;
-  if (hasRealResults()) {
-    const real = realMetricResults(experiments);
+  const snap = getResultsSource().snapshot();
+  if (snap) {
+    const real = realMetricResults(experiments, snap);
     const covered = new Set(real.map((r) => r.faroId));
     metricResults = [...base.metricResults.filter((r) => !covered.has(r.faroId)), ...real];
   }

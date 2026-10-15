@@ -1,4 +1,4 @@
-// Parâmetros de segmento (0.4.0): validação dos valores escolhidos e nome do atributo no DY.
+// Parâmetros de segmento (0.5.0): validação dos valores escolhidos e nome do atributo no DY.
 // Puro e sem dependências, para a API (validação e execução) e o wizard (valores padrão) usarem igual.
 import type { AudienceParameter } from './catalogs.ts';
 

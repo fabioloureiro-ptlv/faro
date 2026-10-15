@@ -8,6 +8,7 @@ import { experimentRoutes } from './experiments/routes.ts';
 import { createExperimentService } from './experiments/service.ts';
 import { painelRoutes } from './painel/routes.ts';
 import { resultadosRoutes } from './resultados/routes.ts';
+import { getResultsSource } from './resultados/roadmap/source.ts';
 import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
 import { mockMetricCatalog } from './mocks/metric-catalog.ts';
@@ -50,7 +51,8 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
     return reply.code(500).send({ error: 'erro_interno', message: 'Erro inesperado. Tente de novo.' });
   });
 
-  app.get('/health', async () => ({ ok: true }));
+  // E8: a fonte de resultados em uso (roadmap + snapshot, ou fixtures).
+  app.get('/health', async () => ({ ok: true, results: getResultsSource().info() }));
   const svc = createExperimentService(db, ports);
   await experimentRoutes(app, svc, db);
   await catalogRoutes(app, ports);

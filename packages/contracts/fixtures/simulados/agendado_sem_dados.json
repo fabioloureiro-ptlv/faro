@@ -1,5 +1,6 @@
 {
   "faroId": "FARO-2026-0105",
+  "source": "fixtures",
   "asOf": "2026-10-13",
   "readWindow": {
     "start": "2026-10-13",

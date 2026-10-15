@@ -15,12 +15,14 @@
     "job:sync-dy": "node src/jobs/sync-dy-campaigns.ts",
     "job:publish-audiences": "node src/publico/jobs/publish-audiences.ts",
     "job:sync-results": "node src/resultados/jobs/sync-results.ts",
+    "job:sync-roadmap": "node src/resultados/jobs/sync-roadmap.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.10",
     "@faro/config-core": "0.1.0",
     "@faro/contracts": "0.1.0",
+    "@faro/stats": "0.1.0",
     "@fastify/cors": "^11.3.1",
     "@google-cloud/bigquery": "^9.3.0",
     "drizzle-orm": "^0.45.4",

@@ -118,6 +118,13 @@ export const PageTargetSchema = z.object({
   appPath: z.string().trim().max(200).optional(),
 });
 
+/** Frente 4 (0.4.0): janela de leitura. */
+export const ReadWindowSchema = z.object({
+  start: isoDate,
+  end: isoDate,
+  excludedDays: z.array(isoDate).optional(),
+});
+
 export const AllocationSchema = z.object({
   platforms: z.array(PlatformSchema),
   pages: z.array(z.string()),
@@ -127,6 +134,7 @@ export const AllocationSchema = z.object({
   startDate: z.union([isoDate, z.literal('')]),
   endDate: z.union([isoDate, z.literal('')]),
   exclusionGroupId: z.string().optional(),
+  readWindow: ReadWindowSchema.optional(),
 });
 
 export const DyCampaignTypeSchema = z.enum(['custom_code', 'api_custom', 'recommendation']);
@@ -218,6 +226,19 @@ export const MetricResultSchema = z.object({
   asOf: isoDate,
   ci95: z.object({ lower: z.number(), upper: z.number() }).optional(),
   maturing: z.boolean().optional(),
+  role: z.enum(['norte', 'guarda', 'exploratoria']).optional(),
+  confirmed: z.boolean().optional(),
+  cuped: z.boolean().optional(),
+  minEvents: z.number().nonnegative().optional(),
+  bayes: z
+    .object({
+      expectedUplift: z.number(),
+      probBetter: z.number().min(0).max(1),
+      lossSwitch: z.number(),
+      lossKeep: z.number(),
+      recommendation: z.string(),
+    })
+    .optional(),
 });
 
 export const ConfigDivergenceSchema = z.object({

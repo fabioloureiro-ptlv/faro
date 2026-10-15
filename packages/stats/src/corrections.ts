@@ -18,7 +18,7 @@ export function benjaminiHochberg(pValues: number[]): number[] {
   const out = new Array<number>(m);
   let running = 1;
   for (let rank = m - 1; rank >= 0; rank--) {
-    const [p, i] = order[rank];
+    const [p, i] = order[rank]!;
     running = Math.min(running, Math.min(1, (m / (rank + 1)) * p));
     out[i] = running;
   }

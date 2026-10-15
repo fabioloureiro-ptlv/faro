@@ -26,7 +26,7 @@ export const AudienceOriginSchema = z.object({
 });
 
 /**
- * 0.4.0 (ajuste de produto 15/10): parâmetro numérico de um segmento. O nome é o parâmetro nomeado
+ * 0.5.0 (ajuste de produto 15/10): parâmetro numérico de um segmento. O nome é o parâmetro nomeado
  * da query (`@dias_inadimplencia`); o BigQuery recebe o valor sem interpolação de texto.
  */
 export const AudienceParameterSchema = z.object({
