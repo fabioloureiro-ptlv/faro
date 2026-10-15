@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { AudienceShortcutSchema, type AudienceShortcut } from '@faro/contracts';
 import audiences from '@faro/contracts/fixtures/audiences.json' with { type: 'json' };
 
-const CUSTOM_PATH = fileURLToPath(new URL('../../.data/audiences-custom.json', import.meta.url));
+// FARO_AUDIENCES_CUSTOM_PATH existe para os testes não lerem os segmentos importados na máquina.
+const CUSTOM_PATH = process.env.FARO_AUDIENCES_CUSTOM_PATH ?? fileURLToPath(new URL('../../.data/audiences-custom.json', import.meta.url));
 
 const fixture: AudienceShortcut[] = (audiences as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
 

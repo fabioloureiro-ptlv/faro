@@ -4,7 +4,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { labelFor, type Experiment, type MetricResult } from '@faro/contracts';
 
-export const RESULTS_PATH = fileURLToPath(new URL('../../.data/results.json', import.meta.url));
+// FARO_RESULTS_PATH existe para os testes não lerem os dados reais sincronizados na máquina.
+export const RESULTS_PATH = process.env.FARO_RESULTS_PATH ?? fileURLToPath(new URL('../../.data/results.json', import.meta.url));
 
 /** Linha do dy_results.sql (colunas usadas aqui; o arquivo guarda todas). */
 export interface ResultRow {

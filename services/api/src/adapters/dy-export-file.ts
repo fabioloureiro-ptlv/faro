@@ -14,7 +14,8 @@ export interface DyExportFile {
   snapshots: DyCampaignSnapshot[];
 }
 
-export const DY_EXPORT_PATH = fileURLToPath(new URL('../../.data/dy-campaigns.json', import.meta.url));
+// FARO_DY_EXPORT_PATH existe para os testes não lerem o export real sincronizado na máquina.
+export const DY_EXPORT_PATH = process.env.FARO_DY_EXPORT_PATH ?? fileURLToPath(new URL('../../.data/dy-campaigns.json', import.meta.url));
 
 export function hasDyExportFile(path = DY_EXPORT_PATH): boolean {
   return existsSync(path);
