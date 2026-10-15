@@ -4,7 +4,7 @@
 // 2) Público-alvo: a query de segmentação da frente 3, o processamento da
 //    estimativa real (BigQuery) e só então os elegíveis por dia.
 import { audienceAttributeFor, defaultAudienceParams } from '@faro/contracts';
-import type { AudienceOrigin, AudienceShortcut, PageTarget, Platform } from '@faro/contracts';
+import type { PageTarget, Platform } from '@faro/contracts';
 import type { DateSuggestion, DateWindow } from '@faro/config-core';
 import { ApiError, useFaroApi } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
@@ -55,21 +55,15 @@ function setTarget(id: string, field: 'urlPattern' | 'appPath', raw: string) {
   else delete a.value.pageTargets;
 }
 
-// ---- Públicos pré-segmentados (ajuste 15/10): agrupados pela origem, com a fonte visível.
-const ORIGIN_LABEL: Record<AudienceOrigin['system'], string> = {
-  bigquery: 'Segmentações prontas (regra ou SQL versionado, processadas no BigQuery)',
-  dy: 'Públicos já criados no DY',
-  faro: 'Públicos publicados pelo Faro',
-  manual: 'Informados pelo time',
-};
-const groupedShortcuts = computed(() => {
-  const map = new Map<AudienceOrigin['system'], AudienceShortcut[]>();
-  for (const s of shortcuts.value) {
-    const k = s.origin?.system ?? 'manual';
-    map.set(k, [...(map.get(k) ?? []), s]);
-  }
-  return [...map.entries()];
-});
+// ---- Segmento do catálogo (ajuste 15/10): escolhido num modal com busca; o selecionado aparece marcado
+// logo abaixo, com a fonte e os parâmetros.
+const pickerOpen = ref(false);
+function clearShortcut() {
+  e.value.audience = { description: '', source: 'manual', estimatedShare: 1 };
+  seg.sql = '';
+  seg.clientes = null;
+  seg.erro = '';
+}
 // Público que já existe no DY (atributo ou segmento criado no console): entra como manual com dyAttribute.
 const dyAud = reactive({ open: false, name: '', attribute: '', share: '', erro: '' });
 function useDyAudience() {
@@ -257,33 +251,50 @@ async function processar() {
       </fieldset>
 
       <div class="field">
-        <label for="f-aud">Quem entra no teste</label>
-        <p id="h-aud" class="hint">Descreva o público com as palavras do seu time: categoria comprada, espécie, plano, região, comportamento.</p>
-        <input id="f-aud" :value="e.audience.description" type="text" aria-describedby="h-aud" placeholder="Ex.: pessoas que compraram tapete higiênico nos últimos 90 dias" @input="onDescription(($event.target as HTMLInputElement).value)">
-        <p class="small muted" style="margin: 10px 0 6px">Públicos pré-segmentados</p>
-        <div v-for="[system, list] in groupedShortcuts" :key="system" class="origin">
-          <div class="sub">{{ ORIGIN_LABEL[system] }}</div>
-          <div class="chips" role="group" :aria-label="ORIGIN_LABEL[system]">
-            <button v-for="s in list" :key="s.id" type="button" class="chip" :aria-pressed="activeShortcut?.id === s.id" :title="s.origin?.label" @click="pickShortcut(s.id)">{{ s.name }}</button>
-          </div>
-        </div>
-        <p v-if="activeShortcut?.origin" class="small muted" style="margin: 8px 0 0">Fonte: {{ activeShortcut.origin.label }}.</p>
-        <p v-else-if="existingDy" class="small muted" style="margin: 8px 0 0">Público já criado no DY · atributo <code>{{ existingDy }}</code>.</p>
-        <div v-for="p in paramList" :key="p.name" class="field param">
-          <label :for="`f-param-${p.name}`">{{ p.label }}</label>
-          <input
-            :id="`f-param-${p.name}`"
-            type="number"
-            :min="p.min"
-            :max="p.max"
-            :step="p.type === 'integer' ? 1 : 'any'"
-            :value="paramValues[p.name]"
-            @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
-          >
-          <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
-        </div>
+        <span id="l-aud" class="label">Quem entra no teste</span>
+        <p id="h-aud" class="hint">Escolha um segmento do catálogo. Se o público não estiver lá, descreva-o com as palavras do seu time.</p>
 
-        <button type="button" class="chip add" style="margin-top: 10px" :aria-expanded="dyAud.open" @click="dyAud.open = !dyAud.open">+ Usar público já criado no DY</button>
+        <button type="button" class="btn" :class="{ ghost: !!activeShortcut }" aria-haspopup="dialog" @click="pickerOpen = true">
+          {{ activeShortcut ? 'Trocar segmento' : 'Escolher segmento' }}
+        </button>
+        <CfgSegmentPicker v-model:open="pickerOpen" :shortcuts="shortcuts" :selected-id="activeShortcut?.id" @select="pickShortcut" />
+
+        <section v-if="activeShortcut" class="selecionado" aria-labelledby="sel-title" aria-live="polite">
+          <div class="spread">
+            <div>
+              <span class="pill okp">Segmento selecionado</span>
+              <h3 id="sel-title">{{ activeShortcut.name }}</h3>
+            </div>
+            <button type="button" class="btn ghost small" @click="clearShortcut">Remover</button>
+          </div>
+          <p v-if="activeShortcut.origin" class="small muted" style="margin: 4px 0 0">Fonte: {{ activeShortcut.origin.label }}.</p>
+          <p v-if="e.audience.dyAttribute" class="small muted" style="margin: 4px 0 0">Atributo no DY: <code>{{ e.audience.dyAttribute }}</code></p>
+          <template v-if="paramList.length">
+            <p class="small" style="margin: 14px 0 0"><b>Parâmetros</b></p>
+            <div v-for="p in paramList" :key="p.name" class="field param">
+              <label :for="`f-param-${p.name}`">{{ p.label }}</label>
+              <input
+                :id="`f-param-${p.name}`"
+                type="number"
+                :min="p.min"
+                :max="p.max"
+                :step="p.type === 'integer' ? 1 : 'any'"
+                :value="paramValues[p.name]"
+                @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
+              >
+              <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
+            </div>
+          </template>
+          <p v-else class="small muted" style="margin: 10px 0 0">Este segmento não tem parâmetros.</p>
+        </section>
+
+        <template v-else>
+          <label class="sub" for="f-aud" style="display: block; margin-top: 14px">Ou descreva o público (sem segmento do catálogo)</label>
+          <input id="f-aud" :value="e.audience.description" type="text" aria-describedby="h-aud" placeholder="Ex.: pessoas que compraram tapete higiênico nos últimos 90 dias" @input="onDescription(($event.target as HTMLInputElement).value)">
+          <p v-if="existingDy" class="small muted" style="margin: 8px 0 0">Público já criado no DY · atributo <code>{{ existingDy }}</code>.</p>
+        </template>
+
+        <button type="button" class="chip add" style="margin-top: 14px" :aria-expanded="dyAud.open" @click="dyAud.open = !dyAud.open">+ Usar público já criado no DY</button>
         <form v-if="dyAud.open" class="dyform" @submit.prevent="useDyAudience">
           <p class="small muted" style="margin: 0 0 8px">Para públicos que já existem no console do DY. O Faro só registra o nome e o atributo; a regra continua no DY.</p>
           <div class="pair">
@@ -423,11 +434,12 @@ async function processar() {
 
 <style scoped>
 .param { max-width: 320px; margin-top: 12px; }
+.selecionado { margin-top: 14px; padding: 16px; border: 1px solid var(--brand); border-radius: 14px; background: var(--brand-soft); }
+.selecionado h3 { margin: 6px 0 0; font-size: 17px; }
+.label { display: block; font-weight: 600; }
 .targets .trow { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 8px; align-items: center; margin-top: 6px; }
 .targets input { width: 100%; }
 @media (max-width: 900px) { .targets .trow { grid-template-columns: 1fr; } }
-.origin { margin-top: 8px; }
-.origin .sub { margin-bottom: 4px; }
 .dyform { border: 1px dashed var(--brand); border-radius: 14px; padding: 14px; margin-top: 10px; background: var(--brand-soft); }
 .sugg { margin-top: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
 .stat { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--line); }
