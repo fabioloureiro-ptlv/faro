@@ -12,19 +12,26 @@ mkdirSync(dataDir, { recursive: true });
 // Encerrar o processo à força (dev com --watch, parar o servidor) deixa o `postmaster.pid`
 // da execução anterior na pasta, e o PGlite se recusa a abrir com ele ("failed to initialize").
 // Só este processo usa a pasta, então a trava velha é removida antes de abrir: os dados estão
-// íntegros. Só se mesmo assim o banco não abrir, a pasta é guardada ao lado e recriada das
-// fixtures (aí os rascunhos locais ficam na pasta guardada, fora do banco em uso).
+// íntegros. Se a API foi parada e subida em seguida, o processo antigo pode ainda estar
+// morrendo e recriar a trava; por isso a abertura é tentada algumas vezes. Só se mesmo assim
+// o banco não abrir, a pasta é guardada ao lado e recriada das fixtures (aí os rascunhos
+// locais ficam na pasta guardada, fora do banco em uso).
 async function openDb() {
-  rmSync(`${dataDir}/postmaster.pid`, { force: true });
-  try {
-    return await createDb(dataDir);
-  } catch (e) {
-    const aside = `${dataDir}-corrompido-${new Date().toISOString().replace(/\D/g, '').slice(0, 14)}`;
-    console.warn(`Banco local ilegível (${(e as Error).message}). Guardando em ${aside} e recriando das fixtures.`);
-    renameSync(dataDir, aside);
-    mkdirSync(dataDir, { recursive: true });
-    return await createDb(dataDir);
+  let erro: unknown;
+  for (let tentativa = 0; tentativa < 4; tentativa++) {
+    if (tentativa) await new Promise((r) => setTimeout(r, 2000));
+    rmSync(`${dataDir}/postmaster.pid`, { force: true });
+    try {
+      return await createDb(dataDir);
+    } catch (e) {
+      erro = e;
+    }
   }
+  const aside = `${dataDir}-corrompido-${new Date().toISOString().replace(/\D/g, '').slice(0, 14)}`;
+  console.warn(`Banco local ilegível (${(erro as Error).message}). Guardando em ${aside} e recriando das fixtures.`);
+  renameSync(dataDir, aside);
+  mkdirSync(dataDir, { recursive: true });
+  return await createDb(dataDir);
 }
 
 const { db } = await openDb();
