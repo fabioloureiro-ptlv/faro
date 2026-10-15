@@ -59,6 +59,11 @@ interface StaticData {
 
 let cached: StaticData | undefined;
 
+/** Após o sync da DY (POST /painel/dy-refresh), o dataset estático é relido do disco. */
+export function invalidateStaticData(): void {
+  cached = undefined;
+}
+
 function pagesFromCatalog(): PageDefinition[] {
   const catalog = PageCatalogSchema.parse(pageCatalog);
   const platforms = Object.entries(catalog.platformShare) as [Platform, number][];

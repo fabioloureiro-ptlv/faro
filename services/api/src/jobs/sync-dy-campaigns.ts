@@ -2,10 +2,11 @@
 // Gera services/api/.data/dy-campaigns.json, consumido por adapters/dy-export-file.ts.
 //
 // Uso: npm run job:sync-dy [-- --meses=6]
+// Também exposto como syncDyCampaigns() para o POST /painel/dy-refresh.
 // Credenciais: Application Default Credentials (gcloud auth application-default login).
 // Regra do contexto geral: toda consulta com intervalo FECHADO de refdate (BETWEEN).
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BigQuery } from '@google-cloud/bigquery';
 import type { Platform } from '@faro/contracts';
@@ -89,8 +90,7 @@ function toPlatforms(rows: PlatformRow[]): Platform[] {
   return out.size ? [...out].sort() : ['site'];
 }
 
-async function main() {
-  const { meses } = parseArgs();
+export async function syncDyCampaigns(meses = 6): Promise<{ campaigns: number; snapshots: number; windowEnd: string }> {
   const w = windows(meses);
   console.log(`Sync DY: campanhas de ${w.start} a ${w.end} (split ${w.splitStart}+, plataformas ${w.platformStart}+)`);
   const bq = new BigQuery({ projectId: PROJECT });
@@ -212,9 +212,13 @@ async function main() {
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(out));
   console.log(`OK: ${campaigns.length} campanhas, ${snapshots.length} snapshots -> ${OUT}`);
+  return { campaigns: campaigns.length, snapshots: snapshots.length, windowEnd: w.end };
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Só roda como CLI (npm run job:sync-dy); importado pela API, apenas exporta a função.
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  syncDyCampaigns(parseArgs().meses).catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

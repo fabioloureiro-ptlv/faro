@@ -81,6 +81,12 @@ export function useFaroApi() {
     importLegacy: (body: { dyCampaignId: string; bu: string; ownerSquad: string }) =>
       call<ServerView>('/experiments/import-legacy', { method: 'POST', body }),
     dyCampaigns: () => call<DyCampaignRow[]>('/experiments/dy-campaigns'),
+    // Painel: roda de novo as queries da DY no BigQuery e atualiza os arquivos de dados.
+    dyRefresh: () =>
+      call<{ campanhas: number; testes: number; linhas: number; segundos: number; atualizadoEm: string }>('/painel/dy-refresh', {
+        method: 'POST',
+        body: {},
+      }),
     events: (faroId: string) => call<FaroEventRow[]>(`/events?faroId=${encodeURIComponent(faroId)}`),
     metrics: () => call<MetricDefinition[]>('/catalog/metrics'),
     createMetric: (body: { name: string; kind: 'proportion' | 'mean'; definition: string; section?: string; baseline: number; stdDev?: number }) =>

@@ -8,7 +8,11 @@ import type { Db } from '../db/client.ts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
 import { appendEvent, getExperiment, updateExperiment } from '../experiments/repository.ts';
-import { buildDataset, buildTimelineEvents, DY_PSEUDO_PREFIX } from './dataset.ts';
+import { invalidateDyExportCache } from '../adapters/dy-export-file.ts';
+import { syncDyCampaigns } from '../jobs/sync-dy-campaigns.ts';
+import { invalidateResultsCache } from '../resultados/results.ts';
+import { syncResults } from '../resultados/jobs/sync-results.ts';
+import { buildDataset, buildTimelineEvents, DY_PSEUDO_PREFIX, invalidateStaticData } from './dataset.ts';
 import { allowedTransitions, closeExperiment, closingChecklist, decideExperiment, type Actor, type CommandResult, type TransitionEvent } from './status/index.ts';
 import { missingDesignFields } from './governance/index.ts';
 
@@ -66,7 +70,33 @@ async function applyCommand(db: Db, result: CommandResult): Promise<{ faroId: st
   return { faroId: exp.faroId, status: exp.status };
 }
 
+// Atualização da DY sob demanda (ajuste de produto 15/10): roda de novo as duas
+// queries no BigQuery (export de campanhas + dy_results) e invalida os caches.
+// Cliques simultâneos entram na mesma execução em andamento (as queries são caras).
+let refreshInFlight: Promise<{ campanhas: number; testes: number; linhas: number; segundos: number }> | undefined;
+
+async function runDyRefresh() {
+  const start = Date.now();
+  const [dy, res] = await Promise.all([syncDyCampaigns(), syncResults()]);
+  invalidateDyExportCache();
+  invalidateResultsCache();
+  invalidateStaticData();
+  return { campanhas: dy.campaigns, testes: res.testes, linhas: res.linhas, segundos: Math.round((Date.now() - start) / 1000) };
+}
+
 export async function painelRoutes(app: FastifyInstance, db: Db) {
+  app.post('/painel/dy-refresh', async (req) => {
+    requireActor(req);
+    try {
+      refreshInFlight ??= runDyRefresh();
+      return { ...(await refreshInFlight), atualizadoEm: new Date().toISOString() };
+    } catch (e) {
+      throw new HttpError(503, 'bigquery_indisponivel', `Não foi possível atualizar da DY: ${(e as Error).message}`);
+    } finally {
+      refreshInFlight = undefined;
+    }
+  });
+
   app.get('/painel', async (req) => {
     requireActor(req);
     const ds = await buildDataset(db);
