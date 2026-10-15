@@ -4,7 +4,7 @@
 // com o filtro de área (Ecom, Saúde…) valendo para tudo. Só o que existe na DY e no cadastro do roadmap.
 import { computed, ref } from 'vue';
 import { navigateTo, refreshNuxtData, useAsyncData, useHead, useRoute } from '#imports';
-import PainelBuTabs from '~~/features/painel/app/components/PainelBuTabs.vue';
+import { BU_LABEL } from '~~/features/painel/app/domain';
 import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
 import { fmtData, fmtDataHora } from '../../composables/format';
 import { useBuFiltro } from '../../composables/useBuFiltro';
@@ -17,6 +17,14 @@ const faroApi = useFaroApi();
 const route = useRoute();
 const { data: resumo } = await useAsyncData('ab-resumo', () => api.resumo());
 const { bu } = useBuFiltro();
+
+const AREAS: [string, string][] = [
+  ['todas', 'Ecossistema (todas as áreas)'],
+  ['ecom', BU_LABEL.ecom],
+  ['saude', BU_LABEL.saude],
+  ['fintech', BU_LABEL.fintech],
+  ['servicos', BU_LABEL.servicos],
+];
 
 const ABAS = ['roadmap', 'dy', 'mapa', 'queries'] as const;
 type Aba = (typeof ABAS)[number];
@@ -54,7 +62,15 @@ async function atualizarDy() {
         <h1>Visão Geral</h1>
         <p class="lead">Os testes do roadmap Digital e o que está rodando no Dynamic Yield, por área, em lista e no mapa por página.</p>
       </div>
-      <button type="button" class="btn ghost" :disabled="busy" @click="atualizarDy">{{ busy ? 'Atualizando… (as queries levam ~2 min)' : 'Atualizar da DY' }}</button>
+      <div class="ab-acoes">
+        <label class="ab-area">
+          <span class="ab-rotulo">Área</span>
+          <select :value="bu" aria-label="Filtrar por área" @change="setBu(($event.target as HTMLSelectElement).value)">
+            <option v-for="[id, rotulo] in AREAS" :key="id" :value="id">{{ rotulo }}</option>
+          </select>
+        </label>
+        <button type="button" class="btn ghost" :disabled="busy" @click="atualizarDy">{{ busy ? 'Atualizando… (~2 min)' : 'Atualizar da DY' }}</button>
+      </div>
     </header>
 
     <p v-if="erro" class="err" role="alert">{{ erro }}</p>
@@ -66,8 +82,6 @@ async function atualizarDy() {
     <p v-else-if="resumo" class="ab-fonte small t-warn-box" role="status">
       Ainda não há dados do DY nesta máquina. Use “Atualizar da DY” (ou rode <code>npm run job:sync-results -w @faro/api</code>) para ver “Rodando no DY” e o Mapa temporal.
     </p>
-
-    <PainelBuTabs :bu="bu" class="ab-bu" @select="setBu" />
 
     <nav class="ab-abas" aria-label="Seções da Visão Geral">
       <button type="button" :class="{ ativa: aba === 'roadmap' }" :aria-current="aba === 'roadmap' ? 'page' : undefined" @click="irPara('roadmap')">
@@ -100,7 +114,9 @@ async function atualizarDy() {
 .ab-mono { font-family: ui-monospace, 'IBM Plex Mono', Menlo, monospace; }
 .ab-rotulo { font-family: ui-monospace, 'IBM Plex Mono', Menlo, monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .ab-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
-.ab-bu { margin: 4px 0 14px; }
+.ab-acoes { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.ab-area { display: flex; flex-direction: column; gap: 3px; }
+.ab-area select { width: auto; min-width: 210px; padding: 9px 12px; border-radius: 999px; font-weight: 600; }
 .ab-ok { color: var(--ok); margin: 0 0 8px; }
 .ab-fonte { margin: 0 0 16px; color: var(--muted); }
 .t-warn-box { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 14px; }
