@@ -5,14 +5,16 @@
 // pergunta aberta do spec); o cuid é o identificador que a DY reconhece
 // (public_id = cuid dos eventos "Identify User", validado no segmentacao-ab).
 //
-// Uso: npm run job:publish-audiences [-- --atalho=<id>] [--dry-run]
+// Uso: npm run job:publish-audiences [-- --atalho=<id>] [--param=nome=valor] [--dry-run]
+// Segmentos com parâmetros (ex.: dias_inadimplencia) usam o padrão do catálogo, ou o valor de
+// --param; cada valor vira um atributo próprio no DY (faro_aud_inadimplentes_60, _90, ...).
 // Orçamento (SEG-05): dry run antes de cada execução; acima de 50 GB o público é
 // pulado, a menos que --forcar seja passado.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BigQuery } from '@google-cloud/bigquery';
-import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
+import { AudienceRuleSchema, audienceAttributeFor, resolveAudienceParams, type AudienceShortcut } from '@faro/contracts';
 import { allShortcuts } from '../custom.ts';
 import { audienceRuleToSql, PROJECT } from '../rule-sql.ts';
 
@@ -22,7 +24,12 @@ const BUDGET_BYTES = 50 * 1024 ** 3;
 
 function args() {
   const only = process.argv.find((a) => a.startsWith('--atalho='))?.split('=')[1];
-  return { only, dryRun: process.argv.includes('--dry-run'), force: process.argv.includes('--forcar') };
+  const overrides: Record<string, string> = {};
+  for (const a of process.argv.filter((x) => x.startsWith('--param='))) {
+    const [name, value] = a.slice('--param='.length).split('=');
+    if (name && value !== undefined) overrides[name] = value;
+  }
+  return { only, overrides, dryRun: process.argv.includes('--dry-run'), force: process.argv.includes('--forcar') };
 }
 
 function sqlFor(a: AudienceShortcut): string | undefined {
@@ -38,7 +45,7 @@ function sqlFor(a: AudienceShortcut): string | undefined {
 }
 
 async function main() {
-  const { only, dryRun, force } = args();
+  const { only, overrides, dryRun, force } = args();
   const bq = new BigQuery({ projectId: PROJECT });
   mkdirSync(OUT_DIR, { recursive: true });
   const list = allShortcuts();
@@ -49,7 +56,17 @@ async function main() {
     const sql = sqlFor(a);
     if (!sql) continue;
 
-    const [job] = await bq.createQueryJob({ query: sql, dryRun: true });
+    // Só os --param que o segmento declara valem para ele; os demais são ignorados.
+    const mine = Object.fromEntries(Object.entries(overrides).filter(([name]) => a.parameters?.some((p) => p.name === name)));
+    const resolved = resolveAudienceParams(a.parameters, mine);
+    if (!resolved.ok) {
+      console.warn(`${a.id}: ${resolved.message} — pulado`);
+      continue;
+    }
+    const params = Object.keys(resolved.values).length ? { params: resolved.values } : {};
+    const attribute = audienceAttributeFor(a.dyAttribute, a.parameters, resolved.values)!;
+
+    const [job] = await bq.createQueryJob({ query: sql, ...params, dryRun: true });
     const bytes = Number(job.metadata.statistics.totalBytesProcessed);
     console.log(`${a.id}: dry run ${(bytes / 1e9).toFixed(1)} GB`);
     if (dryRun) continue;
@@ -58,8 +75,8 @@ async function main() {
       continue;
     }
 
-    const [rows] = await bq.query({ query: sql });
-    const file = join(OUT_DIR, `${a.dyAttribute}.csv`);
+    const [rows] = await bq.query({ query: sql, ...params });
+    const file = join(OUT_DIR, `${attribute}.csv`);
     const comChave = rows.length > 0 && 'chv_cliente' in rows[0]!;
     const csv = comChave
       ? ['chv_cliente,cuid', ...rows.map((r) => `${r.chv_cliente},${r.cuid}`)].join('\n')

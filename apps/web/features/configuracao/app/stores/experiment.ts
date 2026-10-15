@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import type { AudienceShortcut, Experiment, MetricDefinition, PageCatalog } from '@faro/contracts';
 import {
   audienceChecks,
+  dailyUsersNeeded,
   effectiveBaseline,
   estimateDuration,
   evaluateDesignGate,
@@ -46,7 +47,13 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
     if (!a) return null;
     return estimateDuration({ nPerGroup: nPerGroup.value, eligibleDaily: eligibleDaily.value, split: a.split, startDate: a.startDate, endDate: a.endDate });
   });
-  const audience = computed(() => (experiment.value && duration.value ? audienceChecks(experiment.value, duration.value) : []));
+  // Usuários por dia que o período escolhido precisa entregar para atingir a amostra total (informativo).
+  const dailyEstimate = computed(() => {
+    const a = experiment.value?.allocation;
+    return a ? dailyUsersNeeded(duration.value?.totalSample ?? null, a.startDate, a.endDate) : null;
+  });
+  // Amostra, usuários por dia e duração não entram nos pré-requisitos: nunca impedem avançar.
+  const audience = computed(() => (experiment.value ? audienceChecks(experiment.value) : []));
   const overlap = computed(() => (experiment.value ? overlapCheck(experiment.value) : null));
   const unlocked = computed<WizardStep[]>(() => (gate.value && overlap.value ? unlockedSteps(gate.value, audience.value, overlap.value) : [1]));
 
@@ -156,7 +163,7 @@ export const useExperimentStore = defineStore('configuracao/experiment', () => {
   return {
     experiment, catalog, pageCatalog, shortcuts, others, eligibleDaily, designRegistered,
     saveState, savedAt, saveError,
-    gate, primaryMetric, nPerGroup, baseline, duration, audience, overlap, unlocked,
+    gate, primaryMetric, nPerGroup, baseline, duration, dailyEstimate, audience, overlap, unlocked,
     load, save, resolveOverlap, setCampaignType, markReady, confirm, addMetric, suggestDates, suggestMde,
   };
 });

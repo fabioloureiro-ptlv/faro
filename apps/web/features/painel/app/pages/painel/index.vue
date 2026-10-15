@@ -8,7 +8,7 @@ import { usePainel } from '~~/features/painel/app/composables/usePainel';
 import { formatDayMonth } from '~~/features/painel/app/domain';
 import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
 
-useHead({ title: 'Experimentos · Faro' });
+useHead({ title: 'Acompanhamento' });
 
 const painel = usePainel();
 const { filters, rows, total, squads, pages, asOf, store } = painel;
@@ -42,7 +42,7 @@ async function atualizarDy() {
   <main class="pagina">
     <header class="topo">
       <div>
-        <h1>Experimentos</h1>
+        <h1>Acompanhamento</h1>
         <p v-if="asOf" class="sub">Status e leituras com dados até {{ formatDayMonth(asOf) }} (D-1).</p>
       </div>
       <div class="direita">

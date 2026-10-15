@@ -9,6 +9,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'pt-BR' },
+      // Título padrão (casca do SPA); cada página informa o seu e app.vue aplica o prefixo "Faro | ".
       title: 'Faro',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

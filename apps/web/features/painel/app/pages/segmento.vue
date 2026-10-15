@@ -1,100 +1,147 @@
 <script setup lang="ts">
-// Tela /segmento (pedido de produto 15/10): catálogo vivo (fixture + importados), link
-// para o método no repositório e para o artefato onde o segmento novo é montado
-// (texto corrido → Claude sugere a regra → volumetria → aprovação). O segmento aprovado
-// lá chega aqui por importação de JSON e passa a aparecer na etapa de Público do wizard.
-import { reactive, ref } from 'vue';
+// Tela /segmento: o catálogo de segmentos. Cada segmento tem uma query (uma linha por cliente,
+// com cuid) e, quando faz sentido, parâmetros (ex.: dias de inadimplência). Aqui dá para ver a
+// query e contar a volumetria real no BigQuery com o valor do parâmetro escolhido. O catálogo
+// é versionado em data/models/audiences/catalog.json.
+import { reactive } from 'vue';
 import { useAsyncData, useHead } from '#imports';
-import PainelNav from '~~/features/painel/app/components/PainelNav.vue';
-import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
+import { defaultAudienceParams } from '@faro/contracts';
+import { ApiError, useFaroApi, type PackageCheck } from '~~/features/configuracao/app/composables/useFaroApi';
 
-useHead({ title: 'Segmentos · Faro' });
+useHead({ title: 'Segmentos' });
 
 const api = useFaroApi();
-const REPO_CATALOGO = 'https://github.com/fabioloureiro-ptlv/faro#readme';
 const REPO_SQLS = 'https://github.com/fabioloureiro-ptlv/faro/tree/main/data/models/audiences';
-const ARTEFATO = 'https://claude.ai/artifact/Wc1zkoyEGz3Lj3nmPETreA';
-const EXEMPLO_JSON = '{ "versao": 1, "segmentos": [ { "name": "…", "rule": { … }, "clientes": 143762 } ] }';
 
 const { data: catalogo, refresh } = await useAsyncData('segmentos', () => api.audiencesFull());
 
-const ORIGEM_LABEL: Record<string, string> = {
-  'sql-versionado': 'SQL versionado',
-  regra: 'Regra (SQL gerado)',
-  'sql-livre': 'SQL livre (artefato)',
-  manual: 'Manual (sem regra)',
-};
-
-const pct = (x: number) => `${(x * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+const pct = (x: number) => `${(x * 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 const nf = (n: number) => n.toLocaleString('pt-BR');
 
-// ---- Detalhe por linha do catálogo: ver SQL e contar volumetria ----
-const aberto = ref<string | null>(null);
-const detalhe = reactive<Record<string, { sql?: string; clientes?: number; busy?: 'sql' | 'count'; erro?: string }>>({});
+type Estado = { values: Record<string, number>; aberto: boolean; sql?: string; clientes?: number; gb?: number; busy?: 'sql' | 'count'; erro?: string };
+const estado = reactive<Record<string, Estado>>({});
+function st(id: string): Estado {
+  const s = catalogo.value?.find((x) => x.id === id);
+  return (estado[id] ??= { values: defaultAudienceParams(s?.parameters), aberto: false });
+}
 
-async function verSql(id: string) {
-  aberto.value = aberto.value === id ? null : id;
-  const d = (detalhe[id] ??= {});
-  if (aberto.value !== id || d.sql) return;
-  d.busy = 'sql';
-  d.erro = undefined;
+const temQuery = (s: { sqlRef?: string; sql?: string; rule?: unknown }) => !!(s.sqlRef || s.sql || s.rule);
+
+function setParam(id: string, name: string, raw: string) {
+  const value = Number(raw);
+  if (raw.trim() === '' || !Number.isFinite(value)) return;
+  const e = st(id);
+  e.values = { ...e.values, [name]: value };
+  // A contagem e a query mostradas eram de outro valor.
+  e.clientes = undefined;
+  e.sql = undefined;
+  e.erro = undefined;
+}
+
+async function verQuery(id: string, hasParams: boolean) {
+  const e = st(id);
+  e.aberto = !e.aberto;
+  if (!e.aberto || e.sql) return;
+  e.busy = 'sql';
+  e.erro = undefined;
   try {
-    d.sql = (await api.audienceSql(id)).sql;
-  } catch (e) {
-    d.erro = e instanceof ApiError ? e.message : 'Falha ao buscar a query.';
+    e.sql = (await api.audienceSql(id, hasParams ? e.values : undefined)).sql;
+  } catch (err) {
+    e.erro = err instanceof ApiError ? err.message : 'Falha ao buscar a query.';
   } finally {
-    d.busy = undefined;
+    e.busy = undefined;
   }
 }
 
-async function contar(id: string) {
-  const d = (detalhe[id] ??= {});
-  d.busy = 'count';
-  d.erro = undefined;
+// ---- Incluir novo segmento: cola o pacote que a skill criar-segmento-faro entrega ----
+const EXEMPLO_PACOTE = `{
+  "versao": 1,
+  "segmento": {
+    "id": "sem-compra",
+    "name": "Clientes sem compra",
+    "descricao": "Clientes cuja última compra foi há mais de N dias",
+    "dyAttribute": "faro_aud_sem_compra",
+    "parameters": [
+      { "name": "dias_sem_compra", "label": "Dias sem compra (mais de)", "type": "integer", "default": 180, "min": 1, "max": 1825, "unit": "dias" }
+    ]
+  },
+  "sql": [
+    "SELECT public_id AS cuid, chv_cliente",
+    "FROM \`petlove-dataeng-prod-01.dw_corporativo.dim_cliente\`",
+    "WHERE public_id IS NOT NULL",
+    "  AND dt_ultima_compra < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL @dias_sem_compra DAY)"
+  ]
+}`;
+const novo = reactive({
+  aberto: false,
+  texto: '',
+  conferido: '', // texto que passou na conferência: mudou o texto, confere de novo
+  busy: '' as '' | 'check' | 'add',
+  erro: '',
+  resultado: null as PackageCheck | null,
+  adicionado: '',
+});
+const STATUS_LABEL = { ok: 'OK', erro: 'Erro', aviso: 'Atenção', pulado: 'Não conferido' } as const;
+const podeAdicionar = () => !!novo.resultado?.ok && novo.conferido === novo.texto && !novo.busy;
+
+function lerPacote(): unknown | undefined {
+  novo.erro = '';
   try {
-    const r = await api.audienceEstimate(id, true);
-    d.sql = r.sql;
-    d.clientes = r.clientes;
-  } catch (e) {
-    d.erro = e instanceof ApiError ? e.message : 'Falha ao contar no BigQuery.';
-  } finally {
-    d.busy = undefined;
-  }
-}
-
-// ---- Importar do artefato ----
-const texto = ref('');
-const importBusy = ref(false);
-const importErro = ref('');
-const importado = ref<{ importados: { id: string; name: string }[]; ignorados: { name: string; motivo: string; detalhe: string }[] } | null>(null);
-
-const MOTIVO_LABEL: Record<string, string> = {
-  ja_existe: 'já está no catálogo',
-  formato_invalido: 'formato inválido',
-  regra_nao_suportada: 'regra não suportada',
-};
-
-async function importar() {
-  importErro.value = '';
-  importado.value = null;
-  let payload: unknown;
-  try {
-    payload = JSON.parse(texto.value);
+    return JSON.parse(novo.texto);
   } catch {
-    importErro.value = 'Isso não é um JSON válido. Cole exatamente o que o artefato copiou.';
-    return;
+    novo.erro = 'Isso não é um JSON válido. Cole exatamente o que a skill entregou.';
+    return undefined;
   }
-  importBusy.value = true;
+}
+
+async function conferir() {
+  const pacote = lerPacote();
+  novo.adicionado = '';
+  if (pacote === undefined) return;
+  novo.busy = 'check';
+  novo.resultado = null;
   try {
-    importado.value = await api.audienceImport(payload);
-    if (importado.value.importados.length) {
-      texto.value = '';
-      await refresh();
-    }
+    novo.resultado = await api.segmentPackageCheck(pacote);
+    novo.conferido = novo.texto;
   } catch (e) {
-    importErro.value = e instanceof ApiError ? e.message : 'Falha ao importar.';
+    novo.erro = e instanceof ApiError ? e.message : 'Não foi possível conferir o pacote.';
   } finally {
-    importBusy.value = false;
+    novo.busy = '';
+  }
+}
+
+async function adicionar() {
+  const pacote = lerPacote();
+  if (pacote === undefined || !podeAdicionar()) return;
+  novo.busy = 'add';
+  try {
+    const r = await api.segmentPackageAdd(pacote);
+    novo.adicionado = r.shortcut.name;
+    novo.texto = '';
+    novo.conferido = '';
+    novo.resultado = null;
+    novo.aberto = false;
+    await refresh();
+  } catch (e) {
+    novo.erro = e instanceof ApiError ? [e.message, ...(e.body.details ?? []).map((d) => d.message)].join(' ') : 'Não foi possível adicionar o segmento.';
+  } finally {
+    novo.busy = '';
+  }
+}
+
+async function contar(id: string, hasParams: boolean) {
+  const e = st(id);
+  e.busy = 'count';
+  e.erro = undefined;
+  try {
+    const r = await api.audienceEstimate(id, true, hasParams ? e.values : undefined);
+    e.sql = r.sql;
+    e.clientes = r.clientes;
+    e.gb = r.gigabytes;
+  } catch (err) {
+    e.erro = err instanceof ApiError ? err.message : 'Falha ao contar no BigQuery.';
+  } finally {
+    e.busy = undefined;
   }
 }
 </script>
@@ -102,131 +149,124 @@ async function importar() {
 <template>
   <main class="pagina">
     <header class="topo">
-      <div>
+      <div class="topo-linha">
         <h1>Segmentos</h1>
-        <p class="sub">
-          Catálogo de públicos para testes A/B — reuso vem primeiro. O método e as queries versionadas estão no
-          <a :href="REPO_CATALOGO" target="_blank" rel="noopener">README do repositório</a> e em
-          <a :href="REPO_SQLS" target="_blank" rel="noopener">data/models/audiences</a>.
-        </p>
-      </div>
-      <PainelNav />
-    </header>
-
-    <section class="card" aria-labelledby="h-catalogo">
-      <h2 id="h-catalogo">Catálogo atual</h2>
-      <div class="wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Segmento</th>
-              <th scope="col">Origem</th>
-              <th scope="col">Participação</th>
-              <th scope="col">Atributo DY</th>
-              <th scope="col"><span class="sr-only">Ações</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-for="s in catalogo ?? []" :key="s.id">
-              <tr>
-                <th scope="row">{{ s.name }}</th>
-                <td>{{ ORIGEM_LABEL[s.origem] ?? s.origem }}</td>
-                <td>{{ pct(s.share) }}</td>
-                <td><code v-if="s.dyAttribute">{{ s.dyAttribute }}</code><span v-else class="muted">—</span></td>
-                <td class="acoes">
-                  <button v-if="s.origem !== 'manual'" type="button" @click="verSql(s.id)">
-                    {{ aberto === s.id ? 'Fechar' : 'Ver SQL' }}
-                  </button>
-                  <button
-                    v-if="s.origem !== 'manual'"
-                    type="button"
-                    :disabled="detalhe[s.id]?.busy === 'count'"
-                    @click="contar(s.id)"
-                  >
-                    {{ detalhe[s.id]?.busy === 'count' ? 'Contando…' : 'Volumetria' }}
-                  </button>
-                  <span v-else class="muted">sem regra</span>
-                </td>
-              </tr>
-              <tr v-if="aberto === s.id || detalhe[s.id]?.clientes !== undefined || detalhe[s.id]?.erro">
-                <td colspan="5" class="detalhe">
-                  <p v-if="detalhe[s.id]?.erro" role="alert" class="erro">{{ detalhe[s.id]?.erro }}</p>
-                  <p v-if="detalhe[s.id]?.clientes !== undefined" class="volumetria">
-                    <strong>{{ nf(detalhe[s.id]!.clientes!) }}</strong> clientes hoje (contagem real no BigQuery).
-                  </p>
-                  <pre v-if="aberto === s.id && detalhe[s.id]?.sql">{{ detalhe[s.id]?.sql }}</pre>
-                  <p v-else-if="aberto === s.id && detalhe[s.id]?.busy === 'sql'" class="muted">Buscando a query…</p>
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="card" aria-labelledby="h-novo">
-      <h2 id="h-novo">Precisa de um segmento novo?</h2>
-      <p class="muted">
-        O segmento novo é montado no artefato:
-        você descreve o público em texto corrido, o Claude sugere a regra e a query, e você confere a volumetria e
-        aprova. Depois traga o resultado para cá.
-      </p>
-      <ol class="passos">
-        <li>
-          Abra o <a :href="ARTEFATO" target="_blank" rel="noopener">artefato Segmentos Faro</a> e crie e aprove o
-          segmento.
-        </li>
-        <li>No artefato, abra <em>Exportar para o Faro</em> e copie o JSON.</li>
-        <li>Cole abaixo e importe. O segmento passa a aparecer no catálogo e na etapa de Público do wizard.</li>
-      </ol>
-
-      <label class="campo" for="import-json">
-        <span>JSON exportado do artefato</span>
-        <textarea
-          id="import-json"
-          v-model="texto"
-          rows="6"
-          spellcheck="false"
-          :placeholder="EXEMPLO_JSON"
-        />
-      </label>
-      <div class="linha">
-        <button type="button" class="aprovar" :disabled="importBusy || !texto.trim()" @click="importar">
-          {{ importBusy ? 'Importando…' : 'Importar no catálogo' }}
+        <button type="button" class="primario" :aria-expanded="novo.aberto" aria-controls="novo-segmento" @click="novo.aberto = !novo.aberto">
+          {{ novo.aberto ? 'Fechar' : '+ Incluir novo segmento' }}
         </button>
       </div>
+      <p class="sub">
+        Cada segmento tem uma query (uma linha por cliente, com <code>cuid</code>) e, quando faz sentido, parâmetros. As queries ficam em
+        <a :href="REPO_SQLS" target="_blank" rel="noopener">data/models/audiences</a>.
+      </p>
+    </header>
 
-      <p v-if="importErro" role="alert" class="erro">{{ importErro }}</p>
-      <div v-if="importado" class="resultado" role="status">
-        <p v-if="importado.importados.length" class="sucesso">
-          {{ importado.importados.length === 1 ? 'Segmento importado' : `${importado.importados.length} segmentos importados` }}:
-          <strong>{{ importado.importados.map((s) => s.name).join(', ') }}</strong>. Já disponível(is) na etapa de
-          Público do wizard.
+    <p v-if="novo.adicionado" role="status" class="sucesso">Segmento <strong>{{ novo.adicionado }}</strong> adicionado ao catálogo. Já aparece na etapa de Público do wizard.</p>
+
+    <section v-if="novo.aberto" id="novo-segmento" class="card nova" aria-labelledby="nova-title">
+      <h2 id="nova-title">Incluir novo segmento</h2>
+      <ol class="passos">
+        <li>No Claude Code, rode a skill <code>criar-segmento-faro</code> e descreva o público.</li>
+        <li>Copie o pacote em JSON que a skill entrega no final.</li>
+        <li>Cole abaixo e confira. O Faro roda a query no BigQuery e só libera se ela devolver <code>cuid</code> e uma linha por cliente.</li>
+      </ol>
+      <label class="campo" for="novo-json">
+        <span>Pacote do segmento (JSON)</span>
+        <textarea id="novo-json" v-model="novo.texto" rows="10" spellcheck="false" placeholder="Cole aqui o JSON da skill" />
+      </label>
+      <details class="exemplo">
+        <summary>Ver o formato do pacote</summary>
+        <pre>{{ EXEMPLO_PACOTE }}</pre>
+        <p class="meta">
+          <code>sql</code> pode ser texto ou uma lista de linhas. Todo <code>@parametro</code> usado na query precisa estar em <code>parameters</code>, e o
+          contrário também. <code>share</code> é opcional: sem ele, o Faro calcula pela contagem.
         </p>
-        <ul v-if="importado.ignorados.length" class="ignorados">
-          <li v-for="i in importado.ignorados" :key="i.name">
-            <strong>{{ i.name }}</strong> — {{ MOTIVO_LABEL[i.motivo] ?? i.motivo }}<span v-if="i.motivo !== 'ja_existe'">: {{ i.detalhe }}</span>
-          </li>
-        </ul>
+      </details>
+      <div class="acoes-form">
+        <button type="button" :disabled="!novo.texto.trim() || !!novo.busy" @click="conferir">
+          {{ novo.busy === 'check' ? 'Conferindo no BigQuery…' : 'Conferir pacote' }}
+        </button>
+        <button type="button" class="primario" :disabled="!podeAdicionar()" @click="adicionar">
+          {{ novo.busy === 'add' ? 'Adicionando…' : 'Adicionar ao catálogo' }}
+        </button>
+        <span v-if="novo.resultado?.ok && novo.conferido !== novo.texto" class="meta">O texto mudou: confira de novo.</span>
       </div>
+      <p v-if="novo.erro" role="alert" class="erro">{{ novo.erro }}</p>
+      <ul v-if="novo.resultado" class="verificacoes" aria-label="Verificações do pacote">
+        <li v-for="x in novo.resultado.verificacoes" :key="x.id" :class="x.status">
+          <span class="selo">{{ STATUS_LABEL[x.status] }}</span>
+          <span><strong>{{ x.rotulo }}</strong><template v-if="x.detalhe"> — {{ x.detalhe }}</template></span>
+        </li>
+      </ul>
+      <p v-if="novo.resultado?.ok" class="sucesso">
+        Pronto para entrar: <strong>{{ novo.resultado.resumo?.name }}</strong>, atributo DY <code>{{ novo.resultado.resumo?.dyAttribute }}</code>.
+      </p>
     </section>
+
+    <ul class="lista">
+      <li v-for="s in catalogo ?? []" :key="s.id" class="card">
+        <div class="cab">
+          <div>
+            <h2>{{ s.name }}</h2>
+            <p class="meta">
+              {{ temQuery(s) ? 'Com query' : 'Sem query: toda a base elegível' }} · {{ pct(s.share) }} da base (estimativa)
+              <template v-if="s.dyAttribute"> · atributo DY <code>{{ s.dyAttribute }}</code></template>
+            </p>
+            <p v-if="s.origin" class="meta">Fonte: {{ s.origin.label }}.</p>
+          </div>
+          <div v-if="temQuery(s)" class="acoes">
+            <button type="button" :aria-expanded="st(s.id).aberto" @click="verQuery(s.id, !!s.parameters?.length)">
+              {{ st(s.id).aberto ? 'Fechar query' : 'Ver query' }}
+            </button>
+            <button type="button" class="primario" :disabled="st(s.id).busy === 'count'" @click="contar(s.id, !!s.parameters?.length)">
+              {{ st(s.id).busy === 'count' ? 'Contando…' : 'Volumetria' }}
+            </button>
+          </div>
+        </div>
+
+        <div v-if="s.parameters?.length" class="params">
+          <div v-for="p in s.parameters" :key="p.name" class="param">
+            <label :for="`p-${s.id}-${p.name}`">{{ p.label }}</label>
+            <input
+              :id="`p-${s.id}-${p.name}`"
+              type="number"
+              :min="p.min"
+              :max="p.max"
+              :step="p.type === 'integer' ? 1 : 'any'"
+              :value="st(s.id).values[p.name]"
+              @change="setParam(s.id, p.name, ($event.target as HTMLInputElement).value)"
+            >
+            <span class="meta"><code>@{{ p.name }}</code><template v-if="p.unit"> · {{ p.unit }}</template></span>
+            <p v-if="p.description" class="meta">{{ p.description }}</p>
+          </div>
+        </div>
+
+        <p v-if="st(s.id).erro" role="alert" class="erro">{{ st(s.id).erro }}</p>
+        <p v-if="st(s.id).clientes !== undefined" class="volumetria" role="status">
+          <strong>{{ nf(st(s.id).clientes!) }}</strong> clientes hoje, com esse valor de parâmetro
+          <span v-if="st(s.id).gb !== undefined" class="meta">({{ st(s.id).gb!.toLocaleString('pt-BR') }} GB processados)</span>
+        </p>
+        <template v-if="st(s.id).aberto">
+          <pre v-if="st(s.id).sql">{{ st(s.id).sql }}</pre>
+          <p v-else-if="st(s.id).busy === 'sql'" class="meta">Buscando a query…</p>
+        </template>
+      </li>
+    </ul>
+
+    <p class="rodape">
+      Os segmentos incluídos por aqui ficam no servidor da API (<code>services/api/.data</code>), fora do catálogo versionado. Para versionar um deles,
+      mova a query para <code>data/models/audiences/</code> e a entrada para <code>catalog.json</code>.
+    </p>
   </main>
 </template>
 
 <style scoped>
 .pagina {
-  max-width: 1100px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 24px 16px 48px;
 }
-.topo {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-h1 {
+.topo h1 {
   margin: 0;
   font-size: 26px;
   letter-spacing: -0.01em;
@@ -236,43 +276,38 @@ h1 {
   color: var(--muted);
   max-width: 78ch;
 }
-.sub a,
-.card a {
+a {
   color: var(--brand);
+}
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 18px;
-  margin-bottom: 20px;
+  min-width: 0;
+}
+.cab {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
 }
 h2 {
-  margin: 0 0 10px;
+  margin: 0 0 4px;
   font-size: 18px;
 }
-.wrap {
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 720px;
-}
-th,
-td {
-  text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-  vertical-align: top;
-}
-thead th {
-  font-size: 12.5px;
+.meta {
+  margin: 2px 0 0;
   color: var(--muted);
-}
-tbody th {
-  font-weight: 600;
+  font-size: 13.5px;
 }
 code {
   font-size: 12.5px;
@@ -282,46 +317,80 @@ code {
 }
 .acoes {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
 }
 button {
   font: inherit;
   font-size: 13px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
+}
+button.primario {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 600;
 }
 button:disabled {
   opacity: 0.55;
   cursor: default;
 }
-.detalhe {
-  background: var(--brand-soft);
+.params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+.param {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 320px;
+}
+.param label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.param input {
+  width: 140px;
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.erro {
+  color: var(--risk);
+  margin: 12px 0 0;
+}
+.volumetria {
+  margin: 12px 0 0;
 }
 pre {
-  margin: 8px 0 0;
-  padding: 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  margin: 12px 0 0;
+  padding: 12px;
+  background: var(--brand-soft);
   border-radius: 8px;
   font-size: 12px;
   overflow-x: auto;
   white-space: pre-wrap;
 }
-.volumetria {
-  margin: 4px 0;
+.topo-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-.muted {
-  color: var(--muted);
-}
-.erro {
-  color: var(--risk);
-}
-.sucesso {
-  color: var(--ok, #157f3d);
+.nova {
+  margin-bottom: 20px;
 }
 .passos {
   margin: 8px 0 14px;
@@ -332,7 +401,6 @@ pre {
 }
 .campo {
   display: block;
-  margin: 12px 0;
 }
 .campo span {
   display: block;
@@ -351,31 +419,65 @@ pre {
   color: var(--ink);
   resize: vertical;
 }
-.linha {
-  display: flex;
-  gap: 8px;
-}
-.aprovar {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: #fff;
-  padding: 8px 14px;
-  font-weight: 600;
-}
-.resultado {
+.exemplo {
   margin-top: 10px;
 }
-.ignorados {
-  margin: 6px 0 0;
-  padding-left: 18px;
+.exemplo summary {
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.acoes-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.verificacoes {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.verificacoes li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+}
+.selo {
+  flex: none;
+  min-width: 96px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+}
+.verificacoes .ok .selo {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.verificacoes .erro .selo {
+  background: var(--risk-soft);
+  color: var(--risk);
+}
+.verificacoes .aviso .selo {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.sucesso {
+  color: var(--ok);
+  margin: 12px 0 0;
+}
+.rodape {
+  margin: 20px 0 0;
   color: var(--muted);
   font-size: 13.5px;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  max-width: 80ch;
 }
 </style>

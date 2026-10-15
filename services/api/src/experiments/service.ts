@@ -39,6 +39,7 @@ import type { Db } from '../db/client.ts';
 import type { Ports } from '../ports.ts';
 import { HttpError } from '../errors.ts';
 import { buildDataset } from '../painel/dataset.ts';
+import { busyWindows } from './busy.ts';
 import {
   appendAudit,
   appendEvent,
@@ -138,7 +139,7 @@ export function createExperimentService(db: Db, ports: Ports) {
       startDate: exp.allocation.startDate,
       endDate: exp.allocation.endDate,
     });
-    const audience = audienceChecks(exp, duration);
+    const audience = audienceChecks(exp);
     const overlap = overlapCheck(exp);
     return {
       gate,
@@ -312,18 +313,10 @@ export function createExperimentService(db: Db, ports: Ports) {
       const exp = await mustGet(db, faroId);
       const d = await derive(exp, catalog);
       const a = exp.allocation;
-      const busy = (await listExperiments(db))
-        .filter(
-          (o) =>
-            o.faroId !== faroId &&
-            DY_LINKED.includes(o.status) &&
-            !!o.allocation.startDate &&
-            !!o.allocation.endDate &&
-            o.allocation.pages.some((p) => a.pages.includes(p)) &&
-            o.allocation.platforms.some((p) => a.platforms.includes(p)),
-        )
-        .map((o) => ({ faroId: o.faroId, name: o.name, startDate: o.allocation.startDate, endDate: o.allocation.endDate }));
-      return suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy });
+      // Mesma base do Acompanhamento: os experimentos do Faro e os testes ativos que ele lê da DY.
+      const ds = await buildDataset(db);
+      const { busy, dy } = busyWindows({ experiments: ds.experiments, faroId, pages: a.pages, platforms: a.platforms, asOf: ds.asOf });
+      return { ...suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy }), dy };
     },
 
     /**

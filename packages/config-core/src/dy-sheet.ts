@@ -104,7 +104,9 @@ export function buildDySheet(exp: Experiment, ctx: DySheetContext): DySheet {
       key: 'audience',
       label: 'Regra de público',
       value: exp.audience.dyAttribute ? `${exp.audience.dyAttribute} = true` : 'Todos os usuários (sem regra)',
-      hint: exp.audience.description,
+      hint: exp.audience.params && Object.keys(exp.audience.params).length
+        ? `${exp.audience.description} (${Object.entries(exp.audience.params).map(([k, v]) => `${k} = ${v}`).join(', ')})`
+        : exp.audience.description,
     },
     { key: 'traffic', label: 'Tráfego alocado', value: `${a.trafficPercent}%` },
     { key: 'variations', label: 'Variações', value: names.join('\n'), hint: 'Crie as variações com estes nomes, nesta ordem.' },

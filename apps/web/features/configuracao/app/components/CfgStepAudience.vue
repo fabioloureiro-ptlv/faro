@@ -3,14 +3,15 @@
 // 1) Definição: onde o teste aparece e quem entra, sem estimativas.
 // 2) Público-alvo: a query de segmentação da frente 3, o processamento da
 //    estimativa real (BigQuery) e só então os elegíveis por dia.
-import type { AudienceOrigin, AudienceShortcut, PageTarget, Platform } from '@faro/contracts';
+import { audienceAttributeFor, defaultAudienceParams } from '@faro/contracts';
+import type { PageTarget, Platform } from '@faro/contracts';
 import type { DateSuggestion, DateWindow } from '@faro/config-core';
 import { ApiError, useFaroApi } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
 import { PLATFORM_LABEL, fmtDate, fmtInt } from '../utils/labels';
 
 const emit = defineEmits<{ next: [] }>();
-const { experiment: exp, pageCatalog, shortcuts, eligibleDaily, nPerGroup, duration, audience, saveState, suggestDates } = useExperimentDraft();
+const { experiment: exp, pageCatalog, shortcuts, nPerGroup, duration, dailyEstimate, audience, saveState, suggestDates } = useExperimentDraft();
 const api = useFaroApi();
 const e = computed(() => exp.value!);
 const a = computed(() => e.value.allocation);
@@ -54,21 +55,15 @@ function setTarget(id: string, field: 'urlPattern' | 'appPath', raw: string) {
   else delete a.value.pageTargets;
 }
 
-// ---- Públicos pré-segmentados (ajuste 15/10): agrupados pela origem, com a fonte visível.
-const ORIGIN_LABEL: Record<AudienceOrigin['system'], string> = {
-  bigquery: 'Segmentações prontas (regra ou SQL versionado, processadas no BigQuery)',
-  dy: 'Públicos já criados no DY',
-  faro: 'Públicos publicados pelo Faro',
-  manual: 'Informados pelo time',
-};
-const groupedShortcuts = computed(() => {
-  const map = new Map<AudienceOrigin['system'], AudienceShortcut[]>();
-  for (const s of shortcuts.value) {
-    const k = s.origin?.system ?? 'manual';
-    map.set(k, [...(map.get(k) ?? []), s]);
-  }
-  return [...map.entries()];
-});
+// ---- Segmento do catálogo (ajuste 15/10): escolhido num modal com busca; o selecionado aparece marcado
+// logo abaixo, com a fonte e os parâmetros.
+const pickerOpen = ref(false);
+function clearShortcut() {
+  e.value.audience = { description: '', source: 'manual', estimatedShare: 1 };
+  seg.sql = '';
+  seg.clientes = null;
+  seg.erro = '';
+}
 // Público que já existe no DY (atributo ou segmento criado no console): entra como manual com dyAttribute.
 const dyAud = reactive({ open: false, name: '', attribute: '', share: '', erro: '' });
 function useDyAudience() {
@@ -87,7 +82,16 @@ const existingDy = computed(() => (e.value.audience.source === 'manual' && e.val
 
 function pickShortcut(id: string) {
   const s = shortcuts.value.find((x) => x.id === id)!;
-  e.value.audience = { description: s.name, source: 'atalho', estimatedShare: s.share, ...(s.dyAttribute ? { dyAttribute: s.dyAttribute } : {}) };
+  // Segmento com parâmetros começa nos padrões do catálogo; o atributo no DY acompanha o valor escolhido.
+  const params = defaultAudienceParams(s.parameters);
+  const attribute = audienceAttributeFor(s.dyAttribute, s.parameters, params);
+  e.value.audience = {
+    description: s.name,
+    source: 'atalho',
+    estimatedShare: s.share,
+    ...(attribute ? { dyAttribute: attribute } : {}),
+    ...(s.parameters?.length ? { params } : {}),
+  };
   seg.sql = '';
   seg.clientes = null;
   seg.erro = '';
@@ -132,9 +136,13 @@ function setSplit(i: number, v: number) {
   a.value.split = next;
 }
 const splitSum = computed(() => Math.round(a.value.split.reduce((s, x) => s + x, 0) * 1000) / 10);
-const failing = computed(() => audience.value.filter((c) => !c.ok && c.id !== 'viabilidade'));
-const tone = (lvl: string) => (lvl === 'bloqueio' ? 'riskp' : 'warnp');
-const slack = computed(() => (duration.value?.periodDays != null && duration.value.durationDays != null ? duration.value.periodDays - duration.value.durationDays : null));
+const failing = computed(() => audience.value.filter((c) => !c.ok));
+// Amostra e usuários por dia são estimativas informativas: o texto diz o que falta para calculá-las, sem barrar o avanço.
+const estimateHint = computed(() => {
+  if (!duration.value?.totalSample) return 'Escolha a métrica primária (NORTE) no design para calcular a amostra.';
+  if (duration.value.periodDays == null) return 'Defina início e fim na aba Definição para estimar os usuários por dia.';
+  return `Estimativa: amostra total (${fmtInt(duration.value.totalSample)}) ÷ ${duration.value.periodDays} dias do período.`;
+});
 
 // Pré-requisitos mínimos para montar o público-alvo (a viabilidade fica para a aba 2).
 const definicaoOk = computed(
@@ -143,16 +151,37 @@ const definicaoOk = computed(
 
 // ---- Aba público-alvo: código de segmentação e processamento (frente 3) ----
 const seg = reactive({ sql: '', fonte: '', gigabytes: 0, clientes: null as number | null, erro: '', carregando: false });
-const temCodigo = computed(() => !!activeShortcut.value && (!!activeShortcut.value.rule || !!activeShortcut.value.sqlRef));
+const temCodigo = computed(() => !!activeShortcut.value && (!!activeShortcut.value.rule || !!activeShortcut.value.sqlRef || !!activeShortcut.value.sql));
+
+// Parâmetros do segmento escolhido: o valor do experimento, ou o padrão do catálogo.
+const paramList = computed(() => activeShortcut.value?.parameters ?? []);
+const paramValues = computed<Record<string, number>>(() => ({
+  ...defaultAudienceParams(activeShortcut.value?.parameters),
+  ...(e.value.audience.params ?? {}),
+}));
+function setParam(name: string, raw: string) {
+  const s = activeShortcut.value;
+  const value = Number(raw);
+  if (!s || raw.trim() === '' || !Number.isFinite(value)) return;
+  const next = { ...paramValues.value, [name]: value };
+  e.value.audience.params = next;
+  const attribute = audienceAttributeFor(s.dyAttribute, s.parameters, next);
+  if (attribute) e.value.audience.dyAttribute = attribute;
+  // A estimativa anterior era de outro valor.
+  seg.sql = '';
+  seg.clientes = null;
+  seg.erro = '';
+}
+const queryParams = computed(() => (paramList.value.length ? paramValues.value : undefined));
 
 async function puxarCodigo() {
   if (!activeShortcut.value) return;
   seg.erro = '';
   seg.carregando = true;
   try {
-    const r = await api.audienceSql(activeShortcut.value.id);
+    const r = await api.audienceSql(activeShortcut.value.id, queryParams.value);
     seg.sql = r.sql;
-    seg.fonte = r.source === 'sqlRef' ? 'SQL versionado (data/models/audiences)' : 'gerado da regra do atalho';
+    seg.fonte = r.source === 'sqlRef' ? 'SQL versionado (data/models/audiences)' : r.source === 'sql' ? 'SQL guardado no catálogo' : 'gerado da regra do atalho';
   } catch (err) {
     seg.erro = err instanceof ApiError ? err.message : 'Não foi possível puxar o código de segmentação.';
   } finally {
@@ -165,7 +194,7 @@ async function processar() {
   seg.erro = '';
   seg.carregando = true;
   try {
-    const r = await api.audienceEstimate(activeShortcut.value.id, true);
+    const r = await api.audienceEstimate(activeShortcut.value.id, true, queryParams.value);
     seg.sql = r.sql;
     seg.gigabytes = r.gigabytes;
     seg.clientes = r.clientes ?? null;
@@ -226,20 +255,50 @@ async function processar() {
       </fieldset>
 
       <div class="field">
-        <label for="f-aud">Quem entra no teste</label>
-        <p id="h-aud" class="hint">Descreva o público com as palavras do seu time: categoria comprada, espécie, plano, região, comportamento.</p>
-        <input id="f-aud" :value="e.audience.description" type="text" aria-describedby="h-aud" placeholder="Ex.: pessoas que compraram tapete higiênico nos últimos 90 dias" @input="onDescription(($event.target as HTMLInputElement).value)">
-        <p class="small muted" style="margin: 10px 0 6px">Públicos pré-segmentados</p>
-        <div v-for="[system, list] in groupedShortcuts" :key="system" class="origin">
-          <div class="sub">{{ ORIGIN_LABEL[system] }}</div>
-          <div class="chips" role="group" :aria-label="ORIGIN_LABEL[system]">
-            <button v-for="s in list" :key="s.id" type="button" class="chip" :aria-pressed="activeShortcut?.id === s.id" :title="s.origin?.label" @click="pickShortcut(s.id)">{{ s.name }}</button>
-          </div>
-        </div>
-        <p v-if="activeShortcut?.origin" class="small muted" style="margin: 8px 0 0">Fonte: {{ activeShortcut.origin.label }}.</p>
-        <p v-else-if="existingDy" class="small muted" style="margin: 8px 0 0">Público já criado no DY · atributo <code>{{ existingDy }}</code>.</p>
+        <span id="l-aud" class="label">Quem entra no teste</span>
+        <p id="h-aud" class="hint">Escolha um segmento do catálogo. Se o público não estiver lá, descreva-o com as palavras do seu time.</p>
 
-        <button type="button" class="chip add" style="margin-top: 10px" :aria-expanded="dyAud.open" @click="dyAud.open = !dyAud.open">+ Usar público já criado no DY</button>
+        <button type="button" class="btn" :class="{ ghost: !!activeShortcut }" aria-haspopup="dialog" @click="pickerOpen = true">
+          {{ activeShortcut ? 'Trocar segmento' : 'Escolher segmento' }}
+        </button>
+        <CfgSegmentPicker v-model:open="pickerOpen" :shortcuts="shortcuts" :selected-id="activeShortcut?.id" @select="pickShortcut" />
+
+        <section v-if="activeShortcut" class="selecionado" aria-labelledby="sel-title" aria-live="polite">
+          <div class="spread">
+            <div>
+              <span class="pill okp">Segmento selecionado</span>
+              <h3 id="sel-title">{{ activeShortcut.name }}</h3>
+            </div>
+            <button type="button" class="btn ghost small" @click="clearShortcut">Remover</button>
+          </div>
+          <p v-if="activeShortcut.origin" class="small muted" style="margin: 4px 0 0">Fonte: {{ activeShortcut.origin.label }}.</p>
+          <p v-if="e.audience.dyAttribute" class="small muted" style="margin: 4px 0 0">Atributo no DY: <code>{{ e.audience.dyAttribute }}</code></p>
+          <template v-if="paramList.length">
+            <p class="small" style="margin: 14px 0 0"><b>Parâmetros</b></p>
+            <div v-for="p in paramList" :key="p.name" class="field param">
+              <label :for="`f-param-${p.name}`">{{ p.label }}</label>
+              <input
+                :id="`f-param-${p.name}`"
+                type="number"
+                :min="p.min"
+                :max="p.max"
+                :step="p.type === 'integer' ? 1 : 'any'"
+                :value="paramValues[p.name]"
+                @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
+              >
+              <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
+            </div>
+          </template>
+          <p v-else class="small muted" style="margin: 10px 0 0">Este segmento não tem parâmetros.</p>
+        </section>
+
+        <template v-else>
+          <label class="sub" for="f-aud" style="display: block; margin-top: 14px">Ou descreva o público (sem segmento do catálogo)</label>
+          <input id="f-aud" :value="e.audience.description" type="text" aria-describedby="h-aud" placeholder="Ex.: pessoas que compraram tapete higiênico nos últimos 90 dias" @input="onDescription(($event.target as HTMLInputElement).value)">
+          <p v-if="existingDy" class="small muted" style="margin: 8px 0 0">Público já criado no DY · atributo <code>{{ existingDy }}</code>.</p>
+        </template>
+
+        <button type="button" class="chip add" style="margin-top: 14px" :aria-expanded="dyAud.open" @click="dyAud.open = !dyAud.open">+ Usar público já criado no DY</button>
         <form v-if="dyAud.open" class="dyform" @submit.prevent="useDyAudience">
           <p class="small muted" style="margin: 0 0 8px">Para públicos que já existem no console do DY. O Faro só registra o nome e o atributo; a regra continua no DY.</p>
           <div class="pair">
@@ -296,7 +355,11 @@ async function processar() {
           <template v-if="dates.data.overlapping.length">
             <p class="small" style="margin: 8px 0 4px; color: var(--warn)"><b>Testes interpostos</b> nesse período, nas mesmas páginas e plataformas:</p>
             <ul class="small" style="margin: 0; padding-left: 18px">
-              <li v-for="b in dates.data.overlapping" :key="b.faroId">{{ b.name }} · {{ fmtDate(b.startDate) }} → {{ fmtDate(b.endDate) }} <span class="muted">({{ b.faroId }})</span></li>
+              <li v-for="b in dates.data.overlapping" :key="b.faroId">
+                {{ b.name }} · {{ fmtDate(b.startDate) }} → {{ fmtDate(b.endDate) }}<template v-if="b.endEstimated"> (fim estimado)</template>
+                <span v-if="b.source === 'dy'" class="pill warnp" title="Teste ativo na DY, visto no Acompanhamento">Na DY</span>
+                <span v-else class="muted">({{ b.faroId }})</span>
+              </li>
             </ul>
             <p v-if="dates.data.freeWindow" class="small" style="margin: 8px 0 0">
               Próxima janela livre: <b>{{ fmtDate(dates.data.freeWindow.startDate) }} → {{ fmtDate(dates.data.freeWindow.endDate) }}</b>
@@ -305,6 +368,14 @@ async function processar() {
             <p v-else class="small muted" style="margin: 8px 0 0">Sem janela livre nos próximos meses: resolva na etapa de sobreposição.</p>
           </template>
           <p v-else class="small muted" style="margin: 6px 0 0">Nenhum teste interposto nesse período.</p>
+          <p v-if="dates.data.dy" class="small muted" style="margin: 8px 0 0">
+            Considera também os testes ativos na DY que o Acompanhamento mostra (dados até {{ fmtDate(dates.data.dy.asOf) }}):
+            {{ dates.data.dy.considerados }} {{ dates.data.dy.considerados === 1 ? 'teste nas mesmas páginas e plataformas' : 'testes nas mesmas páginas e plataformas' }}.
+            Como a DY não informa a data de fim, assumimos mais 14 dias a partir do último dado.
+            <template v-if="dates.data.dy.semPagina">
+              {{ dates.data.dy.semPagina }} {{ dates.data.dy.semPagina === 1 ? 'teste ativo na DY não tem' : 'testes ativos na DY não têm' }} página identificada e não {{ dates.data.dy.semPagina === 1 ? 'entrou' : 'entraram' }} na conta.
+            </template>
+          </p>
         </template>
       </section>
 
@@ -320,6 +391,19 @@ async function processar() {
         </p>
 
         <template v-if="temCodigo">
+          <div v-for="p in paramList" :key="p.name" class="field param">
+            <label :for="`f-alvo-param-${p.name}`">{{ p.label }}</label>
+            <input
+              :id="`f-alvo-param-${p.name}`"
+              type="number"
+              :min="p.min"
+              :max="p.max"
+              :step="p.type === 'integer' ? 1 : 'any'"
+              :value="paramValues[p.name]"
+              @change="setParam(p.name, ($event.target as HTMLInputElement).value)"
+            >
+            <p v-if="p.description || p.unit" class="hint">{{ p.description }}<span v-if="p.unit"> Em {{ p.unit }}.</span></p>
+          </div>
           <div class="row" style="gap: 10px; flex-wrap: wrap">
             <button type="button" class="btn ghost" :disabled="seg.carregando" @click="puxarCodigo">Puxar código de segmentação</button>
             <button type="button" class="btn" :disabled="seg.carregando" @click="processar">{{ seg.carregando ? 'Processando…' : 'Processar estimativa no BigQuery' }}</button>
@@ -346,13 +430,11 @@ async function processar() {
 
       <div class="sticky">
         <section class="panel" aria-labelledby="est-title" aria-live="polite">
-          <h2 id="est-title">Elegíveis</h2>
-          <div class="stat"><span class="small muted">Usuários elegíveis por dia</span><b>{{ fmtInt(eligibleDaily) }}</b><span v-if="saveState === 'saving'" class="small muted">atualizando…</span></div>
+          <h2 id="est-title">Amostra e período</h2>
           <div class="stat"><span class="small muted">Amostra por grupo</span><b>{{ nPerGroup ? fmtInt(nPerGroup) : '–' }}</b></div>
           <div class="stat"><span class="small muted">Amostra total ({{ groups.length }} grupos)</span><b>{{ duration?.totalSample ? fmtInt(duration.totalSample) : '–' }}</b></div>
-          <div class="stat"><span class="small muted">Duração mínima</span><b>{{ duration?.durationDays ? `${duration.durationDays} dias` : '–' }}</b></div>
-          <div v-for="al in duration?.alerts ?? []" :key="al.code" class="callout" :class="tone(al.level)">{{ al.message }}</div>
-          <div v-if="duration && !duration.alerts.length && slack != null" class="callout okp">Cabe no período, com {{ slack }} dias de folga.</div>
+          <div class="stat"><span class="small muted">Usuários elegíveis por dia (estimativa)</span><b>{{ dailyEstimate ? fmtInt(dailyEstimate) : '–' }}</b><span v-if="saveState === 'saving'" class="small muted">atualizando…</span></div>
+          <p class="small muted estimativa">{{ estimateHint }}</p>
           <ul v-if="failing.length" class="todo small">
             <li v-for="c in failing" :key="c.id">{{ c.message }}</li>
           </ul>
@@ -365,11 +447,14 @@ async function processar() {
 </template>
 
 <style scoped>
+.estimativa { margin: 8px 0 0; }
+.param { max-width: 320px; margin-top: 12px; }
+.selecionado { margin-top: 14px; padding: 16px; border: 1px solid var(--brand); border-radius: 14px; background: var(--brand-soft); }
+.selecionado h3 { margin: 6px 0 0; font-size: 17px; }
+.label { display: block; font-weight: 600; }
 .targets .trow { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 8px; align-items: center; margin-top: 6px; }
 .targets input { width: 100%; }
 @media (max-width: 900px) { .targets .trow { grid-template-columns: 1fr; } }
-.origin { margin-top: 8px; }
-.origin .sub { margin-bottom: 4px; }
 .dyform { border: 1px dashed var(--brand); border-radius: 14px; padding: 14px; margin-top: 10px; background: var(--brand-soft); }
 .sugg { margin-top: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
 .stat { display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--line); }

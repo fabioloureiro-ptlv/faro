@@ -15,7 +15,9 @@ const faroId = computed(() => String(route.params.faroId ?? ''));
 
 const { data, error, refresh, tags, missingDesign, norte, timeline, metric } = useExperimento(faroId);
 
-useHead(() => ({ title: data.value ? `${data.value.experiment.name} · Faro` : 'Experimento · Faro' }));
+useHead(() => ({
+  title: data.value ? `Acompanhamento · ${data.value.experiment.name}` : 'Acompanhamento',
+}));
 
 const painelStore = usePainelStore();
 // Depois de decidir/encerrar, recarrega o detalhe e invalida a lista em cache.

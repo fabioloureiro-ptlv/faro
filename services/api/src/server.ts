@@ -1,4 +1,4 @@
-import { mkdirSync, renameSync } from 'node:fs';
+import { mkdirSync, renameSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { buildApp, defaultPorts } from './app.ts';
 import { createDb } from './db/client.ts';
@@ -9,10 +9,13 @@ const port = Number(process.env.FARO_API_PORT ?? 4000);
 const dataDir = process.env.FARO_DATA_DIR ?? fileURLToPath(new URL('../.data/pglite', import.meta.url));
 mkdirSync(dataDir, { recursive: true });
 
-// O PGlite em disco corrompe quando o processo é morto no meio de uma escrita (comum no
-// dev com --watch ou ao parar o servidor). Em vez de travar o boot, a pasta estragada é
-// guardada ao lado e o banco é recriado a partir das fixtures; rascunhos locais se perdem.
+// Encerrar o processo à força (dev com --watch, parar o servidor) deixa o `postmaster.pid`
+// da execução anterior na pasta, e o PGlite se recusa a abrir com ele ("failed to initialize").
+// Só este processo usa a pasta, então a trava velha é removida antes de abrir: os dados estão
+// íntegros. Só se mesmo assim o banco não abrir, a pasta é guardada ao lado e recriada das
+// fixtures (aí os rascunhos locais ficam na pasta guardada, fora do banco em uso).
 async function openDb() {
+  rmSync(`${dataDir}/postmaster.pid`, { force: true });
   try {
     return await createDb(dataDir);
   } catch (e) {

@@ -6,11 +6,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
+import { AudienceRuleSchema, resolveAudienceParams, type AudienceShortcut } from '@faro/contracts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
 import { addCustomShortcut, allShortcuts } from './custom.ts';
 import { BASE_CLIENTES, buildShortcut, ImportPayloadSchema, planImport, verifySqlSegments } from './import.ts';
+import { checkPackage, type PackageRunner } from './package.ts';
 import { audienceRuleToSql, PROJECT } from './rule-sql.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
@@ -39,34 +40,43 @@ function countable(sql: string): string {
 }
 
 export async function publicoRoutes(app: FastifyInstance) {
-  app.get<{ Params: { id: string } }>('/publico/audiences/:id/sql', async (req) => {
+  /** Valores dos parâmetros do segmento: o que veio mais os padrões, validados (422 se inválido). */
+  function paramsOf(shortcut: AudienceShortcut, provided: Record<string, unknown> | undefined): Record<string, number> {
+    const r = resolveAudienceParams(shortcut.parameters, provided);
+    if (!r.ok) throw new HttpError(422, 'parametro_invalido', r.message);
+    return r.values;
+  }
+
+  // Parâmetros chegam por query string (?dias_inadimplencia=90); a query guarda o parâmetro nomeado (@nome).
+  app.get<{ Params: { id: string }; Querystring: Record<string, string> }>('/publico/audiences/:id/sql', async (req) => {
     requireActor(req);
     const shortcut = allShortcuts().find((s) => s.id === req.params.id);
     if (!shortcut) throw new HttpError(404, 'publico_inexistente', 'Atalho de público não encontrado.');
     const built = sqlFor(shortcut);
-    if (!built)
-      throw new HttpError(404, 'sem_regra', 'Este público não tem regra nem SQL versionado; a estimativa é manual.');
-    return { id: shortcut.id, ...built };
+    if (!built) throw new HttpError(404, 'sem_regra', 'Este público não tem query; o tamanho é informado pelo time.');
+    return { id: shortcut.id, ...built, parameters: shortcut.parameters ?? [], values: paramsOf(shortcut, req.query) };
   });
 
-  const EstimateInput = z.object({ run: z.boolean().optional() });
+  const EstimateInput = z.object({ run: z.boolean().optional(), params: z.record(z.string(), z.unknown()).optional() });
   app.post<{ Params: { id: string } }>('/publico/audiences/:id/estimate', async (req) => {
     requireActor(req);
-    const { run } = EstimateInput.parse(req.body ?? {});
+    const { run, params } = EstimateInput.parse(req.body ?? {});
     const shortcut = allShortcuts().find((s) => s.id === req.params.id);
     if (!shortcut) throw new HttpError(404, 'publico_inexistente', 'Atalho de público não encontrado.');
     const built = sqlFor(shortcut);
-    if (!built)
-      throw new HttpError(404, 'sem_regra', 'Este público não tem regra nem SQL versionado; a estimativa é manual.');
+    if (!built) throw new HttpError(404, 'sem_regra', 'Este público não tem query; o tamanho é informado pelo time.');
+    const values = paramsOf(shortcut, params);
+    // O BigQuery recusa parâmetro nomeado que a query não usa: só vai quando o segmento declara parâmetros.
+    const queryParams = Object.keys(values).length ? { params: values } : {};
 
     try {
       const { BigQuery } = await import('@google-cloud/bigquery');
       const bq = new BigQuery({ projectId: PROJECT });
-      const [job] = await bq.createQueryJob({ query: built.sql, dryRun: true });
+      const [job] = await bq.createQueryJob({ query: built.sql, ...queryParams, dryRun: true });
       const gigabytes = Math.round((Number(job.metadata.statistics.totalBytesProcessed) / 1e9) * 10) / 10;
-      if (!run) return { id: shortcut.id, sql: built.sql, gigabytes };
-      const [rows] = await bq.query({ query: countable(built.sql) });
-      return { id: shortcut.id, sql: built.sql, gigabytes, clientes: Number((rows[0] as { clientes: number }).clientes) };
+      if (!run) return { id: shortcut.id, sql: built.sql, gigabytes, values };
+      const [rows] = await bq.query({ query: countable(built.sql), ...queryParams });
+      return { id: shortcut.id, sql: built.sql, gigabytes, values, clientes: Number((rows[0] as { clientes: number }).clientes) };
     } catch (e) {
       if (e instanceof HttpError) throw e;
       throw new HttpError(503, 'bigquery_indisponivel', `Não foi possível consultar o BigQuery: ${(e as Error).message}`);
@@ -139,4 +149,55 @@ export async function publicoRoutes(app: FastifyInstance) {
     const plan = await verifySqlSegments(planImport(parsed.data, allShortcuts()), dryRunColumns);
     return { importados: plan.novos.map((s) => addCustomShortcut(s)), ignorados: plan.ignorados };
   });
+
+  // Pacote de segmento (saída da skill criar-segmento-faro): `check` só confere; o POST confere de novo
+  // e adiciona ao catálogo. Nada é gravado se alguma verificação falhar.
+  app.post('/publico/audiences/package/check', async (req) => {
+    requireActor(req);
+    const { ok, verificacoes, resumo } = await checkPackage(req.body, allShortcuts(), bigQueryRunner());
+    return { ok, verificacoes, ...(resumo ? { resumo } : {}) };
+  });
+
+  app.post('/publico/audiences/package', async (req, reply) => {
+    requireActor(req);
+    const r = await checkPackage(req.body, allShortcuts(), bigQueryRunner());
+    if (!r.ok || !r.shortcut)
+      throw new HttpError(
+        422,
+        'pacote_invalido',
+        'O pacote não passou nas verificações; nada foi adicionado.',
+        r.verificacoes.filter((x) => x.status === 'erro').map((x) => ({ id: x.id, message: `${x.rotulo}: ${x.detalhe ?? ''}` })),
+      );
+    try {
+      reply.code(201);
+      return { shortcut: addCustomShortcut(r.shortcut), verificacoes: r.verificacoes, resumo: r.resumo };
+    } catch (e) {
+      throw new HttpError(409, 'segmento_existente', (e as Error).message);
+    }
+  });
+}
+
+/** Execução real no BigQuery para as verificações do pacote; erros de credencial viram aviso, não bloqueio. */
+function bigQueryRunner(): PackageRunner {
+  const client = async () => {
+    const { BigQuery } = await import('@google-cloud/bigquery');
+    return new BigQuery({ projectId: PROJECT });
+  };
+  const withParams = (params: Record<string, number>) => (Object.keys(params).length ? { params } : {});
+  return {
+    async dryRun(sql, params) {
+      const bq = await client();
+      const [job] = await bq.createQueryJob({ query: sql, ...withParams(params), dryRun: true });
+      const stats = job.metadata.statistics;
+      const fields = (stats?.query?.schema?.fields ?? []) as { name: string }[];
+      return { gigabytes: Math.round((Number(stats?.totalBytesProcessed) / 1e9) * 10) / 10, colunas: fields.map((f) => f.name) };
+    },
+    async count(sql, params) {
+      const bq = await client();
+      const query = `SELECT COUNT(*) AS linhas, COUNT(DISTINCT cuid) AS clientes, COUNTIF(cuid IS NULL) AS sem_cuid FROM (\n${sql.replace(/;\s*$/, '')}\n)`;
+      const [rows] = await bq.query({ query, ...withParams(params) });
+      const r = rows[0] as { linhas: number; clientes: number; sem_cuid: number };
+      return { linhas: Number(r.linhas), clientes: Number(r.clientes), semCuid: Number(r.sem_cuid) };
+    },
+  };
 }

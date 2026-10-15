@@ -40,6 +40,19 @@ export interface DyCampaignRow {
   observedSplit: number[];
 }
 
+export interface PackageVerification {
+  id: string;
+  rotulo: string;
+  status: 'ok' | 'erro' | 'aviso' | 'pulado';
+  detalhe?: string;
+}
+
+export interface PackageCheck {
+  ok: boolean;
+  verificacoes: PackageVerification[];
+  resumo?: { id: string; name: string; dyAttribute: string; share?: number; clientes?: number; gigabytes?: number; parameters: string[] };
+}
+
 export interface FaroEventRow {
   id: number;
   type: string;
@@ -97,21 +110,23 @@ export function useFaroApi() {
       call<MetricDefinition>('/catalog/metrics', { method: 'POST', body }),
     pages: () => call<PageCatalog>('/catalog/pages'),
     shortcuts: () => call<AudienceShortcut[]>('/catalog/audiences'),
-    // Frente 3 (ajuste de produto 14/10): query de segmentação e estimativa do público-alvo.
-    audienceSql: (id: string) => call<{ sql: string; source: string }>(`/publico/audiences/${encodeURIComponent(id)}/sql`),
-    audienceEstimate: (id: string, run: boolean) =>
-      call<{ sql: string; gigabytes: number; clientes?: number }>(`/publico/audiences/${encodeURIComponent(id)}/estimate`, {
-        method: 'POST',
-        body: { run },
-      }),
-    // Tela /segmento: catálogo completo, preview de regra nova e aprovação.
-    audiencesFull: () => call<(AudienceShortcut & { origem: string })[]>('/publico/audiences'),
-    // Segmentos aprovados no artefato "Segmentos": cola o JSON exportado de lá.
-    audienceImport: (payload: unknown) =>
-      call<{ importados: AudienceShortcut[]; ignorados: { name: string; motivo: string; detalhe: string }[] }>(
-        '/publico/audiences/import',
-        { method: 'POST', body: payload },
+    // Frente 3: query de segmentação e estimativa do público-alvo. `params` são os valores dos
+    // parâmetros do segmento (ex.: { dias_inadimplencia: 90 }); sem eles valem os padrões do catálogo.
+    audienceSql: (id: string, params?: Record<string, number>) =>
+      call<{ sql: string; source: string; values: Record<string, number> }>(
+        `/publico/audiences/${encodeURIComponent(id)}/sql${params && Object.keys(params).length ? `?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}` : ''}`,
       ),
+    audienceEstimate: (id: string, run: boolean, params?: Record<string, number>) =>
+      call<{ sql: string; gigabytes: number; clientes?: number; values: Record<string, number> }>(`/publico/audiences/${encodeURIComponent(id)}/estimate`, {
+        method: 'POST',
+        body: { run, ...(params ? { params } : {}) },
+      }),
+    // Tela /segmento: catálogo completo (com query e parâmetros).
+    audiencesFull: () => call<(AudienceShortcut & { origem: string })[]>('/publico/audiences'),
+    // Pacote de segmento (saída da skill criar-segmento-faro): conferir sem gravar, e adicionar ao catálogo.
+    segmentPackageCheck: (pacote: unknown) => call<PackageCheck>('/publico/audiences/package/check', { method: 'POST', body: pacote }),
+    segmentPackageAdd: (pacote: unknown) =>
+      call<PackageCheck & { shortcut: AudienceShortcut }>('/publico/audiences/package', { method: 'POST', body: pacote }),
     templates: () => call<Template[]>('/templates'),
   };
 }

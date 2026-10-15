@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estimateDuration, periodDays } from '../src/index.ts';
+import { dailyUsersNeeded, estimateDuration, periodDays } from '../src/index.ts';
 
 const base = { split: [0.5, 0.5], startDate: '2026-10-19', endDate: '2026-11-09' };
 
@@ -7,6 +7,14 @@ describe('duração e viabilidade (CFG-08)', () => {
   it('período conta início e fim', () => {
     expect(periodDays('2026-10-19', '2026-11-09')).toBe(22);
     expect(periodDays('2026-10-19', '2026-10-18')).toBeNull();
+  });
+
+  it('usuários por dia = amostra total ÷ dias do período (estimativa informativa)', () => {
+    expect(dailyUsersNeeded(380_000, '2026-10-19', '2026-11-09')).toBe(Math.ceil(380_000 / 22));
+    expect(dailyUsersNeeded(100, '2026-10-19', '2026-10-19')).toBe(100); // um dia só
+    expect(dailyUsersNeeded(null, '2026-10-19', '2026-11-09')).toBeNull(); // sem amostra
+    expect(dailyUsersNeeded(380_000, '', '')).toBeNull(); // sem período
+    expect(dailyUsersNeeded(380_000, '2026-10-19', '2026-10-18')).toBeNull(); // fim antes do início
   });
 
   it('split igual: amostra total ÷ elegíveis por dia', () => {

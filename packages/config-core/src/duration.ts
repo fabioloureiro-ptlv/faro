@@ -33,6 +33,16 @@ export function periodDays(startDate: string, endDate: string): number | null {
   return Math.round((b - a) / 86_400_000) + 1;
 }
 
+/**
+ * Usuários por dia que o período escolhido precisa entregar para atingir a amostra total
+ * (amostra total ÷ dias do período). Estimativa informativa: null sem amostra ou sem período válido.
+ */
+export function dailyUsersNeeded(totalSample: number | null, startDate: string, endDate: string): number | null {
+  const days = periodDays(startDate, endDate);
+  if (totalSample == null || !(totalSample > 0) || days == null) return null;
+  return Math.ceil(totalSample / days);
+}
+
 export function estimateDuration(input: DurationInput): DurationResult {
   const { nPerGroup, eligibleDaily, split } = input;
   const alerts: ViabilityAlert[] = [];
