@@ -31,6 +31,15 @@ async function run(fn: () => Promise<{ experiment: { faroId: string } }>) {
 
 const imp = reactive({ open: false, dyCampaignId: '', bu: 'ecom' as Bu, ownerSquad: '' });
 const dyCampaigns = ref<DyCampaignRow[]>([]);
+// Vindo da tela de órfãs do painel (?importar=<campaignId>): abre o formulário já preenchido.
+const route = useRoute();
+onMounted(() => {
+  const q = route.query.importar;
+  if (typeof q === 'string' && q) {
+    imp.open = true;
+    imp.dyCampaignId = q;
+  }
+});
 watch(
   () => imp.open,
   (open) => {

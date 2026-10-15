@@ -66,11 +66,10 @@ const { data, error, refresh } = await useFetch<{
               <small>Dono: {{ alert.owner }}</small>
             </td>
             <td>
-              <!-- CFG-14 é da frente 1 (pedido 3). O botão aparece para mostrar o caminho. -->
-              <button type="button" disabled :aria-describedby="`motivo-${campaign.campaignId}`">
+              <!-- Unificação: CFG-14 (frente 1) disponível no mesmo repo — pedido 3 atendido. -->
+              <NuxtLink class="btn-importar" :to="`/configuracao?importar=${encodeURIComponent(campaign.campaignId)}`">
                 Importar como legado
-              </button>
-              <small :id="`motivo-${campaign.campaignId}`">Disponível quando o cadastro (frente 1) liberar a importação.</small>
+              </NuxtLink>
             </td>
           </tr>
         </tbody>
