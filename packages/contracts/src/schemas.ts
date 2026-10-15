@@ -4,11 +4,12 @@ import { z } from 'zod';
 
 export const FARO_ID_PATTERN = /^FARO-\d{4}-\d{4}$/;
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use o formato AAAA-MM-DD');
-const isoDateTime = z.iso.datetime({ offset: true });
+// Unificação: a frente 1 grava datetime completo; a frente 2 e suas fixtures usam só a data.
+const isoDateTime = z.union([z.iso.datetime({ offset: true }), isoDate]);
 
 export const BuSchema = z.enum(['ecom', 'saude', 'fintech', 'servicos', 'ecossistema']);
 export const PlatformSchema = z.enum(['site', 'android', 'ios']);
-export const ExperimentStatusSchema = z.enum([
+export const EXPERIMENT_STATUSES = [
   'rascunho',
   'design_completo',
   'pronto_para_configurar',
@@ -17,7 +18,8 @@ export const ExperimentStatusSchema = z.enum([
   'decidido',
   'encerrado',
   'cancelado',
-]);
+] as const;
+export const ExperimentStatusSchema = z.enum(EXPERIMENT_STATUSES);
 
 export const FaroIdSchema = z.string().regex(FARO_ID_PATTERN, 'faroId fora do formato FARO-AAAA-NNNN');
 
@@ -83,8 +85,8 @@ export const OverlapDecisionSchema = z.object({
 
 export const DecisionSchema = z.object({
   outcome: z.enum(['implementar_variante', 'manter_controle', 'sem_vencedor', 'invalido']),
-  rationale: z.string(),
-  decidedBy: z.string(),
+  rationale: z.string().min(1),
+  decidedBy: z.string().min(1),
   decidedAt: isoDateTime,
   /** Unificação (frente 2, PNL-10): onde o aprendizado foi publicado; só https. */
   learningUrl: z.string().regex(/^https:\/\//, 'apenas URLs https').optional(),

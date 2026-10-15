@@ -1,0 +1,138 @@
+// Rotas do painel (frente 2) na API unificada: lista, detalhe, órfãs, decisão e
+// encerramento. Dados de experimento vêm do banco da frente 1; métricas/saúde das
+// fixtures (até a frente 4); campanhas do export real do DY.
+import type { FastifyInstance } from 'fastify';
+import { FaroIdSchema } from '@faro/contracts';
+import type { Experiment } from '@faro/contracts';
+import type { Db } from '../db/client.ts';
+import { HttpError } from '../errors.ts';
+import { requireActor } from '../http.ts';
+import { appendEvent, getExperiment, updateExperiment } from '../experiments/repository.ts';
+import { buildDataset, buildTimelineEvents, orphanItems } from './dataset.ts';
+import { allowedTransitions, closeExperiment, closingChecklist, decideExperiment, type Actor, type CommandResult, type TransitionEvent } from './status/index.ts';
+import { missingDesignFields } from './governance/index.ts';
+
+const STATUS_BY_ERROR: Record<string, number> = {
+  entrada_invalida: 400,
+  sem_permissao: 403,
+  somente_sistema: 403,
+  transicao_invalida: 409,
+  status_terminal: 409,
+  decisao_obrigatoria: 409,
+  decisao_invalida: 400,
+  sem_exposicao: 409,
+  checklist_incompleto: 409,
+};
+
+// DECISAO-PENDENTE: sem SSO não há squad/papel reais. Em dev todo usuário do header
+// age como time de experimentação (senão ninguém decide teste de outro squad).
+function actorFrom(email: string): Actor {
+  return { kind: 'user', email, roles: ['experimentacao'] };
+}
+
+function parseFaroId(raw: unknown): string {
+  const parsed = FaroIdSchema.safeParse(raw);
+  if (!parsed.success) throw new HttpError(400, 'faro_id_invalido', 'faroId inválido.');
+  return parsed.data;
+}
+
+async function applyCommand(db: Db, result: CommandResult): Promise<{ faroId: string; status: Experiment['status'] }> {
+  if (!result.ok) {
+    throw new HttpError(STATUS_BY_ERROR[result.error] ?? 400, result.error, result.message, {
+      ...('checklist' in result ? { checklist: result.checklist } : {}),
+    });
+  }
+  const exp = { ...result.experiment, updatedAt: new Date().toISOString() };
+  await updateExperiment(db, exp);
+  for (const ev of result.events as TransitionEvent[]) {
+    const occurredAt = new Date().toISOString();
+    if (ev.type === 'experiment.status_changed')
+      await appendEvent(db, {
+        type: 'experiment.status_changed',
+        faroId: ev.faroId,
+        actor: ev.actor,
+        occurredAt,
+        payload: { from: ev.from, to: ev.to, ...(ev.reason ? { reason: ev.reason } : {}) },
+      });
+    else
+      await appendEvent(db, {
+        type: 'experiment.decided',
+        faroId: ev.faroId,
+        actor: exp.decision?.decidedBy ?? 'system',
+        occurredAt,
+        payload: { decision: ev.decision },
+      });
+  }
+  return { faroId: exp.faroId, status: exp.status };
+}
+
+export async function painelRoutes(app: FastifyInstance, db: Db) {
+  app.get('/painel', async (req) => {
+    requireActor(req);
+    const ds = await buildDataset(db);
+    const primary = new Map(ds.experiments.map((e) => [e.faroId, e.design.primaryMetricId]));
+    return {
+      experiments: ds.experiments,
+      norteResults: ds.metricResults.filter((r) => primary.get(r.faroId) === r.metricId),
+      alerts: ds.alerts,
+      pages: ds.pages,
+      metrics: ds.metrics.map(({ id, name, direction }) => ({ id, name, direction })),
+      asOf: ds.asOf,
+    };
+  });
+
+  app.get<{ Params: { faroId: string } }>('/painel/experiments/:faroId', async (req) => {
+    const actorEmail = requireActor(req);
+    const faroId = parseFaroId(req.params.faroId);
+    const ds = await buildDataset(db);
+    const experiment = ds.experiments.find((e) => e.faroId === faroId);
+    if (!experiment) throw new HttpError(404, 'nao_encontrado', 'Experimento não encontrado');
+
+    const d = experiment.design;
+    const metricIds = new Set([d.primaryMetricId, ...d.secondaryMetricIds, ...d.guardrailMetricIds]);
+    const relatedIds = new Set((experiment.overlap ?? []).map((o) => o.otherFaroId));
+    const actor = actorFrom(actorEmail);
+    const allowed = allowedTransitions(experiment, actor);
+    const campaign = ds.linkedCampaigns.find((c) => c.labels.includes(`faro:${faroId}`));
+
+    return {
+      experiment,
+      norteResults: ds.metricResults.filter((r) => r.faroId === faroId && r.metricId === d.primaryMetricId),
+      health: ds.health.find((h) => h.faroId === faroId),
+      events: await buildTimelineEvents(db, faroId),
+      alerts: ds.alerts.filter((a) => a.faroId === faroId && !a.resolvedAt),
+      metrics: ds.metrics.filter((m) => metricIds.has(m.id)),
+      pages: ds.pages.filter((p) => experiment.allocation.pages.includes(p.id)),
+      related: ds.experiments
+        .filter((e) => relatedIds.has(e.faroId))
+        .map(({ faroId, name, bu, status }) => ({ faroId, name, bu, status })),
+      ...(experiment.status === 'decidido' ? { closing: closingChecklist(experiment, campaign) } : {}),
+      actions: { actor: actorEmail, canDecide: allowed.includes('decidido'), canClose: allowed.includes('encerrado') },
+      missingDesign: missingDesignFields(d),
+    };
+  });
+
+  app.get('/dy-campaigns/orphans', async (req) => {
+    requireActor(req);
+    const ds = await buildDataset(db);
+    return { asOf: ds.asOf, items: orphanItems(ds) };
+  });
+
+  app.post<{ Params: { faroId: string } }>('/experiments/:faroId/decision', async (req) => {
+    const actor = actorFrom(requireActor(req));
+    const faroId = parseFaroId(req.params.faroId);
+    const experiment = await getExperiment(db, faroId);
+    if (!experiment) throw new HttpError(404, 'nao_encontrado', 'Experimento não encontrado');
+    return applyCommand(db, decideExperiment(experiment, req.body, { actor, now: new Date().toISOString() }));
+  });
+
+  app.post<{ Params: { faroId: string } }>('/experiments/:faroId/close', async (req) => {
+    const actor = actorFrom(requireActor(req));
+    const faroId = parseFaroId(req.params.faroId);
+    const experiment = await getExperiment(db, faroId);
+    if (!experiment) throw new HttpError(404, 'nao_encontrado', 'Experimento não encontrado');
+    const ds = await buildDataset(db);
+    const campaign = ds.linkedCampaigns.find((c) => c.labels.includes(`faro:${faroId}`));
+    return applyCommand(db, closeExperiment(experiment, req.body, { actor, now: new Date().toISOString(), campaign }));
+  });
+}

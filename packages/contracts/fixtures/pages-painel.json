@@ -1,0 +1,12 @@
+{
+  "_fonte": "Catálogo de páginas do protótipo (usuários/dia estimados). dailyUsersByPlatform = dailyUsers × participação de plataforma do protótipo (site 45%, Android 35%, iOS 20%).",
+  "items": [
+    {"id": "home", "name": "Home", "dailyUsers": 180000, "dailyUsersByPlatform": {"site": 81000, "android": 63000, "ios": 36000}},
+    {"id": "busca", "name": "Busca", "dailyUsers": 95000, "dailyUsersByPlatform": {"site": 42750, "android": 33250, "ios": 19000}},
+    {"id": "pdp", "name": "Página de produto", "dailyUsers": 140000, "dailyUsersByPlatform": {"site": 63000, "android": 49000, "ios": 28000}},
+    {"id": "carrinho", "name": "Carrinho", "dailyUsers": 42000, "dailyUsersByPlatform": {"site": 18900, "android": 14700, "ios": 8400}},
+    {"id": "checkout", "name": "Checkout", "dailyUsers": 21000, "dailyUsersByPlatform": {"site": 9450, "android": 7350, "ios": 4200}},
+    {"id": "saude", "name": "Área Saúde", "dailyUsers": 16000, "dailyUsersByPlatform": {"site": 7200, "android": 5600, "ios": 3200}},
+    {"id": "conta", "name": "Minha conta", "dailyUsers": 30000, "dailyUsersByPlatform": {"site": 13500, "android": 10500, "ios": 6000}}
+  ]
+}

@@ -6,6 +6,7 @@ import { HttpError } from './errors.ts';
 import { catalogRoutes } from './catalog/routes.ts';
 import { experimentRoutes } from './experiments/routes.ts';
 import { createExperimentService } from './experiments/service.ts';
+import { painelRoutes } from './painel/routes.ts';
 import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
 import { mockAudience } from './mocks/audience.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
@@ -50,5 +51,6 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
   const svc = createExperimentService(db, ports);
   await experimentRoutes(app, svc, db);
   await catalogRoutes(app, ports);
+  await painelRoutes(app, db);
   return app;
 }

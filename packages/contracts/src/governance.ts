@@ -49,6 +49,7 @@ export const GovernanceAlertSchema = z
   .refine((a) => !!a.faroId || !!a.dyCampaignId, { message: 'alerta precisa de faroId ou dyCampaignId' });
 
 export type GovernanceAlert = z.infer<typeof GovernanceAlertSchema>;
+export type GovernanceRule = (typeof GOVERNANCE_RULES)[number];
 
 // ---- Saúde do experimento (proposta da frente 2; dono: frente 4) ----
 
@@ -137,3 +138,19 @@ export const ExperimentAuditEventSchema = z.discriminatedUnion('type', [
 ]);
 
 export type ExperimentAuditEvent = z.infer<typeof ExperimentAuditEventSchema>;
+export type ExperimentStatusChangedEvent = z.infer<typeof TimelineStatusChangedSchema>;
+export type ExperimentDecidedEvent = z.infer<typeof TimelineDecidedSchema>;
+
+// ---- Catálogo de páginas na forma consumida pelo painel (PNL-06/12) ----
+// Convive com PageCatalog (catalogs.ts): o painel lê PageDefinition[]; a API
+// deriva de PageCatalog até as frentes 1 e 3 unificarem a fonte real de tráfego.
+
+export const PageDefinitionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  dailyUsers: z.number().int().nonnegative(),
+  /** Usuários/dia por plataforma (visão de capacidade, PNL-12). */
+  dailyUsersByPlatform: z.partialRecord(PlatformSchema, z.number().int().nonnegative()).optional(),
+});
+
+export type PageDefinition = z.infer<typeof PageDefinitionSchema>;

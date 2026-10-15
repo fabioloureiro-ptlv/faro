@@ -1,0 +1,14 @@
+{
+  "_fonte": "Mock do export de campanhas do DY (forma provisória). dy-2001 e dy-2002 são órfãs: ativas e sem label faro:.",
+  "items": [
+    { "campaignId": "dy-1001", "campaignName": "Nexus | Nova Home do App", "labels": ["faro:FARO-2026-0001"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-1002", "campaignName": "FARO-2026-0002 | Frete grátis em destaque no carrinho", "labels": ["faro:FARO-2026-0002"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-1003", "campaignName": "FARO-2026-0003 | Upsell de Repet na página de produto", "labels": ["faro:FARO-2026-0003"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-1004", "campaignName": "FARO-2026-0004 | Onboarding da Área Saúde em 3 passos", "labels": ["faro:FARO-2026-0004"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-1005", "campaignName": "FARO-2026-0005 | Recomendação de ração por raça", "labels": ["faro:FARO-2026-0005"], "active": true, "lastExposureDate": null, "asOf": "2026-10-13" },
+    { "campaignId": "dy-1006", "campaignName": "FARO-2026-0006 | Cupom de primeira compra no checkout", "labels": ["faro:FARO-2026-0006"], "active": false, "lastExposureDate": "2026-09-29", "asOf": "2026-10-13" },
+    { "campaignId": "dy-1007", "campaignName": "FARO-2026-0007 | Cashback Petlove na tela de pagamento", "labels": ["faro:FARO-2026-0007"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-2001", "campaignName": "Banner Black Friday antecipada", "labels": [], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" },
+    { "campaignId": "dy-2002", "campaignName": "Teste de ordenação da busca", "labels": ["squad:descoberta"], "active": true, "lastExposureDate": "2026-10-13", "asOf": "2026-10-13" }
+  ]
+}
