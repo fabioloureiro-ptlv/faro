@@ -5,7 +5,7 @@
 import { ApiError, useFaroApi, type ExperimentSummary } from '../../composables/useFaroApi';
 import { BU_LABEL, fmtDate } from '../../utils/labels';
 
-useHead({ title: 'Experimentos · Faro' });
+useHead({ title: 'Novo Experimento' });
 const api = useFaroApi();
 const list = ref<ExperimentSummary[]>([]);
 const error = ref('');

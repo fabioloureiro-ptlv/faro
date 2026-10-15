@@ -7,7 +7,7 @@ import PainelNav from '~~/features/painel/app/components/PainelNav.vue';
 import { usePainel } from '~~/features/painel/app/composables/usePainel';
 import { BU_LABEL, addDays, buildTimeMap, formatDayMonth } from '~~/features/painel/app/domain';
 
-useHead({ title: 'Mapa temporal · Faro' });
+useHead({ title: 'Acompanhamento de Experimentos · Mapa temporal' });
 
 const painel = usePainel();
 const { filters, store } = painel;

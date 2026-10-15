@@ -8,7 +8,7 @@ import { usePainel } from '~~/features/painel/app/composables/usePainel';
 import { formatDayMonth } from '~~/features/painel/app/domain';
 import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
 
-useHead({ title: 'Experimentos · Faro' });
+useHead({ title: 'Acompanhamento de Experimentos' });
 
 const painel = usePainel();
 const { filters, rows, total, squads, pages, asOf, store } = painel;

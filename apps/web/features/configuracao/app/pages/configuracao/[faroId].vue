@@ -12,7 +12,7 @@ const loadError = ref('');
 
 await load(faroId.value).catch((e) => (loadError.value = e instanceof ApiError ? e.message : 'Não foi possível carregar o experimento.'));
 useAutosave();
-useHead({ title: () => `${experiment.value?.name || faroId.value} · Faro` });
+useHead({ title: () => `Novo Experimento · ${experiment.value?.name || faroId.value}` });
 
 const step = computed<WizardStep>(() => {
   const n = Number(route.query.etapa ?? 1) as WizardStep;

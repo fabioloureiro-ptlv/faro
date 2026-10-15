@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useRoute } from '#imports';
 
-// Dois destinos: montar um teste (frente 1) e acompanhar os que existem (painel, mapa e segmentos).
+// Três destinos, nesta ordem: acompanhar os testes (painel e mapa), montar um novo (frente 1) e o catálogo de segmentos.
 const route = useRoute();
 const under = (base: string) => route.path === base || route.path.startsWith(`${base}/`);
 const novoAtivo = computed(() => under('/configuracao'));
-const painelAtivo = computed(() => under('/painel') || under('/segmento'));
+const painelAtivo = computed(() => under('/painel'));
+const segmentoAtivo = computed(() => under('/segmento'));
 </script>
 
 <template>
@@ -21,13 +22,6 @@ const painelAtivo = computed(() => under('/painel') || under('/segmento'));
         <span>Faro<small>Experimentos Petlove</small></span>
       </NuxtLink>
       <nav aria-label="Principal">
-        <NuxtLink to="/configuracao" :class="{ active: novoAtivo }" :aria-current="novoAtivo ? 'page' : undefined">
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-            <circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6" />
-            <path d="M9 5.5v7M5.5 9h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-          </svg>
-          <span>Novo Experimento</span>
-        </NuxtLink>
         <NuxtLink to="/painel" :class="{ active: painelAtivo }" :aria-current="painelAtivo ? 'page' : undefined">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
             <path d="M2 14.5V3.5M2 14.5h14" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
@@ -37,6 +31,21 @@ const painelAtivo = computed(() => under('/painel') || under('/segmento'));
             <span class="longo">Acompanhamento de Experimentos</span>
             <span class="curto">Acompanhamento</span>
           </span>
+        </NuxtLink>
+        <NuxtLink to="/configuracao" :class="{ active: novoAtivo }" :aria-current="novoAtivo ? 'page' : undefined">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <circle cx="9" cy="9" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <path d="M9 5.5v7M5.5 9h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <span>Novo Experimento</span>
+        </NuxtLink>
+        <NuxtLink to="/segmento" :class="{ active: segmentoAtivo }" :aria-current="segmentoAtivo ? 'page' : undefined">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <circle cx="6.5" cy="6.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <circle cx="12.5" cy="7.5" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <path d="M1.8 14.5c.4-2.4 2.3-3.8 4.7-3.8s4.3 1.4 4.7 3.8M11.2 11c2.2-.2 4.4.8 5 3.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
+          </svg>
+          <span>Segmentos</span>
         </NuxtLink>
       </nav>
     </aside>

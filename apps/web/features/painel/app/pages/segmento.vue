@@ -5,10 +5,9 @@
 // lá chega aqui por importação de JSON e passa a aparecer na etapa de Público do wizard.
 import { reactive, ref } from 'vue';
 import { useAsyncData, useHead } from '#imports';
-import PainelNav from '~~/features/painel/app/components/PainelNav.vue';
 import { ApiError, useFaroApi } from '~~/features/configuracao/app/composables/useFaroApi';
 
-useHead({ title: 'Segmentos · Faro' });
+useHead({ title: 'Segmentos' });
 
 const api = useFaroApi();
 const REPO_CATALOGO = 'https://github.com/fabioloureiro-ptlv/faro#readme';
@@ -110,7 +109,6 @@ async function importar() {
           <a :href="REPO_SQLS" target="_blank" rel="noopener">data/models/audiences</a>.
         </p>
       </div>
-      <PainelNav />
     </header>
 
     <section class="card" aria-labelledby="h-catalogo">
