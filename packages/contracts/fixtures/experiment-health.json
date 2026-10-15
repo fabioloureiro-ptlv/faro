@@ -1,0 +1,11 @@
+{
+  "_fonte": "Mock da frente 4. Usuários e contaminação do protótipo (Nexus do export do DY). srmPValue: qui-quadrado (1 g.l.) sobre o split da alocação, calculado das contagens. plannedSamplePerArm: arbitrado para cobrir o caso de parada antecipada (FARO-2026-0002).",
+  "items": [
+    { "faroId": "FARO-2026-0001", "usersByVariant": { "controle": 21379, "home_nova": 1100094 }, "contaminatedUsers": 26016, "unstableSplitDays": 6, "srmPValue": 1.39e-12, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0002", "usersByVariant": { "controle": 148210, "a": 148455 }, "contaminatedUsers": 1840, "srmPValue": 0.653, "plannedSamplePerArm": 260000, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0003", "usersByVariant": { "controle": 61340, "a": 61102 }, "contaminatedUsers": 910, "srmPValue": 0.496, "plannedSamplePerArm": 120000, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0004", "usersByVariant": { "controle": 49120, "a": 46410 }, "contaminatedUsers": 420, "srmPValue": 1.82e-18, "plannedSamplePerArm": 70000, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0006", "usersByVariant": { "controle": 30500, "a": 30380 }, "contaminatedUsers": 610, "srmPValue": 0.627, "plannedSamplePerArm": 30000, "asOf": "2026-09-30" },
+    { "faroId": "FARO-2026-0007", "usersByVariant": { "controle": 40200, "a": 40070 }, "contaminatedUsers": 380, "srmPValue": 0.646, "plannedSamplePerArm": 90000, "asOf": "2026-10-13" }
+  ]
+}

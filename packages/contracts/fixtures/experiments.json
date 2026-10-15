@@ -1,0 +1,493 @@
+{
+  "_fonte": "Protótipo Faro (faro-prototipo.html, dados de 14/10/2026). FARO-2026-0001 é o Nexus real (legado importado); 0002–0008 são os simulados do protótipo; 0009–0011 são complementares para cobrir os status rascunho, design_completo e cancelado. E-mails são fictícios (@example.com).",
+  "items": [
+    {
+      "faroId": "FARO-2026-0001",
+      "name": "Nexus | Nova Home do App",
+      "bu": "ecossistema",
+      "ownerSquad": "Nexus",
+      "ownerEmail": "squad-nexus@example.com",
+      "status": "decidido",
+      "legacy": true,
+      "design": {
+        "context": "Teste criado direto no Dynamic Yield, antes do Faro. O contexto e a evidência ainda não foram registrados.",
+        "hypothesis": {
+          "change": "Substituir a home antiga do app pela home nova",
+          "expectedEffect": "A receita por usuário vai aumentar",
+          "because": ""
+        },
+        "control": { "name": "home antiga", "description": "" },
+        "variants": [{ "key": "home_nova", "name": "home nova", "description": "" }],
+        "primaryMetricId": "receita_por_usuario",
+        "secondaryMetricIds": ["adicao_carrinho", "ticket_medio", "adesao_repet"],
+        "guardrailMetricIds": ["conversao", "margem_2"],
+        "mdeRelative": 0.05
+      },
+      "audience": { "description": "Todos os clientes", "source": "atalho", "estimatedShare": 1 },
+      "allocation": {
+        "platforms": ["android", "ios"],
+        "pages": ["home"],
+        "trafficPercent": 100,
+        "split": [0.02, 0.98],
+        "startDate": "2026-08-12",
+        "endDate": "2026-11-30"
+      },
+      "overlap": [{ "otherFaroId": "FARO-2026-0004", "severity": "alto", "estimatedDailyUsers": 27720 }],
+      "dy": {
+        "campaignName": "Nexus | Nova Home do App",
+        "campaignId": "dy-1001",
+        "labels": ["faro:FARO-2026-0001"]
+      },
+      "decision": {
+        "outcome": "implementar_variante",
+        "rationale": "home nova com melhora confirmada na NORTE (receita por usuário +108,1%). A variante já recebe 98% do tráfego; o controle residual só gera ruído.",
+        "decidedBy": "squad-nexus@example.com",
+        "decidedAt": "2026-10-13"
+      },
+      "createdAt": "2026-10-13",
+      "updatedAt": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0002",
+      "name": "Frete grátis em destaque no carrinho",
+      "bu": "ecom",
+      "ownerSquad": "Squad Checkout",
+      "ownerEmail": "squad-checkout@example.com",
+      "status": "rodando",
+      "design": {
+        "context": "Pesquisa de abandono mostrou que 41% dos clientes que saem do carrinho citam o valor do frete. Hoje a régua de frete grátis só aparece no checkout.",
+        "hypothesis": {
+          "change": "Mostrar quanto falta para o frete grátis já no carrinho",
+          "expectedEffect": "A conversão do checkout vai aumentar",
+          "because": "O cliente decide completar o pedido antes de ver o custo"
+        },
+        "control": { "name": "Controle", "description": "Carrinho atual, sem informação de frete" },
+        "variants": [
+          {
+            "key": "a",
+            "name": "Variante A",
+            "description": "Barra de progresso “faltam R$ X para frete grátis” no topo do carrinho"
+          }
+        ],
+        "primaryMetricId": "conversao",
+        "secondaryMetricIds": ["ticket_medio", "adicao_carrinho"],
+        "guardrailMetricIds": ["tempo_carregamento"],
+        "mdeRelative": 0.05
+      },
+      "audience": { "description": "Todos os clientes", "source": "atalho", "estimatedShare": 1 },
+      "allocation": {
+        "platforms": ["site", "android", "ios"],
+        "pages": ["carrinho"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-09-30",
+        "endDate": "2026-10-28"
+      },
+      "overlap": [],
+      "dy": {
+        "campaignName": "FARO-2026-0002 | Frete grátis em destaque no carrinho",
+        "campaignId": "dy-1002",
+        "labels": ["faro:FARO-2026-0002"],
+        "configuredAt": "2026-09-29",
+        "configuredBy": "squad-checkout@example.com"
+      },
+      "createdAt": "2026-09-20",
+      "updatedAt": "2026-09-30"
+    },
+    {
+      "faroId": "FARO-2026-0003",
+      "name": "Upsell de Repet na página de produto",
+      "bu": "ecom",
+      "ownerSquad": "Squad Retenção",
+      "ownerEmail": "squad-retencao@example.com",
+      "status": "rodando",
+      "design": {
+        "context": "Clientes não assinantes compram ração com recorrência de ~35 dias, mas só 6% conhecem o desconto do Repet na PDP.",
+        "hypothesis": {
+          "change": "Deixar o seletor “Compra programada” pré-selecionado na PDP de ração",
+          "expectedEffect": "A adesão ao Repet vai aumentar",
+          "because": "Reduz o esforço de escolha"
+        },
+        "control": { "name": "Controle", "description": "Compra única pré-selecionada" },
+        "variants": [
+          {
+            "key": "a",
+            "name": "Variante A",
+            "description": "Compra programada (Repet) pré-selecionada com economia em destaque"
+          }
+        ],
+        "primaryMetricId": "adesao_repet",
+        "secondaryMetricIds": ["conversao", "receita_por_usuario"],
+        "guardrailMetricIds": ["cancelamento_repet"],
+        "mdeRelative": 0.08
+      },
+      "audience": { "description": "Não assinantes Repet", "source": "atalho", "estimatedShare": 0.62 },
+      "allocation": {
+        "platforms": ["android", "ios"],
+        "pages": ["pdp"],
+        "trafficPercent": 30,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-05",
+        "endDate": "2026-11-02"
+      },
+      "overlap": [
+        {
+          "otherFaroId": "FARO-2026-0005",
+          "severity": "medio",
+          "estimatedDailyUsers": 4100,
+          "resolution": "paralelo",
+          "decidedBy": "time-experimentacao@example.com",
+          "decidedAt": "2026-10-10"
+        }
+      ],
+      "dy": {
+        "campaignName": "FARO-2026-0003 | Upsell de Repet na página de produto",
+        "campaignId": "dy-1003",
+        "labels": ["faro:FARO-2026-0003"],
+        "configuredAt": "2026-10-04",
+        "configuredBy": "squad-retencao@example.com"
+      },
+      "createdAt": "2026-09-25",
+      "updatedAt": "2026-10-05"
+    },
+    {
+      "faroId": "FARO-2026-0004",
+      "name": "Onboarding da Área Saúde em 3 passos",
+      "bu": "saude",
+      "ownerSquad": "Squad Saúde",
+      "ownerEmail": "squad-saude@example.com",
+      "status": "rodando",
+      "design": {
+        "context": "Novos clientes que entram na Área Saúde abandonam o cadastro do pet em 62% dos casos no formulário único atual.",
+        "hypothesis": {
+          "change": "Quebrar o cadastro em 3 passos curtos",
+          "expectedEffect": "A ativação do plano Saúde vai aumentar",
+          "because": "Cada passo parece menor e mais fácil"
+        },
+        "control": { "name": "Controle", "description": "Formulário único com 11 campos" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "Fluxo em 3 telas: pet, endereço, plano" }],
+        "primaryMetricId": "ativacao_saude",
+        "secondaryMetricIds": ["retencao_30d"],
+        "guardrailMetricIds": ["chamados_sac"],
+        "mdeRelative": 0.15
+      },
+      "audience": { "description": "Novos clientes", "source": "atalho", "estimatedShare": 0.28 },
+      "allocation": {
+        "platforms": ["android", "ios"],
+        "pages": ["saude", "home"],
+        "trafficPercent": 100,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-01",
+        "endDate": "2026-10-29"
+      },
+      "overlap": [{ "otherFaroId": "FARO-2026-0001", "severity": "alto", "estimatedDailyUsers": 27720 }],
+      "dy": {
+        "campaignName": "FARO-2026-0004 | Onboarding da Área Saúde em 3 passos",
+        "campaignId": "dy-1004",
+        "labels": ["faro:FARO-2026-0004"],
+        "configuredAt": "2026-09-30",
+        "configuredBy": "squad-saude@example.com"
+      },
+      "createdAt": "2026-09-22",
+      "updatedAt": "2026-10-01"
+    },
+    {
+      "faroId": "FARO-2026-0005",
+      "name": "Recomendação de ração por raça",
+      "bu": "ecom",
+      "ownerSquad": "Squad Descoberta",
+      "ownerEmail": "squad-descoberta@example.com",
+      "status": "configurado_no_dy",
+      "design": {
+        "context": "O carrossel “Você também pode gostar” usa só histórico de navegação e tem CTR de 6%.",
+        "hypothesis": {
+          "change": "Recomendar rações pela raça e porte cadastrados do pet",
+          "expectedEffect": "Os cliques na recomendação vão aumentar",
+          "because": "A sugestão fica mais relevante"
+        },
+        "control": { "name": "Controle", "description": "Carrossel atual por navegação" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "Carrossel por raça e porte do pet cadastrado" }],
+        "primaryMetricId": "ctr_recomendacao",
+        "secondaryMetricIds": ["adicao_carrinho", "receita_por_usuario"],
+        "guardrailMetricIds": ["tempo_carregamento"],
+        "mdeRelative": 0.1
+      },
+      "audience": { "description": "Tutores de cães", "source": "atalho", "estimatedShare": 0.68 },
+      "allocation": {
+        "platforms": ["site", "android"],
+        "pages": ["pdp", "home"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-21",
+        "endDate": "2026-11-18",
+        "exclusionGroupId": "grp-home-caes"
+      },
+      "overlap": [
+        {
+          "otherFaroId": "FARO-2026-0003",
+          "severity": "medio",
+          "estimatedDailyUsers": 4100,
+          "resolution": "paralelo",
+          "decidedBy": "time-experimentacao@example.com",
+          "decidedAt": "2026-10-10"
+        },
+        {
+          "otherFaroId": "FARO-2026-0008",
+          "severity": "alto",
+          "estimatedDailyUsers": 18360,
+          "resolution": "exclusao_mutua",
+          "decidedBy": "time-experimentacao@example.com",
+          "decidedAt": "2026-10-12"
+        }
+      ],
+      "dy": {
+        "campaignName": "FARO-2026-0005 | Recomendação de ração por raça",
+        "campaignId": "dy-1005",
+        "labels": ["faro:FARO-2026-0005"],
+        "configuredAt": "2026-10-13",
+        "configuredBy": "squad-descoberta@example.com"
+      },
+      "createdAt": "2026-10-06",
+      "updatedAt": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0006",
+      "name": "Cupom de primeira compra no checkout",
+      "bu": "ecom",
+      "ownerSquad": "Squad Aquisição",
+      "ownerEmail": "squad-aquisicao@example.com",
+      "status": "encerrado",
+      "design": {
+        "context": "Novos clientes convertem 30% menos que recorrentes e o cupom de boas-vindas só é enviado por e-mail.",
+        "hypothesis": {
+          "change": "Aplicar automaticamente o cupom de primeira compra no checkout",
+          "expectedEffect": "A conversão de novos clientes vai aumentar",
+          "because": "Elimina a busca pelo código"
+        },
+        "control": { "name": "Controle", "description": "Campo de cupom vazio" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "Cupom aplicado automaticamente com aviso" }],
+        "primaryMetricId": "conversao",
+        "secondaryMetricIds": ["ticket_medio"],
+        "guardrailMetricIds": ["taxa_devolucao"],
+        "mdeRelative": 0.12
+      },
+      "audience": { "description": "Novos clientes", "source": "atalho", "estimatedShare": 0.28 },
+      "allocation": {
+        "platforms": ["site", "android"],
+        "pages": ["checkout"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-09-01",
+        "endDate": "2026-09-29"
+      },
+      "overlap": [],
+      "dy": {
+        "campaignName": "FARO-2026-0006 | Cupom de primeira compra no checkout",
+        "campaignId": "dy-1006",
+        "labels": ["faro:FARO-2026-0006"],
+        "configuredAt": "2026-08-31",
+        "configuredBy": "squad-aquisicao@example.com"
+      },
+      "decision": {
+        "outcome": "implementar_variante",
+        "rationale": "Vencedor: Variante A. Implementado em 06/10.",
+        "decidedBy": "squad-aquisicao@example.com",
+        "decidedAt": "2026-10-01"
+      },
+      "createdAt": "2026-08-20",
+      "updatedAt": "2026-10-06"
+    },
+    {
+      "faroId": "FARO-2026-0007",
+      "name": "Cashback Petlove na tela de pagamento",
+      "bu": "fintech",
+      "ownerSquad": "Squad Fintech",
+      "ownerEmail": "squad-fintech@example.com",
+      "status": "rodando",
+      "design": {
+        "context": "Clientes recorrentes que usam a carteira digital têm frequência 22% maior, mas só 9% conhecem o cashback, que hoje fica escondido em Minha conta.",
+        "hypothesis": {
+          "change": "Mostrar o saldo e o cashback do pedido na tela de pagamento",
+          "expectedEffect": "A conversão do checkout vai aumentar",
+          "because": "O benefício fica visível na hora da decisão"
+        },
+        "control": { "name": "Controle", "description": "Pagamento sem menção ao cashback" },
+        "variants": [
+          {
+            "key": "a",
+            "name": "Variante A",
+            "description": "Bloco “Você ganha R$ X de cashback” acima dos meios de pagamento"
+          }
+        ],
+        "primaryMetricId": "conversao",
+        "secondaryMetricIds": ["receita_por_usuario"],
+        "guardrailMetricIds": ["taxa_devolucao"],
+        "mdeRelative": 0.06
+      },
+      "audience": { "description": "Clientes recorrentes", "source": "atalho", "estimatedShare": 0.72 },
+      "allocation": {
+        "platforms": ["android", "ios"],
+        "pages": ["checkout", "conta"],
+        "trafficPercent": 40,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-02",
+        "endDate": "2026-10-30"
+      },
+      "overlap": [],
+      "dy": {
+        "campaignName": "FARO-2026-0007 | Cashback Petlove na tela de pagamento",
+        "campaignId": "dy-1007",
+        "labels": ["faro:FARO-2026-0007"],
+        "configuredAt": "2026-10-01",
+        "configuredBy": "squad-fintech@example.com"
+      },
+      "createdAt": "2026-09-24",
+      "updatedAt": "2026-10-02"
+    },
+    {
+      "faroId": "FARO-2026-0008",
+      "name": "Agendamento de banho e tosa na home",
+      "bu": "servicos",
+      "ownerSquad": "Squad Serviços",
+      "ownerEmail": "squad-servicos@example.com",
+      "status": "pronto_para_configurar",
+      "design": {
+        "context": "Tutores de cães que agendam banho e tosa compram 1,6x mais no mês seguinte, mas o serviço só aparece em um menu secundário.",
+        "hypothesis": {
+          "change": "Exibir um card de agendamento de banho e tosa na home",
+          "expectedEffect": "Os cliques vão aumentar",
+          "because": "O serviço fica no caminho de quem já está comprando para o cão"
+        },
+        "control": { "name": "Controle", "description": "Home sem card de serviços" },
+        "variants": [
+          {
+            "key": "a",
+            "name": "Variante A",
+            "description": "Card “Agende banho e tosa perto de você” abaixo do banner principal"
+          }
+        ],
+        "primaryMetricId": "ctr_recomendacao",
+        "secondaryMetricIds": ["receita_por_usuario"],
+        "guardrailMetricIds": ["tempo_carregamento"],
+        "mdeRelative": 0.12
+      },
+      "audience": { "description": "Tutores de cães", "source": "atalho", "estimatedShare": 0.68 },
+      "allocation": {
+        "platforms": ["site"],
+        "pages": ["home"],
+        "trafficPercent": 30,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-26",
+        "endDate": "2026-11-23",
+        "exclusionGroupId": "grp-home-caes"
+      },
+      "overlap": [
+        {
+          "otherFaroId": "FARO-2026-0005",
+          "severity": "alto",
+          "estimatedDailyUsers": 18360,
+          "resolution": "exclusao_mutua",
+          "decidedBy": "time-experimentacao@example.com",
+          "decidedAt": "2026-10-12"
+        }
+      ],
+      "createdAt": "2026-10-08",
+      "updatedAt": "2026-10-12"
+    },
+    {
+      "faroId": "FARO-2026-0009",
+      "name": "Filtro por porte na busca",
+      "bu": "ecom",
+      "ownerSquad": "Squad Descoberta",
+      "ownerEmail": "squad-descoberta@example.com",
+      "status": "rascunho",
+      "design": {
+        "context": "Buscas por ração com termo de porte (“pequeno”, “grande”) têm reformulação alta.",
+        "hypothesis": { "change": "Adicionar filtro de porte no topo da busca", "expectedEffect": "", "because": "" },
+        "control": { "name": "Controle", "description": "Busca atual" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "" }],
+        "primaryMetricId": "adicao_carrinho",
+        "secondaryMetricIds": ["conversao"],
+        "guardrailMetricIds": [],
+        "mdeRelative": 0.05
+      },
+      "audience": { "description": "Todos os clientes", "source": "atalho", "estimatedShare": 1 },
+      "allocation": {
+        "platforms": ["site"],
+        "pages": ["busca"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-11-03",
+        "endDate": "2026-11-24"
+      },
+      "createdAt": "2026-10-14",
+      "updatedAt": "2026-10-14"
+    },
+    {
+      "faroId": "FARO-2026-0010",
+      "name": "Selo de entrega rápida na busca",
+      "bu": "ecom",
+      "ownerSquad": "Squad Logística",
+      "ownerEmail": "squad-logistica@example.com",
+      "status": "design_completo",
+      "design": {
+        "context": "32% dos chamados pré-compra perguntam prazo de entrega; o prazo só aparece no checkout.",
+        "hypothesis": {
+          "change": "Exibir selo “chega amanhã” nos cards da busca",
+          "expectedEffect": "A adição ao carrinho vai aumentar",
+          "because": "O prazo deixa de ser uma incerteza na escolha"
+        },
+        "control": { "name": "Controle", "description": "Card de busca sem prazo" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "Card com selo de entrega rápida" }],
+        "primaryMetricId": "adicao_carrinho",
+        "secondaryMetricIds": ["conversao"],
+        "guardrailMetricIds": ["chamados_sac"],
+        "mdeRelative": 0.06
+      },
+      "audience": { "description": "Todos os clientes", "source": "atalho", "estimatedShare": 1 },
+      "allocation": {
+        "platforms": ["site", "android", "ios"],
+        "pages": ["busca"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-11-10",
+        "endDate": "2026-12-08"
+      },
+      "createdAt": "2026-10-09",
+      "updatedAt": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0011",
+      "name": "Parcelamento em destaque na PDP",
+      "bu": "fintech",
+      "ownerSquad": "Squad Fintech",
+      "ownerEmail": "squad-fintech@example.com",
+      "status": "cancelado",
+      "design": {
+        "context": "Itens acima de R$ 300 têm conversão 40% menor que a média.",
+        "hypothesis": {
+          "change": "Mostrar parcelamento sem juros acima do preço",
+          "expectedEffect": "A conversão de itens caros vai aumentar",
+          "because": "A parcela reduz a percepção de preço"
+        },
+        "control": { "name": "Controle", "description": "Parcelamento abaixo do preço" },
+        "variants": [{ "key": "a", "name": "Variante A", "description": "Parcelamento em destaque acima do preço" }],
+        "primaryMetricId": "conversao",
+        "secondaryMetricIds": ["ticket_medio"],
+        "guardrailMetricIds": [],
+        "mdeRelative": 0.08
+      },
+      "audience": { "description": "Todos os clientes", "source": "atalho", "estimatedShare": 1 },
+      "allocation": {
+        "platforms": ["site"],
+        "pages": ["pdp"],
+        "trafficPercent": 50,
+        "split": [0.5, 0.5],
+        "startDate": "2026-10-07",
+        "endDate": "2026-10-28"
+      },
+      "createdAt": "2026-09-28",
+      "updatedAt": "2026-10-03"
+    }
+  ]
+}

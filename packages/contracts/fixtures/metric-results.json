@@ -1,0 +1,26 @@
+{
+  "_fonte": "Mock da frente 4: só a NORTE, grão usuário, D-1 = 13/10/2026. Nexus copiado do export do DY no protótipo (consolidado e por plataforma). Simulados: valores derivados dos lifts do protótipo; probBetter arbitrado para cobrir os casos de borda.",
+  "items": [
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "all", "grain": "user", "variantKey": "controle", "value": 21.83, "n": 21379, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "all", "grain": "user", "variantKey": "home_nova", "value": 88.2, "n": 1100094, "deltaRelative": 1.081, "probBetter": 1, "label": "melhora_confirmada", "mde": 0.045, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "android", "grain": "user", "variantKey": "controle", "value": 13.28, "n": 8415, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "android", "grain": "user", "variantKey": "home_nova", "value": 80.23, "n": 592676, "deltaRelative": 1.383, "probBetter": 1, "label": "melhora_confirmada", "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "ios", "grain": "user", "variantKey": "controle", "value": 27.38, "n": 12964, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "ios", "grain": "user", "variantKey": "home_nova", "value": 97.51, "n": 507418, "deltaRelative": 1.008, "probBetter": 1, "label": "melhora_confirmada", "asOf": "2026-10-13" },
+
+    { "faroId": "FARO-2026-0002", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "controle", "value": 0.032, "n": 148210, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0002", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "a", "value": 0.03376, "n": 148455, "deltaRelative": 0.055, "probBetter": 0.97, "label": "melhora_confirmada", "mde": 0.06, "asOf": "2026-10-13" },
+
+    { "faroId": "FARO-2026-0003", "metricId": "adesao_repet", "platform": "all", "grain": "user", "variantKey": "controle", "value": 0.021, "n": 61340, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0003", "metricId": "adesao_repet", "platform": "all", "grain": "user", "variantKey": "a", "value": 0.02205, "n": 61102, "deltaRelative": 0.05, "probBetter": 0.86, "label": "tendencia_de_melhora", "mde": 0.12, "asOf": "2026-10-13" },
+
+    { "faroId": "FARO-2026-0004", "metricId": "ativacao_saude", "platform": "all", "grain": "user", "variantKey": "controle", "value": 0.015, "n": 49120, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0004", "metricId": "ativacao_saude", "platform": "all", "grain": "user", "variantKey": "a", "value": 0.0171, "n": 46410, "deltaRelative": 0.14, "probBetter": 0.91, "label": "tendencia_de_melhora", "mde": 0.16, "asOf": "2026-10-13" },
+
+    { "faroId": "FARO-2026-0006", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "controle", "value": 0.0397, "n": 30500, "asOf": "2026-09-30" },
+    { "faroId": "FARO-2026-0006", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "a", "value": 0.04419, "n": 30380, "deltaRelative": 0.113, "probBetter": 0.99, "label": "melhora_confirmada", "mde": 0.1, "asOf": "2026-09-30" },
+
+    { "faroId": "FARO-2026-0007", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "controle", "value": 0.041, "n": 40200, "asOf": "2026-10-13" },
+    { "faroId": "FARO-2026-0007", "metricId": "conversao", "platform": "all", "grain": "user", "variantKey": "a", "value": 0.04223, "n": 40070, "deltaRelative": 0.03, "probBetter": 0.72, "label": "sem_tendencia", "mde": 0.07, "asOf": "2026-10-13" }
+  ]
+}

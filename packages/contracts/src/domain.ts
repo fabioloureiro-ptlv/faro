@@ -133,6 +133,8 @@ export interface Decision {
   rationale: string;
   decidedBy: string;
   decidedAt: string;
+  /** Unificação (frente 2, PNL-10): onde o aprendizado foi publicado; só https. */
+  learningUrl?: string;
 }
 
 // ---- Acréscimos 0.1.0 (frente 1) ----

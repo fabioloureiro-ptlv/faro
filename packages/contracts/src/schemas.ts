@@ -86,6 +86,8 @@ export const DecisionSchema = z.object({
   rationale: z.string(),
   decidedBy: z.string(),
   decidedAt: isoDateTime,
+  /** Unificação (frente 2, PNL-10): onde o aprendizado foi publicado; só https. */
+  learningUrl: z.string().regex(/^https:\/\//, 'apenas URLs https').optional(),
 });
 
 export const ExperimentSchema = z.object({
