@@ -145,3 +145,21 @@ export interface ConsultasView {
   consultas: Consulta[];
   injetado: { campanha: string; inicio: string | null; fim: string | null; controle: string | null; norte: string; teste: number; testeNome: string | null }[];
 }
+
+export interface TesteNoMapa {
+  key: string;
+  campanha: string;
+  stream: 'web' | 'app';
+  bu: 'ecom' | 'saude' | 'fintech' | 'servicos' | 'ecossistema';
+  status: { key: StatusDy['key']; rotulo: string };
+  inicio: string;
+  fim: string;
+  paginas: string[];
+  base: number;
+}
+
+export interface MapaDy {
+  dadosAte: string;
+  paginas: { id: string; name: string; dailyUsers: number }[];
+  testes: TesteNoMapa[];
+}

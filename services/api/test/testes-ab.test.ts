@@ -6,6 +6,7 @@ import type { ResultsRow } from '../src/resultados/roadmap/types.ts';
 import { createResultsSource } from '../src/resultados/roadmap/source.ts';
 import { detalharDy, listarDy, recomendar } from '../src/testes-ab/dy.ts';
 import { METRICAS, metricaPorKey, significancia, statusDe } from '../src/testes-ab/metricas.ts';
+import { mapaDy, PAGINA_SEM_ID } from '../src/testes-ab/mapa.ts';
 import { carregarRoadmap, vinculosPorCampanha } from '../src/testes-ab/roadmap.ts';
 import { PM, setup, type Ctx } from './helpers.ts';
 
@@ -134,6 +135,33 @@ describe('Rodando no DY — detalhe', () => {
   });
 });
 
+describe('Mapa temporal só com a DY', () => {
+  const catalogo = [{ id: 'home', name: 'Home', dailyUsers: 100 }];
+
+  it('uma barra por campanha, com página do export e janela de leitura; sem página vai para a linha própria', () => {
+    const datas = rows.map((r) => ({ ...r, data_inicio_leitura: '2026-09-23', data_fim_leitura: '2026-10-08' }) as ResultsRow);
+    const m = mapaDy(datas, '2026-10-14', new Map([[CAMPANHA.toLowerCase(), { pages: ['home'] }]]), catalogo);
+    expect(m.testes.map((t) => t.campanha).sort()).toEqual([CAMPANHA, 'Nexus | Nova Home do App', 'Teste web'].sort());
+    const fide = m.testes.find((t) => t.campanha === CAMPANHA)!;
+    expect(fide).toMatchObject({ paginas: ['home'], inicio: '2026-09-23', fim: '2026-10-08', status: { key: 'saudavel' }, bu: 'ecom' });
+    const nexus = m.testes.find((t) => t.campanha.startsWith('Nexus'))!;
+    expect(nexus).toMatchObject({ paginas: [], status: { key: 'decidido' }, bu: 'ecossistema' });
+    expect(m.paginas.map((p) => p.id)).toEqual(['home', PAGINA_SEM_ID]);
+  });
+
+  it('página do export que não existe no catálogo vira "não identificada" em vez de sumir', () => {
+    const m = mapaDy(rows, '2026-10-14', new Map([[CAMPANHA.toLowerCase(), { pages: ['home', 'produto'] }]]), catalogo);
+    expect(m.testes.find((t) => t.campanha === CAMPANHA)?.paginas).toEqual(['home']);
+    const so = mapaDy(rows, '2026-10-14', new Map([[CAMPANHA.toLowerCase(), { pages: ['produto'] }]]), catalogo);
+    expect(so.testes.find((t) => t.campanha === CAMPANHA)?.paginas).toEqual([]);
+  });
+
+  it('sem datas de leitura usa o último dia de dados', () => {
+    const m = mapaDy(rows, '2026-10-14', new Map(), catalogo);
+    expect(m.testes.every((t) => t.inicio === '2026-10-14' && t.fim === '2026-10-14')).toBe(true);
+  });
+});
+
 describe('cadastro dos testes do roadmap', () => {
   it('são 21 testes, ids únicos, com os contadores do documento', () => {
     const c = carregarRoadmap();
@@ -168,6 +196,7 @@ describe('rotas /testes-ab', () => {
     const l = await ctx.app.inject({ url: '/testes-ab/dy', headers: PM });
     expect(l.statusCode).toBe(409);
     expect(l.json().error).toBe('sem_snapshot');
+    expect((await ctx.app.inject({ url: '/testes-ab/mapa', headers: PM })).statusCode).toBe(409);
     const rm = await ctx.app.inject({ url: '/testes-ab/roadmap', headers: PM });
     expect(rm.statusCode).toBe(200);
     expect(rm.json().contadores).toEqual({ desenhando: 9, pronto: 1, rodando: 7, concluido: 4 });
@@ -196,6 +225,10 @@ describe('rotas /testes-ab', () => {
     expect(t26.avisos).toEqual(['falta indicador', 'cenários']);
     const rodando = rm.testes.find((t: { id: number }) => t.id === 3);
     expect(rodando.diasEmCampo).toBe(16); // 29/09 → 14/10, inclusive
+
+    const mapa = (await ctx.app.inject({ url: '/testes-ab/mapa', headers: PM })).json();
+    expect(mapa.testes).toHaveLength(3); // as campanhas do snapshot; nenhum experimento do banco do Faro
+    expect(mapa.paginas.at(-1).id).toBe('sem_pagina');
 
     const c = (await ctx.app.inject({ url: '/testes-ab/consultas', headers: PM })).json();
     expect(c.consultas.map((q: { id: string }) => q.id)).toEqual(['results', 'discovery', 'daily']);

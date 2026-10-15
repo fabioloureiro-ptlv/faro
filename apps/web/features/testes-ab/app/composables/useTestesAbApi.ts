@@ -1,5 +1,5 @@
 // Cliente da API da aba Teste AB. Erros chegam como { error, message } (services/api/src/app.ts).
-import type { ConsultasView, DetalheDy, Grao, ListaDy, Resumo, RoadmapView, StreamFiltro } from './types';
+import type { ConsultasView, DetalheDy, Grao, ListaDy, MapaDy, Resumo, RoadmapView, StreamFiltro } from './types';
 
 export function useTestesAbApi() {
   const cfg = useRuntimeConfig().public;
@@ -13,6 +13,7 @@ export function useTestesAbApi() {
     dy: (q: { grao: Grao; stream: StreamFiltro; metrica?: string }) => get<ListaDy>('/dy', q),
     detalhe: (q: { campanha: string; stream: 'web' | 'app'; grao: Grao }) => get<DetalheDy>('/dy/detalhe', q),
     consultas: () => get<ConsultasView>('/consultas'),
+    mapa: () => get<MapaDy>('/mapa'),
     sql: (id: string) => $fetch<string>(`${cfg.apiBase}/testes-ab/consultas/${id}/sql`, { headers, responseType: 'text' }),
   };
 }

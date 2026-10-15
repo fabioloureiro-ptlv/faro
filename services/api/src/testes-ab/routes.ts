@@ -6,10 +6,12 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
+import { pagesFromCatalog, paginasDoExportDy } from '../painel/dataset.ts';
 import { REPO_ROOT } from '../resultados/roadmap/paths.ts';
 import { getResultsSource } from '../resultados/roadmap/source.ts';
 import { detalharDy, listarDy } from './dy.ts';
 import { METRICAS } from './metricas.ts';
+import { mapaDy } from './mapa.ts';
 import { carregarRoadmap, vinculosPorCampanha } from './roadmap.ts';
 import { CONSULTAS, resumo, visaoConsultas, visaoRoadmap } from './visoes.ts';
 
@@ -60,6 +62,13 @@ export async function testesAbRoutes(app: FastifyInstance) {
     const detalhe = detalharDy(snap.results, q.campanha, q.stream, q.grao, { ...(teste ? { teste } : {}), vinculos });
     if (!detalhe) throw new HttpError(404, 'nao_encontrado', 'Teste não encontrado no snapshot do DY.');
     return detalhe;
+  });
+
+  // Mapa temporal: só campanhas da DY, nunca os experimentos cadastrados no Faro.
+  app.get('/testes-ab/mapa', async (req) => {
+    requireActor(req);
+    const snap = snapshot();
+    return mapaDy(snap.results, snap.meta.dadosAte, paginasDoExportDy(), pagesFromCatalog());
   });
 
   app.get('/testes-ab/consultas', async (req) => {

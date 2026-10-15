@@ -87,7 +87,7 @@ function pickStream(streams: ('web' | 'app')[], exp: Experiment | undefined, row
 
 const STATUS_BY_ESTADO = (estado: string | undefined): ExperimentStatus =>
   estado === undefined ? 'rodando' : /^rodando/i.test(estado) ? 'rodando' : /^decidido/i.test(estado) ? 'decidido' : 'configurado_no_dy';
-const BU_BY_COL = (bu: string): Bu => {
+export const BU_BY_COL = (bu: string): Bu => {
   const b = bu.toLowerCase();
   if (b === 'cross' || b === 'ecossistema') return 'ecossistema';
   if (b.startsWith('servic')) return 'servicos';
