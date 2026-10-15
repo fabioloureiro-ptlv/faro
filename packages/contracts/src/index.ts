@@ -6,3 +6,4 @@ export * from './catalogs.ts';
 export * from './governance.ts';
 export * from './templates.ts';
 export * from './results.ts';
+export * from './roadmap-map.ts';

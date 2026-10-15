@@ -12,12 +12,12 @@ export function cupedAdjust(y: number[], x: number[]): CupedResult {
   const my = mean(y), mx = mean(x);
   let cov = 0, varX = 0, varY = 0;
   for (let i = 0; i < y.length; i++) {
-    cov += (x[i] - mx) * (y[i] - my);
-    varX += (x[i] - mx) ** 2;
-    varY += (y[i] - my) ** 2;
+    cov += (x[i]! - mx) * (y[i]! - my);
+    varX += (x[i]! - mx) ** 2;
+    varY += (y[i]! - my) ** 2;
   }
   const theta = varX > 0 ? cov / varX : 0;
-  const adjusted = y.map((yi, i) => yi - theta * (x[i] - mx));
+  const adjusted = y.map((yi, i) => yi - theta * (x[i]! - mx));
   const mAdj = mean(adjusted);
   const varAdj = adjusted.reduce((s, a) => s + (a - mAdj) ** 2, 0);
   return { theta, adjusted, varianceReduction: varY > 0 ? 1 - varAdj / varY : 0 };

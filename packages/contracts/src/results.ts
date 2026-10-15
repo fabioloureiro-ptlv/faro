@@ -121,11 +121,22 @@ export interface Funnel {
   rows: FunnelRow[];
 }
 
+/** 0.4.0 (E8): de onde veio a janela de leitura (`origem_datas` do roadmap). */
+export type ReadWindowOrigin = 'roadmap' | 'detectado' | 'periodo_inteiro';
+/** 0.4.0 (E8): quem montou a resposta. */
+export type ResultsSource = 'roadmap' | 'fixtures';
+
 export interface ResultsResponse {
   faroId: string;
   asOf: string; // data dos dados (D-1)
   fetchedAt?: string;
-  readWindow: { start: string; end: string };
+  readWindow: { start: string; end: string; origin?: ReadWindowOrigin };
+  /** 0.4.0 (E8): fonte dos números. Obrigatório, para a tela dizer de onde veio. */
+  source: ResultsSource;
+  /** 0.4.0 (E8): `status` da linha na consulta do roadmap (saudavel, decidido, volume baixo, split desigual). */
+  status?: string;
+  /** 0.4.0 (E8): guardrails que pioraram segundo o SQL (`guardas_piora`), como metricId. */
+  guardrailsWorse?: string[];
   grain: Grain;
   availableGrains: Grain[];
   platforms: (Platform | 'all')[];
@@ -149,6 +160,8 @@ export interface ResultsResponse {
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD');
 export const platformOrAllSchema = z.union([PlatformSchema, z.literal('all')]);
 export const grainSchema = z.enum(['user', 'session']);
+export const ReadWindowOriginSchema = z.enum(['roadmap', 'detectado', 'periodo_inteiro']);
+export const ResultsSourceSchema = z.enum(['roadmap', 'fixtures']);
 
 export const recommendationSchema = z.object({
   code: z.enum([
@@ -172,7 +185,10 @@ export const resultsResponseSchema: z.ZodType<ResultsResponse> = z.object({
   faroId: z.string(),
   asOf: isoDate,
   fetchedAt: z.string().optional(),
-  readWindow: z.object({ start: isoDate, end: isoDate }),
+  readWindow: z.object({ start: isoDate, end: isoDate, origin: ReadWindowOriginSchema.optional() }),
+  source: ResultsSourceSchema,
+  status: z.string().optional(),
+  guardrailsWorse: z.array(z.string()).optional(),
   grain: grainSchema,
   availableGrains: z.array(grainSchema).min(1),
   platforms: z.array(platformOrAllSchema).min(1),

@@ -14,8 +14,8 @@ export function srm(observed: number[], plannedShares: number[], options: { unst
   const observedShares = observed.map((x) => (total > 0 ? x / total : 0));
   let chi = 0;
   for (let i = 0; i < observed.length; i++) {
-    const expected = total * (plannedShares[i] / shareSum);
-    if (expected > 0) chi += (observed[i] - expected) ** 2 / expected;
+    const expected = total * (plannedShares[i]! / shareSum);
+    if (expected > 0) chi += (observed[i]! - expected) ** 2 / expected;
   }
   const df = observed.length - 1;
   const pValue = total > 0 ? chiSquareSurvival(chi, df) : 1;
