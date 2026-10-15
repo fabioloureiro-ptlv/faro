@@ -99,7 +99,7 @@ function pickShortcut(id: string) {
 
 // ---- Sugestão de datas (ajuste 15/10): pela duração mínima, com os testes interpostos.
 const dates = reactive({ data: null as DateSuggestion | null, busy: false, erro: '' });
-const canSuggest = computed(() => a.value.pages.length > 0 && a.value.platforms.length > 0);
+const canSuggest = computed(() => a.value.pages.length > 0);
 async function loadDates() {
   if (!canSuggest.value) return;
   dates.busy = true;
@@ -344,7 +344,7 @@ async function processar() {
           <b id="sugg-title" class="small">Sugestão de datas</b>
           <button type="button" class="btn ghost small" :disabled="!canSuggest || dates.busy" @click="loadDates">{{ dates.busy ? 'Calculando…' : 'Sugerir datas' }}</button>
         </div>
-        <p v-if="!canSuggest" class="small muted" style="margin: 6px 0 0">Escolha páginas e plataformas para sugerir o período.</p>
+        <p v-if="!canSuggest" class="small muted" style="margin: 6px 0 0">Escolha ao menos uma página para sugerir o período.</p>
         <p v-else-if="dates.erro" class="err" role="alert">{{ dates.erro }}</p>
         <template v-else-if="dates.data">
           <p class="small" style="margin: 6px 0 0">
@@ -353,12 +353,13 @@ async function processar() {
             <button type="button" class="chip add" style="margin-left: 6px" @click="applyDates(dates.data!)">Usar</button>
           </p>
           <template v-if="dates.data.overlapping.length">
-            <p class="small" style="margin: 8px 0 4px; color: var(--warn)"><b>Testes interpostos</b> nesse período, nas mesmas páginas e plataformas:</p>
+            <p class="small" style="margin: 8px 0 4px; color: var(--warn)"><b>Testes interpostos</b> nesse período, na mesma página:</p>
             <ul class="small" style="margin: 0; padding-left: 18px">
               <li v-for="b in dates.data.overlapping" :key="b.faroId">
                 {{ b.name }} · {{ fmtDate(b.startDate) }} → {{ fmtDate(b.endDate) }}<template v-if="b.endEstimated"> (fim estimado)</template>
-                <span v-if="b.source === 'dy'" class="pill warnp" title="Teste ativo na DY, visto no Acompanhamento">Na DY</span>
-                <span v-else class="muted">({{ b.faroId }})</span>
+                <span v-if="b.status === 'na_dy'" class="pill warnp" title="Teste ativo na DY, visto no Acompanhamento">Na DY</span>
+                <span v-else-if="b.status === 'em_design'" class="pill" title="Experimento do Faro em andamento, ainda não está na DY">Em design</span>
+                <span v-if="!b.faroId.startsWith('FARO-0000-')" class="muted">({{ b.faroId }})</span>
               </li>
             </ul>
             <p v-if="dates.data.freeWindow" class="small" style="margin: 8px 0 0">
@@ -369,8 +370,8 @@ async function processar() {
           </template>
           <p v-else class="small muted" style="margin: 6px 0 0">Nenhum teste interposto nesse período.</p>
           <p v-if="dates.data.dy" class="small muted" style="margin: 8px 0 0">
-            Considera também os testes ativos na DY que o Acompanhamento mostra (dados até {{ fmtDate(dates.data.dy.asOf) }}):
-            {{ dates.data.dy.considerados }} {{ dates.data.dy.considerados === 1 ? 'teste nas mesmas páginas e plataformas' : 'testes nas mesmas páginas e plataformas' }}.
+            Considera só os testes na mesma página que estão na DY, como o Acompanhamento mostra (dados até {{ fmtDate(dates.data.dy.asOf) }}):
+            {{ dates.data.dy.considerados }} {{ dates.data.dy.considerados === 1 ? 'teste' : 'testes' }}, mais os experimentos do Faro em andamento.
             Como a DY não informa a data de fim, assumimos mais 14 dias a partir do último dado.
             <template v-if="dates.data.dy.semPagina">
               {{ dates.data.dy.semPagina }} {{ dates.data.dy.semPagina === 1 ? 'teste ativo na DY não tem' : 'testes ativos na DY não têm' }} página identificada e não {{ dates.data.dy.semPagina === 1 ? 'entrou' : 'entraram' }} na conta.

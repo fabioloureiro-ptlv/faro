@@ -295,7 +295,8 @@ describe('sugestões de datas e de MDE (ajustes de produto 15/10)', () => {
   beforeEach(async () => (ctx = await setup({ seed: true })));
 
   it('sugere datas a partir da duração e lista os testes interpostos', async () => {
-    // Home no app cruza com o Nexus (FARO-2026-0001, até 30/11) e o Exemplo de saúde (FARO-2026-0004, 01/10 → 29/10).
+    // Só entram testes na mesma página que estão na DY ou em design: o Exemplo de saúde (0004, rodando, 01/10 → 29/10)
+    // e a recomendação de ração (0005, configurada na DY, até 18/11). O Nexus já foi decidido e fica de fora.
     const { experiment } = await readyDraft(ctx, { pages: ['home'], platforms: ['android', 'ios'], startDate: '', endDate: '' });
     const res = await ctx.app.inject({ url: `/experiments/${experiment.faroId}/date-suggestion`, headers: PM });
     expect(res.statusCode).toBe(200);
@@ -303,8 +304,10 @@ describe('sugestões de datas e de MDE (ajustes de produto 15/10)', () => {
     expect(s.startDate).toBe('2026-10-15'); // dia seguinte ao relógio do teste (14/10)
     expect(s.days % 7).toBe(0);
     expect(s.basedOn).toBe('amostra');
-    expect(s.overlapping.map((b: { faroId: string }) => b.faroId)).toEqual(expect.arrayContaining(['FARO-2026-0001', 'FARO-2026-0004']));
-    expect(s.freeWindow.startDate > '2026-11-30').toBe(true);
+    const faro = s.overlapping.filter((b: { faroId: string }) => b.faroId.startsWith('FARO-2026-'));
+    expect(faro.map((b: { faroId: string }) => b.faroId)).toEqual(['FARO-2026-0004', 'FARO-2026-0005']);
+    expect(faro.every((b: { status: string }) => b.status === 'na_dy')).toBe(true);
+    expect(s.freeWindow.startDate > '2026-11-18').toBe(true);
   });
 
   it('sugere o MDE pela base histórica da NORTE', async () => {

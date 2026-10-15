@@ -306,7 +306,7 @@ export function createExperimentService(db: Db, ports: Ports) {
 
     /**
      * Ajuste de produto 15/10: sugestão de datas a partir da duração mínima (CFG-08),
-     * com os testes interpostos (mesmas páginas e plataformas, ativos ou agendados).
+     * com os testes interpostos na mesma página (na DY ou em design, ver busy.ts).
      */
     async suggestDates(faroId: string) {
       const catalog = await ports.metrics.list();
@@ -315,7 +315,7 @@ export function createExperimentService(db: Db, ports: Ports) {
       const a = exp.allocation;
       // Mesma base do Acompanhamento: os experimentos do Faro e os testes ativos que ele lê da DY.
       const ds = await buildDataset(db);
-      const { busy, dy } = busyWindows({ experiments: ds.experiments, faroId, pages: a.pages, platforms: a.platforms, asOf: ds.asOf });
+      const { busy, dy } = busyWindows({ experiments: ds.experiments, faroId, pages: a.pages, asOf: ds.asOf });
       return { ...suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy }), dy };
     },
 
