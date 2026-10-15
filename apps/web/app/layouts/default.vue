@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useRoute } from '#imports';
 
-// Três destinos, nesta ordem: acompanhar os testes (painel e mapa), montar um novo (frente 1) e o catálogo de segmentos.
+// Destinos, nesta ordem: acompanhar os testes (painel e mapa), montar um novo (frente 1), o catálogo de segmentos e a aba experimental Teste AB.
 const route = useRoute();
 const under = (base: string) => route.path === base || route.path.startsWith(`${base}/`);
 const novoAtivo = computed(() => under('/configuracao'));
 const painelAtivo = computed(() => under('/painel'));
 const segmentoAtivo = computed(() => under('/segmento'));
+const testeAbAtivo = computed(() => under('/testes-ab'));
 </script>
 
 <template>
@@ -46,6 +47,13 @@ const segmentoAtivo = computed(() => under('/segmento'));
             <path d="M1.8 14.5c.4-2.4 2.3-3.8 4.7-3.8s4.3 1.4 4.7 3.8M11.2 11c2.2-.2 4.4.8 5 3.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" />
           </svg>
           <span>Segmentos</span>
+        </NuxtLink>
+        <NuxtLink to="/testes-ab" :class="{ active: testeAbAtivo }" :aria-current="testeAbAtivo ? 'page' : undefined">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M7 2.5h4M8 2.5v4.6L3.6 14a1.4 1.4 0 0 0 1.2 2.1h8.4a1.4 1.4 0 0 0 1.2-2.1L10 7.1V2.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M5.4 11.5h7.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          <span>Teste AB</span>
         </NuxtLink>
       </nav>
     </aside>
