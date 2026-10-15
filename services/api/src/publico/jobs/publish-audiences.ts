@@ -12,8 +12,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BigQuery } from '@google-cloud/bigquery';
-import { AudienceRuleSchema, AudienceShortcutSchema, type AudienceShortcut } from '@faro/contracts';
-import audiences from '@faro/contracts/fixtures/audiences.json' with { type: 'json' };
+import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
+import { allShortcuts } from '../custom.ts';
 import { audienceRuleToSql, PROJECT } from '../rule-sql.ts';
 
 const OUT_DIR = fileURLToPath(new URL('../../../.data/audiences', import.meta.url));
@@ -31,6 +31,8 @@ function sqlFor(a: AudienceShortcut): string | undefined {
     const raw = readFileSync(join(REPO_ROOT, a.sqlRef), 'utf-8');
     return `SELECT chv_cliente, cuid FROM (\n${raw.replace(/;\s*$/, '')}\n) WHERE cuid IS NOT NULL`;
   }
+  // SQL livre (segmento aprovado no artefato): 1 linha por cliente, com cuid; chv_cliente é opcional.
+  if (a.sql) return `SELECT * FROM (\n${a.sql.replace(/;\s*$/, '')}\n) WHERE cuid IS NOT NULL`;
   if (a.rule) return audienceRuleToSql(AudienceRuleSchema.parse(a.rule));
   return undefined;
 }
@@ -39,7 +41,7 @@ async function main() {
   const { only, dryRun, force } = args();
   const bq = new BigQuery({ projectId: PROJECT });
   mkdirSync(OUT_DIR, { recursive: true });
-  const list = (audiences as unknown[]).map((a) => AudienceShortcutSchema.parse(a));
+  const list = allShortcuts();
 
   for (const a of list) {
     if (only && a.id !== only) continue;
@@ -58,7 +60,10 @@ async function main() {
 
     const [rows] = await bq.query({ query: sql });
     const file = join(OUT_DIR, `${a.dyAttribute}.csv`);
-    const csv = ['chv_cliente,cuid', ...rows.map((r) => `${r.chv_cliente},${r.cuid}`)].join('\n');
+    const comChave = rows.length > 0 && 'chv_cliente' in rows[0]!;
+    const csv = comChave
+      ? ['chv_cliente,cuid', ...rows.map((r) => `${r.chv_cliente},${r.cuid}`)].join('\n')
+      : ['cuid', ...rows.map((r) => `${r.cuid}`)].join('\n');
     writeFileSync(file, csv, 'utf-8');
     console.log(`${a.id}: ${rows.length} clientes -> ${file}`);
   }

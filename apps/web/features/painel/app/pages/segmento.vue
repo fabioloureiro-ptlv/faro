@@ -21,6 +21,7 @@ const { data: catalogo, refresh } = await useAsyncData('segmentos', () => api.au
 const ORIGEM_LABEL: Record<string, string> = {
   'sql-versionado': 'SQL versionado',
   regra: 'Regra (SQL gerado)',
+  'sql-livre': 'SQL livre (artefato)',
   manual: 'Manual (sem regra)',
 };
 

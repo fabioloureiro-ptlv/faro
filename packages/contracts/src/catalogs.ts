@@ -26,6 +26,8 @@ export const AudienceShortcutSchema = z.object({
   disjointWith: z.array(z.string()).optional(),
   /** SQL versionado em data/models/audiences quando a regra não cabe no construtor. */
   sqlRef: z.string().optional(),
+  /** SQL livre guardado no catálogo (segmento aprovado fora do construtor). Sempre 1 linha por cliente, com `cuid`. */
+  sql: z.string().optional(),
 });
 
 /** Visão consumida pela frente 1. Provisório até a frente 5 publicar `Template`. */

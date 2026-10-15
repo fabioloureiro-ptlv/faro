@@ -5,7 +5,7 @@ Orquestração de testes A/B da Petlove sobre o Dynamic Yield — **repositório
 | Frente | O quê | Estado | Onde |
 |---|---|---|---|
 | 1 — Configuração | wizard, gate de design, amostra/duração, ficha do DY, D+1, legado | completa | `features/configuracao`, `services/api/src/experiments`, `packages/config-core` |
-| 2 — Painel | lista, detalhe, mapa, capacidade, órfãs, decisão/encerramento | portada; persiste no banco e lê o export real do DY | `features/painel`, `services/api/src/painel` |
+| 2 — Painel | lista, detalhe, mapa, decisão/encerramento | portada; persiste no banco e lê o export real do DY | `features/painel`, `services/api/src/painel` |
 | 3 — Segmentação | atalhos com regra, motor de sobreposição, regra→SQL, publicação DY | núcleo real (origem: repo segmentacao-ab) | `services/api/src/publico`, `data/models/audiences` |
 | 4 — Métricas | resultados reais por teste (dy_results.sql v3), stats puro | MVP: sync + API + painel com NORTE real | `data/models/results`, `services/api/src/resultados`, `packages/stats` |
 | 5 — Templates | biblioteca de 8 templates + template de relatório | MVP como dados | `fixtures/campaign-templates.json`, `services/api/src/templates` |
@@ -41,9 +41,11 @@ npm test && npm run typecheck && npm run lint
 
 ## Segmentos novos
 
-O catálogo (fixture + importados) aparece em `/segmento`. Um segmento novo nasce no artefato **Segmentos Faro** (claude.ai): a pessoa descreve o público em texto corrido, o Claude sugere a **regra** (`AudienceRule`), o artefato gera a query, roda a volumetria no BigQuery e, aprovado, salva no catálogo do artefato. Para usar no Faro: no artefato, *Exportar para o Faro*; em `/segmento`, colar o JSON em *Importar do artefato* (`POST /publico/audiences/import`). A regra é revalidada e o SQL regenerado pelo gerador do Faro (`publico/rule-sql.ts`); o que já existe ou não compila volta em `ignorados`. O segmento importado aparece na etapa de Público do wizard.
+O catálogo (fixture + importados) aparece em `/segmento`. Um segmento novo nasce no artefato **Segmentos Faro** (claude.ai): a pessoa descreve o público em texto corrido, o Claude consulta o catálogo de dados (OpenMetadata e BigQuery, via conectores locais do app) e escreve uma **query livre**, o artefato valida (dry run), roda a volumetria e, aprovado, salva no catálogo do artefato. A única exigência de forma: **uma linha por indivíduo, com `cuid`** (`dim_cliente.public_id`); o artefato bloqueia a aprovação se a contagem mostrar linhas duplicadas ou `cuid` nulo.
 
-O artefato embute uma porta JS do gerador de SQL; depois de mexer em `rule-sql.ts`, rode `node services/api/scripts/check-artifact-sql.ts <segmentos-faro.html>` para conferir que as duas continuam idênticas, e `node services/api/scripts/export-catalog-seed.ts <pasta>` para regerar o catálogo inicial do artefato.
+Para usar no Faro: no artefato, *Exportar para o Faro*; em `/segmento`, colar o JSON em *Importar do artefato* (`POST /publico/audiences/import`). Itens com `sql` passam pela guarda estática (`publico/sql-guard.ts`: só `SELECT`/`WITH`, um comando, coluna `cuid`) e por um dry run no BigQuery que confere as colunas; itens com `rule` têm o SQL regenerado pelo gerador do Faro (`publico/rule-sql.ts`). O que já existe ou não passa volta em `ignorados`. O segmento importado aparece na etapa de Público do wizard e é publicável por `job:publish-audiences`.
+
+O artefato embute uma cópia da guarda de SQL; depois de mexer em `sql-guard.ts`, rode `node services/api/scripts/check-artifact-sql.ts <segmentos-faro.html>` para conferir que as duas continuam idênticas, e `node services/api/scripts/export-catalog-seed.ts <pasta>` para regerar o catálogo inicial do artefato.
 
 Se o banco local (`services/api/.data/pglite`) ficar ilegível por um encerramento brusco, a API o guarda em `pglite-corrompido-<data>` e recria a partir das fixtures; rascunhos locais se perdem.
 

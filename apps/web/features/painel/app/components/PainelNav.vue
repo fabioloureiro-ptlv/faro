@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useRoute } from '#imports';
 
-// Alterna entre as visões do painel preservando a BU escolhida (capacidade e segmentos são globais).
+// Alterna entre as visões do painel preservando a BU escolhida (segmentos é global).
 const route = useRoute();
 const query = computed(() => (route.query.bu ? { bu: route.query.bu } : {}));
 </script>
@@ -12,9 +12,6 @@ const query = computed(() => (route.query.bu ? { bu: route.query.bu } : {}));
     <NuxtLink :to="{ path: '/painel', query }" :class="{ on: route.path === '/painel' }">Lista</NuxtLink>
     <NuxtLink :to="{ path: '/painel/mapa', query }" :class="{ on: route.path === '/painel/mapa' }">
       Mapa temporal
-    </NuxtLink>
-    <NuxtLink to="/painel/capacidade" :class="{ on: route.path === '/painel/capacidade' }">
-      Capacidade
     </NuxtLink>
     <NuxtLink to="/segmento" :class="{ on: route.path === '/segmento' }">Segmentos</NuxtLink>
   </nav>

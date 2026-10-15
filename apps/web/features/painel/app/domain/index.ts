@@ -6,4 +6,3 @@ export * from './rows';
 export * from './labels';
 export * from './detail';
 export * from './time-map';
-export * from './capacity';

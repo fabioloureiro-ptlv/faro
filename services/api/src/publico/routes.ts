@@ -10,18 +10,28 @@ import { AudienceRuleSchema, type AudienceShortcut } from '@faro/contracts';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
 import { addCustomShortcut, allShortcuts } from './custom.ts';
-import { BASE_CLIENTES, buildShortcut, ImportPayloadSchema, planImport } from './import.ts';
+import { BASE_CLIENTES, buildShortcut, ImportPayloadSchema, planImport, verifySqlSegments } from './import.ts';
 import { audienceRuleToSql, PROJECT } from './rule-sql.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../../..', import.meta.url));
 
-function sqlFor(a: AudienceShortcut): { sql: string; source: 'rule' | 'sqlRef' } | undefined {
+function sqlFor(a: AudienceShortcut): { sql: string; source: 'rule' | 'sqlRef' | 'sql' } | undefined {
   if (a.sqlRef) {
     const raw = readFileSync(join(REPO_ROOT, a.sqlRef), 'utf-8');
     return { sql: raw, source: 'sqlRef' };
   }
+  if (a.sql) return { sql: a.sql, source: 'sql' };
   if (a.rule) return { sql: audienceRuleToSql(AudienceRuleSchema.parse(a.rule)), source: 'rule' };
   return undefined;
+}
+
+/** Colunas do resultado de uma query (dry run, sem custo): confere o grão exigido do segmento. */
+async function dryRunColumns(sql: string): Promise<string[]> {
+  const { BigQuery } = await import('@google-cloud/bigquery');
+  const bq = new BigQuery({ projectId: PROJECT });
+  const [job] = await bq.createQueryJob({ query: sql, dryRun: true });
+  const fields = (job.metadata.statistics?.query?.schema?.fields ?? []) as { name: string }[];
+  return fields.map((f) => f.name);
 }
 
 function countable(sql: string): string {
@@ -69,7 +79,7 @@ export async function publicoRoutes(app: FastifyInstance) {
     requireActor(req);
     return allShortcuts().map((s) => ({
       ...s,
-      origem: s.sqlRef ? 'sql-versionado' : s.rule ? 'regra' : 'manual',
+      origem: s.sqlRef ? 'sql-versionado' : s.sql ? 'sql-livre' : s.rule ? 'regra' : 'manual',
     }));
   });
 
@@ -126,7 +136,7 @@ export async function publicoRoutes(app: FastifyInstance) {
     if (!parsed.success)
       throw new HttpError(400, 'formato_invalido', 'Envie uma lista de segmentos ou { "segmentos": [...] }.');
     if (!parsed.data.length) throw new HttpError(400, 'lote_vazio', 'Nenhum segmento no JSON.');
-    const plan = planImport(parsed.data, allShortcuts());
+    const plan = await verifySqlSegments(planImport(parsed.data, allShortcuts()), dryRunColumns);
     return { importados: plan.novos.map((s) => addCustomShortcut(s)), ignorados: plan.ignorados };
   });
 }

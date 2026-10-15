@@ -1,27 +1,29 @@
-// Garante que a porta JS do gerador de SQL, embutida no artefato "Segmentos", continua
-// idêntica a audienceRuleToSql. Uso: node scripts/check-artifact-sql.ts <segmentos-faro.html>
+// Garante que a guarda de SQL embutida no artefato "Segmentos" continua idêntica a
+// guardAudienceSql. Uso: node scripts/check-artifact-sql.ts <segmentos-faro.html>
 import { readFileSync } from 'node:fs';
-import { audienceRuleToSql } from '../src/publico/rule-sql.ts';
-import type { AudienceRule } from '@faro/contracts';
+import { guardAudienceSql } from '../src/publico/sql-guard.ts';
 
 const html = readFileSync(process.argv[2]!, 'utf-8');
-const start = html.indexOf('function esc(');
-const end = html.indexOf('// Mesmas regras do AudienceRuleSchema');
-if (start < 0 || end < 0) throw new Error('Marcadores do gerador não encontrados no HTML.');
-const port = new Function(
-  `var PROJECT = 'petlove-dataeng-prod-01'; ${html.slice(start, end)}; return audienceSql;`,
-)() as (r: AudienceRule) => string;
+const start = html.indexOf('// guarda:inicio');
+const end = html.indexOf('// guarda:fim');
+if (start < 0 || end < 0) throw new Error('Marcadores da guarda não encontrados no HTML.');
+const port = new Function(`${html.slice(start, end)}; return guardSql;`)() as (sql: string) => string | null;
 
-const rules: AudienceRule[] = [
-  { op: 'and', conditions: [{ type: 'comprou', dimension: 'categoria', values: ['cachorro/racoes', "d'ouro"], windowDays: 180 }, { type: 'propriedade', key: 'especie_pet', op: 'eq', values: ['gato', 'cachorro'] }] },
-  { op: 'or', conditions: [{ type: 'comprou', dimension: 'marca', values: ['golden'], windowDays: 30 }, { type: 'comprou', dimension: 'item', values: ['A1', 'B2'], windowDays: 365 }] },
-  { op: 'and', conditions: [{ type: 'evento', eventName: 'add_to_cart', windowDays: 30, minCount: 3 }, { type: 'propriedade', key: 'clube', op: 'neq', values: ['1'] }, { type: 'propriedade', key: 'plano_saude', op: 'eq', values: ['1'] }] },
-  { op: 'and', conditions: [{ type: 'comprou', dimension: 'categoria', values: ["x\\' OR 1=1 --"], windowDays: 7 }, { type: 'evento', eventName: "e'v", windowDays: 7 }] },
+const casos = [
+  'SELECT public_id AS cuid FROM `p.d.t`',
+  'WITH a AS (SELECT 1) SELECT cuid FROM a;',
+  '',
+  'SELECT 1; SELECT cuid FROM t',
+  'DELETE FROM `x.y.z` WHERE cuid IS NOT NULL',
+  'SELECT cuid FROM t WHERE x IN (SELECT 1) UNION ALL SELECT cuid FROM (DROP TABLE a)',
+  'SELECT chv_cliente FROM t',
+  "-- cria lista de update\nSELECT public_id AS cuid, 'drop table' AS nota, dt_update, `p.d.create_log` FROM `p.d.t`",
+  'SELECT /* insert */ cuid FROM t',
 ];
 let ok = true;
-rules.forEach((r, i) => {
-  const same = port(r) === audienceRuleToSql(r);
-  ok &&= same;
-  console.log(`regra ${i + 1}: ${same ? 'idêntico' : 'DIFERENTE'}`);
-});
+for (const c of casos) {
+  const igual = port(c) === guardAudienceSql(c);
+  ok &&= igual;
+  console.log(`${igual ? 'idêntico' : 'DIFERENTE'}: ${JSON.stringify(c.slice(0, 50))}`);
+}
 if (!ok) process.exit(1);

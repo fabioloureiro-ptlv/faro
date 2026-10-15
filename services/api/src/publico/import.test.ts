@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AudienceRule, AudienceShortcut } from '@faro/contracts';
-import { BASE_CLIENTES, planImport } from './import.ts';
+import { BASE_CLIENTES, planImport, verifySqlSegments } from './import.ts';
 import { audienceRuleToSql } from './rule-sql.ts';
 
 const rule = (values: string[]): AudienceRule => ({
@@ -49,6 +49,69 @@ describe('importação de segmentos do artefato', () => {
     );
     expect(plan.novos).toEqual([]);
     expect(plan.ignorados.map((i) => i.motivo)).toEqual(['formato_invalido', 'regra_nao_suportada']);
+  });
+});
+
+const SQL_OK = `SELECT c.chv_cliente, c.public_id AS cuid
+FROM \`petlove-dataeng-prod-01.dw_corporativo.dim_cliente\` c
+WHERE c.public_id IS NOT NULL AND c.fl_plano_ativo_saude = 1`;
+
+describe('importação de SQL livre', () => {
+  it('guarda o SQL no atalho e exige a volumetria', () => {
+    const plan = planImport([{ name: 'Inadimplentes há mais de 60 dias', sql: SQL_OK, clientes: 4200 }], existing);
+    expect(plan.ignorados).toEqual([]);
+    expect(plan.novos[0]).toMatchObject({ id: 'inadimplentes-ha-mais-de-60-dias', sql: SQL_OK });
+    expect(plan.novos[0]?.rule).toBeUndefined();
+
+    const semVolumetria = planImport([{ name: 'Inadimplentes há mais de 60 dias', sql: SQL_OK }], existing);
+    expect(semVolumetria.ignorados[0]?.motivo).toBe('formato_invalido');
+  });
+
+  it('com regra e SQL no mesmo item, vale a regra (SQL regenerado)', () => {
+    const plan = planImport([{ name: 'Regra e SQL juntos', rule: rule(['racao']), sql: 'SELECT 1', clientes: 10 }], existing);
+    expect(plan.novos[0]?.sql).toBeUndefined();
+    expect(plan.novos[0]?.rule).toBeDefined();
+  });
+
+  it('barra comando que escreve, vários comandos e query sem cuid', () => {
+    const casos: [string, RegExp][] = [
+      ['DELETE FROM `x.y.z` WHERE true', /SELECT ou WITH/],
+      [`${SQL_OK}; DROP TABLE x`, /um comando/],
+      ['SELECT cuid FROM t WHERE 1=1 AND (SELECT 1 FROM u) IN (SELECT 1) UNION ALL SELECT cuid FROM (DROP TABLE a)', /DROP/],
+      ['SELECT chv_cliente FROM `p.d.t`', /cuid/],
+    ];
+    for (const [sql, msg] of casos) {
+      const plan = planImport([{ name: 'Segmento de teste', sql, clientes: 1 }], []);
+      expect(plan.novos).toEqual([]);
+      expect(plan.ignorados[0]?.detalhe).toMatch(msg);
+    }
+  });
+
+  it('palavra-chave dentro de string, comentário ou nome de coluna não conta', () => {
+    const sql = `-- cria lista de update
+SELECT public_id AS cuid, 'drop table' AS nota, dt_update, \`p.d.create_log\`
+FROM \`p.d.t\``;
+    expect(planImport([{ name: 'Segmento com palavras', sql, clientes: 1 }], []).ignorados).toEqual([]);
+  });
+
+  it('o dry run recusa query sem cuid ou que não compila', async () => {
+    const plan = planImport(
+      [
+        { name: 'Com cuid certinho', sql: SQL_OK, clientes: 10 },
+        { name: 'Sem cuid no resultado', sql: 'SELECT chv_cliente, public_id AS cuid FROM t', clientes: 10 },
+        { name: 'Que nao compila nada', sql: 'SELECT cuid FROM tabela_que_nao_existe', clientes: 10 },
+      ],
+      [],
+    );
+    const dryRun = async (sql: string) => {
+      if (sql.includes('tabela_que_nao_existe')) throw new Error('Not found: Table');
+      return sql.includes('chv_cliente, public_id') ? ['chv_cliente', 'id'] : ['chv_cliente', 'cuid'];
+    };
+    const out = await verifySqlSegments(plan, dryRun);
+    expect(out.novos.map((s) => s.name)).toEqual(['Com cuid certinho']);
+    expect(out.ignorados.map((i) => i.motivo)).toEqual(['sql_invalido', 'sql_invalido']);
+    expect(out.ignorados[0]?.detalhe).toMatch(/não devolve a coluna cuid/);
+    expect(out.ignorados[1]?.detalhe).toMatch(/BigQuery recusou/);
   });
 });
 
