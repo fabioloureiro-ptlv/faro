@@ -1,0 +1,1225 @@
+{
+  "source": "Export D-1 do Dynamic Yield de 13/10/2026, copiado do protótipo (docs/prototipo/faro-prototipo.html).",
+  "experiment": {
+    "faroId": "FARO-2026-0001",
+    "name": "Nexus | Nova Home do App",
+    "bu": "ecossistema",
+    "ownerSquad": "Nexus",
+    "ownerEmail": "nexus@example.com",
+    "status": "decidido",
+    "design": {
+      "context": "",
+      "hypothesis": {
+        "change": "a nova home do app substituir a antiga",
+        "expectedEffect": "a receita por usuário vai aumentar",
+        "because": ""
+      },
+      "control": {
+        "name": "home antiga",
+        "description": "home antiga"
+      },
+      "variants": [
+        {
+          "key": "a",
+          "name": "home nova",
+          "description": "home nova"
+        }
+      ],
+      "primaryMetricId": "receita_por_usuario",
+      "secondaryMetricIds": [
+        "conversao_carrinho",
+        "ticket_medio",
+        "conversao_repet_nova"
+      ],
+      "guardrailMetricIds": [
+        "conversao",
+        "margem_2_por_usuario"
+      ],
+      "mdeRelative": 0.05
+    },
+    "audience": {
+      "description": "Todos os clientes",
+      "source": "manual",
+      "estimatedShare": 1
+    },
+    "allocation": {
+      "platforms": [
+        "android",
+        "ios"
+      ],
+      "pages": [
+        "home"
+      ],
+      "trafficPercent": 100,
+      "split": [
+        0.02,
+        0.98
+      ],
+      "startDate": "2026-08-12",
+      "endDate": "2026-11-30"
+    },
+    "dy": {
+      "campaignName": "Nexus | Nova Home do App",
+      "campaignId": "dy-nexus-home-app",
+      "campaignType": "api_custom",
+      "labels": [
+        "faro:FARO-2026-0001"
+      ],
+      "configuredAt": "2026-08-12T09:00:00-03:00",
+      "configuredBy": "importacao-legado"
+    },
+    "legacy": true,
+    "createdAt": "2026-10-14T09:40:00-03:00",
+    "updatedAt": "2026-10-14T09:40:00-03:00"
+  },
+  "dyExport": {
+    "campaignId": "dy-nexus-home-app",
+    "campaignName": "Nexus | Nova Home do App",
+    "labels": [],
+    "refdate": "2026-10-13",
+    "variations": [
+      {
+        "name": "home antiga",
+        "users": 21379
+      },
+      {
+        "name": "home nova",
+        "users": 1100094
+      }
+    ],
+    "observedSplit": [
+      0.0191,
+      0.9809
+    ],
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "firstSeen": "2026-08-12"
+  },
+  "health": {
+    "contaminatedUsers": 26016,
+    "contaminatedShare": 0.023,
+    "unstableSplitDays": 6,
+    "unstableSplitWindowDays": 90,
+    "readWindow": {
+      "from": "2026-08-31",
+      "to": "2026-10-12"
+    },
+    "dailyExposures": [
+      {
+        "date": "2026-09-30",
+        "controle": 350,
+        "a": 17500
+      },
+      {
+        "date": "2026-10-01",
+        "controle": 330,
+        "a": 16500
+      },
+      {
+        "date": "2026-10-02",
+        "controle": 300,
+        "a": 15000
+      },
+      {
+        "date": "2026-10-03",
+        "controle": 285,
+        "a": 14200
+      },
+      {
+        "date": "2026-10-04",
+        "controle": 220,
+        "a": 11000
+      },
+      {
+        "date": "2026-10-05",
+        "controle": 270,
+        "a": 13500
+      },
+      {
+        "date": "2026-10-06",
+        "controle": 250,
+        "a": 12500
+      },
+      {
+        "date": "2026-10-07",
+        "controle": 240,
+        "a": 12000
+      },
+      {
+        "date": "2026-10-08",
+        "controle": 220,
+        "a": 11000
+      },
+      {
+        "date": "2026-10-09",
+        "controle": 210,
+        "a": 10500
+      },
+      {
+        "date": "2026-10-10",
+        "controle": 200,
+        "a": 10000
+      },
+      {
+        "date": "2026-10-11",
+        "controle": 190,
+        "a": 9500
+      },
+      {
+        "date": "2026-10-12",
+        "controle": 120,
+        "a": 6000
+      },
+      {
+        "date": "2026-10-13",
+        "controle": 80,
+        "a": 4000
+      }
+    ],
+    "dailyExposuresNote": "Valores aproximados, lidos do gráfico do visualizador."
+  },
+  "results": [
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 21.83,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 88.2,
+      "n": 1100094,
+      "deltaRelative": 1.081,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.045,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0746,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.2549,
+      "n": 1100094,
+      "deltaRelative": 2.413,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.068,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0933,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.4221,
+      "n": 1100094,
+      "deltaRelative": 1.105,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.034,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 233.95,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 208.97,
+      "n": 1100094,
+      "deltaRelative": -0.107,
+      "probBetter": 0,
+      "label": "queda_confirmada",
+      "mde": 0.056,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 29.18,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 111.85,
+      "n": 1100094,
+      "deltaRelative": 0.922,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.054,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 3.99,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 13.08,
+      "n": 1100094,
+      "deltaRelative": 0.767,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.068,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.1013,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.3062,
+      "n": 1100094,
+      "deltaRelative": 2.022,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.057,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0002,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0022,
+      "n": 1100094,
+      "deltaRelative": 6.816,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "mde": 1.144,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.003,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0112,
+      "n": 1100094,
+      "deltaRelative": 2.673,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.348,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.66,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 2.57,
+      "n": 1100094,
+      "deltaRelative": 2.886,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "mde": 0.42,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0363,
+      "n": 1100094,
+      "deltaRelative": 1.398,
+      "probBetter": 0.19,
+      "label": "sem_tendencia",
+      "mde": 2.782,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 1100094,
+      "deltaRelative": -0.747,
+      "probBetter": 0.09,
+      "label": "tendencia_de_queda",
+      "mde": 2.906,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 1100094,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 1100094,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": null,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 158.59,
+      "n": 1100094,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": null,
+      "n": 21379,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "all",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 1100094,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 13.28,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 80.23,
+      "n": 592676,
+      "deltaRelative": 1.383,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0474,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.2368,
+      "n": 592676,
+      "deltaRelative": 3.984,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0595,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.3931,
+      "n": 592676,
+      "deltaRelative": 1.362,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 223.03,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 204.1,
+      "n": 592676,
+      "deltaRelative": -0.085,
+      "probBetter": 0.02,
+      "label": "queda_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 17.69,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 103.35,
+      "n": 592676,
+      "deltaRelative": 1.228,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 2.29,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 11.67,
+      "n": 592676,
+      "deltaRelative": 1.063,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0778,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.2922,
+      "n": 592676,
+      "deltaRelative": 2.749,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0001,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0021,
+      "n": 592676,
+      "deltaRelative": 7.791,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0012,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0108,
+      "n": 592676,
+      "deltaRelative": 7.277,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.22,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 2.42,
+      "n": 592676,
+      "deltaRelative": 10.099,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0395,
+      "n": 592676,
+      "deltaRelative": -0.524,
+      "probBetter": 0.78,
+      "label": "sem_tendencia",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 592676,
+      "deltaRelative": -0.986,
+      "probBetter": 0,
+      "label": "tendencia_de_queda",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 592676,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 8415,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "android",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 592676,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 27.38,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 97.51,
+      "n": 507418,
+      "deltaRelative": 1.008,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0923,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.2761,
+      "n": 507418,
+      "deltaRelative": 1.988,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.1152,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "transacoes_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.456,
+      "n": 507418,
+      "deltaRelative": 1.03,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 237.62,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_medio",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 213.87,
+      "n": 507418,
+      "deltaRelative": -0.1,
+      "probBetter": 0,
+      "label": "queda_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 36.65,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_faturada_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 121.77,
+      "n": 507418,
+      "deltaRelative": 0.826,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 5.09,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "margem_2_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 14.72,
+      "n": 507418,
+      "deltaRelative": 0.705,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.1165,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_carrinho",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.3225,
+      "n": 507418,
+      "deltaRelative": 1.768,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0003,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_repet_nova",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0023,
+      "n": 507418,
+      "deltaRelative": 5.01,
+      "probBetter": 1,
+      "label": "tendencia_de_melhora",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.0042,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_clube",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0116,
+      "n": 507418,
+      "deltaRelative": 1.73,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0.95,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_clube_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 2.75,
+      "n": 507418,
+      "deltaRelative": 1.895,
+      "probBetter": 1,
+      "label": "melhora_confirmada",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_clube",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0.0327,
+      "n": 507418,
+      "deltaRelative": 0.841,
+      "probBetter": 0.27,
+      "label": "sem_tendencia",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "conversao_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 507418,
+      "deltaRelative": -0.668,
+      "probBetter": 0.14,
+      "label": "tendencia_de_queda",
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "vidas_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 507418,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": 0,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "receita_saude_por_usuario",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 507418,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": null,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "ticket_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 158.59,
+      "n": 507418,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "controle",
+      "value": null,
+      "n": 12964,
+      "asOf": "2026-10-13"
+    },
+    {
+      "faroId": "FARO-2026-0001",
+      "metricId": "churn_saude",
+      "platform": "ios",
+      "grain": "user",
+      "variantKey": "a",
+      "value": 0,
+      "n": 507418,
+      "asOf": "2026-10-13"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@faro/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0"
+  }
+}

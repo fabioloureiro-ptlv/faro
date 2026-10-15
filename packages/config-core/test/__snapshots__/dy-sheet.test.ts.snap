@@ -1,0 +1,180 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ficha do DY (CFG-11) > snapshot JSON e Markdown 1`] = `
+{
+  "blocks": [
+    {
+      "key": "campaign_name",
+      "label": "Nome da campanha",
+      "value": "FARO-2026-0042 | Selo de entrega rápida na busca",
+    },
+    {
+      "hint": "Um label por linha. O label faro: é o que liga a campanha ao Faro.",
+      "key": "labels",
+      "label": "Labels",
+      "value": "faro:FARO-2026-0042
+bu:ecom
+squad:Squad Descoberta",
+    },
+    {
+      "key": "campaign_type",
+      "label": "Tipo de campanha",
+      "value": "API Custom",
+    },
+    {
+      "hint": "O mesmo identificador que o time de front/app usa para pedir a variação.",
+      "key": "selector",
+      "label": "API selector",
+      "value": "faro-2026-0042",
+    },
+    {
+      "key": "pages",
+      "label": "Páginas",
+      "value": "Home (home)
+Busca (busca)",
+    },
+    {
+      "key": "platforms",
+      "label": "Plataformas",
+      "value": "App Android
+App iOS",
+    },
+    {
+      "hint": "Tutores de cães",
+      "key": "audience",
+      "label": "Regra de público",
+      "value": "faro_publico_caes = true",
+    },
+    {
+      "key": "traffic",
+      "label": "Tráfego alocado",
+      "value": "30%",
+    },
+    {
+      "hint": "Crie as variações com estes nomes, nesta ordem.",
+      "key": "variations",
+      "label": "Variações",
+      "value": "FARO-2026-0042:controle
+FARO-2026-0042:a",
+    },
+    {
+      "key": "split",
+      "label": "Split e controle",
+      "value": "FARO-2026-0042:controle: 50%
+FARO-2026-0042:a: 50%
+Controle: FARO-2026-0042:controle",
+    },
+    {
+      "hint": "NORTE no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.",
+      "key": "primary_metric",
+      "label": "Métrica primária no DY",
+      "value": "Add to Cart",
+    },
+    {
+      "key": "dates",
+      "label": "Datas",
+      "value": "Início: 19/10/2026
+Fim: 09/11/2026",
+    },
+  ],
+  "faroId": "FARO-2026-0042",
+  "generatedAt": "2026-10-14T10:00:00-03:00",
+}
+`;
+
+exports[`ficha do DY (CFG-11) > snapshot JSON e Markdown 2`] = `
+"# Ficha de configuração do DY — FARO-2026-0042
+
+Gerada em 2026-10-14T10:00:00-03:00.
+
+## Nome da campanha
+
+\`\`\`
+FARO-2026-0042 | Selo de entrega rápida na busca
+\`\`\`
+
+## Labels
+
+\`\`\`
+faro:FARO-2026-0042
+bu:ecom
+squad:Squad Descoberta
+\`\`\`
+
+> Um label por linha. O label faro: é o que liga a campanha ao Faro.
+
+## Tipo de campanha
+
+\`\`\`
+API Custom
+\`\`\`
+
+## API selector
+
+\`\`\`
+faro-2026-0042
+\`\`\`
+
+> O mesmo identificador que o time de front/app usa para pedir a variação.
+
+## Páginas
+
+\`\`\`
+Home (home)
+Busca (busca)
+\`\`\`
+
+## Plataformas
+
+\`\`\`
+App Android
+App iOS
+\`\`\`
+
+## Regra de público
+
+\`\`\`
+faro_publico_caes = true
+\`\`\`
+
+> Tutores de cães
+
+## Tráfego alocado
+
+\`\`\`
+30%
+\`\`\`
+
+## Variações
+
+\`\`\`
+FARO-2026-0042:controle
+FARO-2026-0042:a
+\`\`\`
+
+> Crie as variações com estes nomes, nesta ordem.
+
+## Split e controle
+
+\`\`\`
+FARO-2026-0042:controle: 50%
+FARO-2026-0042:a: 50%
+Controle: FARO-2026-0042:controle
+\`\`\`
+
+## Métrica primária no DY
+
+\`\`\`
+Add to Cart
+\`\`\`
+
+> NORTE no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.
+
+## Datas
+
+\`\`\`
+Início: 19/10/2026
+Fim: 09/11/2026
+\`\`\`
+"
+`;

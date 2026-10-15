@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Faro · Orquestração de testes A/B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF9FE;--surface:#FFFFFF;--ink:#24123A;--muted:#6E6280;--line:#E6DEF0;
+  --brand:#6B3FA0;--on-brand:#FFFFFF;--brand-soft:#EFE7F8;
+  --gate:#FFC93C;--gate-ink:#3D2A00;--gate-soft:#FFF6DB;
+  --risk:#C9353C;--risk-soft:#FDECEC;--ok:#2B8559;--ok-soft:#E3F3EA;--warn:#9A6410;--warn-soft:#FFF2D6;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#150B21;--surface:#1F132E;--ink:#F1EAF9;--muted:#A99BBB;--line:#352648;
+  --brand:#B892EA;--on-brand:#1A0E28;--brand-soft:#2C1D40;
+  --gate:#FFC93C;--gate-ink:#2A1C00;--gate-soft:#3A2E10;
+  --risk:#FF7A7F;--risk-soft:#3A1A24;--ok:#63CC98;--ok-soft:#16302A;--warn:#F2B544;--warn-soft:#33280F;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#150B21;--surface:#1F132E;--ink:#F1EAF9;--muted:#A99BBB;--line:#352648;
+  --brand:#B892EA;--on-brand:#1A0E28;--brand-soft:#2C1D40;
+  --gate:#FFC93C;--gate-ink:#2A1C00;--gate-soft:#3A2E10;
+  --risk:#FF7A7F;--risk-soft:#3A1A24;--ok:#63CC98;--ok-soft:#16302A;--warn:#F2B544;--warn-soft:#33280F;color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+aside{border-right:1px solid var(--line);padding:28px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:28px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.02em}
+.logo svg{flex:none}
+.logo small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:10px;font-weight:500;color:var(--muted)}
+nav button:hover{color:var(--ink);background:var(--brand-soft)}
+nav button[aria-current="true"]{color:var(--ink);background:var(--brand-soft);font-weight:700}
+nav button:focus-visible{outline:2px solid var(--brand)}
+.side-note{margin-top:auto;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+main{padding:36px clamp(18px,4vw,48px) 80px;max-width:1180px;width:100%}
+h1{font-size:clamp(26px,3vw,34px);line-height:1.15;letter-spacing:-.025em;margin:0 0 6px;font-weight:800}
+h2{font-size:19px;letter-spacing:-.01em;margin:0 0 4px;font-weight:700}
+h3{font-size:15px;margin:0 0 4px;font-weight:700}
+.lead{color:var(--muted);margin:0 0 28px;max-width:64ch}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.btn{border:0;cursor:pointer;border-radius:999px;padding:10px 18px;font-weight:700;background:var(--brand);color:var(--on-brand)}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--brand-soft)}
+.btn.gate{background:var(--gate);color:var(--gate-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:820px}
+th{text-align:left;font-weight:600;font-size:13px;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line)}
+td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--brand-soft)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.s-running{color:var(--ok);background:var(--ok-soft)}
+.s-scheduled{color:var(--brand);background:var(--brand-soft)}
+.s-decided{color:var(--warn);background:var(--warn-soft)}
+.bar.decided{background:var(--warn-soft);color:var(--warn)}
+.tg-real{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.s-finished{color:var(--muted);background:var(--line)}
+.risk{color:var(--risk);background:var(--risk-soft)}
+.warnp{color:var(--warn);background:var(--warn-soft)}
+.okp{color:var(--ok);background:var(--ok-soft)}
+/* stepper */
+.steps{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px 7px 8px;cursor:pointer;font-weight:600;color:var(--muted)}
+.step .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--line);color:var(--ink)}
+.step[aria-current="true"]{color:var(--ink);border-color:var(--brand)}
+.step[aria-current="true"] .n{background:var(--brand);color:var(--on-brand)}
+.step.done .n{background:var(--ok);color:#fff}
+.step.locked{cursor:not-allowed;opacity:.6}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.sticky{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}
+.field{margin-bottom:20px}
+.field label,.field .lbl{display:block;font-weight:700;margin-bottom:4px}
+.field .hint{font-size:13px;color:var(--muted);margin:0 0 8px}
+input[type=text],input[type=date],input[type=number],textarea,select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px}
+textarea{min-height:92px;resize:vertical}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pair .sub{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 13px;cursor:pointer;font-size:14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+/* gate */
+.gatebox{border-radius:16px;padding:20px;background:var(--gate-soft);border:1px solid color-mix(in srgb,var(--gate) 55%,transparent)}
+.meter{height:10px;border-radius:999px;background:color-mix(in srgb,var(--gate) 25%,var(--surface));overflow:hidden;margin:12px 0 14px}
+.meter span{display:block;height:100%;background:var(--gate);transition:width .35s ease}
+.checks{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;font-size:14px}
+.checks li{display:flex;gap:9px;align-items:flex-start}
+.tick{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);margin-top:2px;display:grid;place-items:center}
+.checks li.ok .tick{background:var(--ok);border-color:var(--ok)}
+.checks li.ok .tick::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.checks li.ok{color:var(--muted)}
+.unlocked{display:flex;gap:10px;align-items:center;font-weight:700}
+.stat{display:flex;flex-direction:column;gap:2px;padding:12px 0;border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:0}
+.stat b{font-size:22px;letter-spacing:-.02em}
+.callout{border-radius:12px;padding:12px 14px;font-size:14px;margin-top:12px}
+.conf{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px;background:var(--surface)}
+.conf.alto{border-color:color-mix(in srgb,var(--risk) 50%,var(--line))}
+.radio{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.radio label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:14px}
+.radio input{margin-top:4px;accent-color:var(--brand)}
+.radio label:has(input:checked){border-color:var(--brand);background:var(--brand-soft)}
+dl.sum{display:grid;grid-template-columns:200px 1fr;gap:10px 18px;margin:0}
+dl.sum dt{color:var(--muted);font-weight:600}
+dl.sum dd{margin:0}
+/* map */
+.map{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.map-inner{min-width:860px;position:relative}
+.mrow{display:grid;grid-template-columns:150px 1fr;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mlabel{padding:12px 14px;font-weight:700;font-size:14px;border-right:1px solid var(--line)}
+.mtrack{position:relative}
+.bar{position:absolute;height:28px;border-radius:8px;font-size:12.5px;font-weight:600;padding:5px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border:2px solid transparent}
+.bar.running{background:var(--ok-soft);color:var(--ok)}
+.bar.scheduled{background:var(--brand-soft);color:var(--brand)}
+.bar.finished{background:var(--line);color:var(--muted)}
+.bar.clash{border-color:var(--risk);border-style:dashed}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--gate);z-index:2}
+.weeks{display:grid;grid-template-columns:150px 1fr;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.weeks .t{position:relative;height:30px}
+.weeks .t span{position:absolute;top:7px;transform:translateX(-2px)}
+/* results */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--surface)}
+.kpi b{display:block;font-size:26px;letter-spacing:-.02em;line-height:1.2}
+.ci{position:relative;height:34px;margin:8px 0 4px}
+.ci .axis{position:absolute;top:16px;left:0;right:0;height:2px;background:var(--line)}
+.ci .zero{position:absolute;top:4px;bottom:4px;width:2px;background:var(--muted)}
+.ci .rng{position:absolute;top:11px;height:12px;border-radius:6px}
+.ci .pt{position:absolute;top:8px;width:18px;height:18px;border-radius:50%;transform:translateX(-9px);border:3px solid var(--surface)}
+.design-card{border-left:4px solid var(--gate);padding:4px 0 4px 18px;margin-bottom:24px}
+.progress{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;background:var(--brand)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;transition:.25s;z-index:9;max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.back{all:unset;cursor:pointer;color:var(--muted);font-weight:600;margin-bottom:14px;display:inline-block}
+.back:hover{color:var(--ink)}
+.mform{border:1px dashed var(--brand);border-radius:14px;padding:16px;margin-top:12px;background:var(--brand-soft)}
+.mform .sub{font-size:13px;font-weight:600;color:var(--muted);margin:10px 0 4px}
+.chip.add{border-style:dashed;color:var(--brand);font-weight:600}
+.chip .x{margin-left:4px;opacity:.6}
+.basebox{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.basebox input{width:130px}
+.tg{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tg-norte{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-size:10.5px;padding:1px 7px;letter-spacing:.04em}
+.tg-guarda{border-color:var(--warn);color:var(--warn);font-size:10.5px;padding:1px 7px;letter-spacing:.04em}
+.tg-sec{font-size:10.5px;padding:1px 7px}
+.tg-risk{border-color:var(--risk);color:var(--risk);background:var(--risk-soft)}
+.tg-warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.sub{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;margin-bottom:18px}
+.vars div{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:middle}
+.sintese{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 16px;font-size:14.5px}
+.doit{border-radius:12px;padding:14px 18px;border-left:5px solid}
+.doit b{font-size:17px}.doit p{margin:4px 0 0;font-size:14px}
+.do-ok{background:var(--ok-soft);border-color:var(--ok)}.do-warn{background:var(--gate-soft);border-color:var(--gate)}.do-risk{background:var(--risk-soft);border-color:var(--risk)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--surface);flex-wrap:wrap}
+.seg button{border:0;background:none;padding:5px 13px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+table.mt{min-width:760px}
+.mt td,.mt th{padding:10px 14px}
+td.num,th.num{text-align:right}
+.vline{border-left:2px solid var(--brand-soft)}
+tr.msec td{font-size:12.5px;font-weight:700;color:var(--muted);padding-top:18px;background:transparent!important}
+tr.norte td{background:var(--brand-soft)}
+.mt tbody tr,.health tbody tr{cursor:default}
+.mt tbody tr:hover td{background:inherit}
+tr.norte:hover td{background:var(--brand-soft)!important}
+.sg{display:inline-flex;gap:4px;font-size:12.5px;font-weight:600;padding:2px 10px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.sg .pp{font-weight:500;opacity:.8}
+.sg-up{color:var(--ok);background:var(--ok-soft)}.sg-down{color:var(--risk);background:var(--risk-soft)}
+.sg-tup{color:var(--ok);border-color:var(--ok)}.sg-tdown{color:var(--warn);background:var(--warn-soft)}.sg-none{color:var(--muted)}
+.health{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.health td,.health th{padding:8px 10px}
+.how{margin-top:24px;color:var(--muted);font-size:14px}.how summary{cursor:pointer;font-weight:700;color:var(--ink)}.how p{max-width:75ch}
+@media (max-width:900px){.health{grid-template-columns:1fr}}
+.bar.ext{opacity:.55;border-style:dotted}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.figin{margin-top:8px;font-size:14px}
+.fig-err{font-size:12.5px;color:var(--risk);margin:4px 0 0;min-height:1em}
+.figlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.figlink{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none}
+.figlink:hover{background:var(--brand-soft)}
+.figlink svg{flex:none}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;padding:12px 16px;gap:16px;z-index:5;background:var(--bg);border-right:0;border-bottom:1px solid var(--line);top:env(safe-area-inset-top,0px);overflow-x:auto}
+  aside nav{flex-direction:row}
+  nav button{white-space:nowrap}
+  .side-note,.logo small{display:none}
+  .grid2{grid-template-columns:1fr}
+  .sticky{position:static}
+  dl.sum{grid-template-columns:1fr}
+  dl.sum dd{margin-bottom:8px}
+  .pair{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="var(--brand)"/><circle cx="12" cy="13" r="3" fill="var(--gate)"/><circle cx="22" cy="13" r="3" fill="var(--on-brand)"/><path d="M9 22c3 3 13 3 16 0" stroke="var(--on-brand)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      <div>Faro<small>Experimentos Petlove</small></div>
+    </div>
+    <nav id="nav">
+      <button data-go="list">Experimentos</button>
+      <button data-go="new">Novo experimento</button>
+      <button data-go="map">Mapa de sobreposição</button>
+    </nav>
+    <p class="side-note">Protótipo do Hackapet. Dados de exemplo; a configuração final seria enviada ao Dynamic Yield via API.</p>
+  </aside>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const TODAY='2026-10-14';
+const PAGES={home:{n:'Home',daily:180000},busca:{n:'Busca',daily:95000},pdp:{n:'Página de produto',daily:140000},carrinho:{n:'Carrinho',daily:42000},checkout:{n:'Checkout',daily:21000},saude:{n:'Área Saúde',daily:16000},conta:{n:'Minha conta',daily:30000}};
+const PLATS={site:{n:'Site',share:.45},android:{n:'App Android',share:.35},ios:{n:'App iOS',share:.2}};
+const SEG={todos:{n:'Todos os clientes',share:1},novos:{n:'Novos clientes',share:.28},recorrentes:{n:'Clientes recorrentes',share:.72},repet:{n:'Assinantes Repet',share:.38},naorepet:{n:'Não assinantes Repet',share:.62},caes:{n:'Tutores de cães',share:.68},gatos:{n:'Tutores de gatos',share:.44},tapete:{n:'Compradores de tapete higiênico',share:.09},areia:{n:'Compradores de areia para gatos',share:.14},antipulgas:{n:'Compradores de antipulgas',share:.12}};
+function segOf(x){if(x.segment&&x.segment!=='custom'&&SEG[x.segment])return SEG[x.segment];return{n:(x.segText||'').trim()||'Público personalizado',share:(x.segShare>0?Math.min(x.segShare,100):100)/100}}
+const DISJOINT=[['novos','recorrentes'],['repet','naorepet']];
+const METRICS={conv:{n:'Conversão do checkout',base:.032},rpv:{n:'Receita por visitante',cv:3},ticket:{n:'Ticket médio',cv:.8},repet:{n:'Adesão ao Repet',base:.021},atc:{n:'Adição ao carrinho',base:.11},ctr:{n:'Cliques na recomendação',base:.06},saude:{n:'Ativação do plano Saúde',base:.015},ret30:{n:'Retenção em 30 dias',base:.41}};
+const GUARDS={cancel:'Cancelamento de Repet',load:'Tempo de carregamento',sac:'Chamados no SAC',devol:'Taxa de devolução'};
+const BUS={ecom:{n:'Ecom'},saude:{n:'Saúde'},fintech:{n:'Fintech'},servicos:{n:'Serviços'},ecossistema:{n:'Ecossistema'}};
+const BUF=[['todas','Ecossistema (todos)'],['ecom','Ecom'],['saude','Saúde'],['fintech','Fintech'],['servicos','Serviços']];
+const inBU=(e,f)=>f==='todas'||e.bu===f||e.bu==='ecossistema';
+const STATUS={decided:'Decidido',running:'Rodando',scheduled:'Agendado',finished:'Encerrado'};
+
+let EXPS=[
+ {id:'r1',real:true,bu:'ecossistema',name:'Nexus | Nova Home do App',status:'decided',owner:'Nexus',pages:['home'],platforms:['android','ios'],segment:'todos',traffic:100,variants:1,start:'2026-08-12',end:'2026-11-30',primary:'rpv',secondary:['atc','ticket','repet'],guardrails:['conv','m2'],mde:5,
+  context:'Teste criado direto no Dynamic Yield, antes do Faro. O contexto e a evidência ainda não foram registrados: complete o design para manter o histórico do que foi aprendido.',
+  hypothesis:'Não registrada. Pelo setup: se a nova home do app substituir a antiga, então a receita por usuário vai aumentar, porque [motivo a preencher].',
+  control:'home antiga',variant:'home nova',
+  results:{armNames:['home antiga','home nova'],split:[2,98],crossed:26016,crossedPct:.023,
+   tags:['app','cross','eCom e saúde','ecossistema: conta compras de todas as BUs'],
+   meta:'Resultado do Dynamic Yield com dados até 13/10, buscado em 14/10 09:40. Desde 12/08 · 63 dias em campo. Leitura de 31/08 a 12/10 (split estável detectado) · 43 dias · grão usuário · export D-1.',
+   banner:'6 dias com split instável nos últimos 90 dias.',
+   sintese:'<b>home nova</b> (consolidado): <span class="tg tg-norte">NORTE</span> receita por usuário <b style="color:var(--ok)">+108,1%</b> (melhora confirmada, 100%) · conversão <b style="color:var(--ok)">+241,3%</b> (melhora confirmada, 100%) · conversão em saúde <b style="color:var(--risk)">−74,7%</b> (tendência de queda, 9%).',
+   decision:['Desligar a campanha no Dynamic Yield','Uma variante já está com ~100% do tráfego. O teste não produz mais leitura e o controle residual só gera ruído.'],
+   fixed:{
+    all:{vol:[['Usuários',21379,1100094,5045.7],['Compradores',1596,280454,17472.3],['Transações',1995,464349,23175.6],['Receita',467283,97333314,20729.6,1]],
+     rows:[['rpu',21.83,88.20,108.1,'up',100],['conv',.0746,.2549,241.3,'up',100],['tpu',.0933,.4221,110.5,'up',100],['ticket',233.95,208.97,-10.7,'down',0],['rfpu',29.18,111.85,92.2,'up',100],['m2',3.99,13.08,76.7,'up',100],['atc',.1013,.3062,202.2,'up',100],['repet',.0002,.0022,681.6,'tup',100],
+      ['clube',.0030,.0112,267.3,'up',100],['rclube',.66,2.57,288.6,'up',100],['churnc',0,.0363,139.8,'none',19],
+      ['saude',0,0,-74.7,'tdown',9],['vidas',0,0,null,null],['rsaude',0,0,null,null],['tsaude',null,158.59,null,null],['churns',null,0,null,null]]},
+    plats:{
+     android:{vol:[['Usuários',8415,592676,6943.1],['Compradores',399,140372,35081.0],['Transações',501,232990,46405.0],['Receita',111736,47714272,42602.7,1]],
+      rows:[['rpu',13.28,80.23,138.3,'up',100],['conv',.0474,.2368,398.4,'up',100],['tpu',.0595,.3931,136.2,'up',100],['ticket',223.03,204.10,-8.5,'down',2],['rfpu',17.69,103.35,122.8,'up',100],['m2',2.29,11.67,106.3,'up',100],['atc',.0778,.2922,274.9,'up',100],['repet',.0001,.0021,779.1,'tup',100],
+       ['clube',.0012,.0108,727.7,'tup',100],['rclube',.22,2.42,1009.9,'tup',100],['churnc',0,.0395,-52.4,'none',78],
+       ['saude',0,0,-98.6,'tdown',0],['vidas',0,0,null,null],['rsaude',0,0,null,null]]},
+     ios:{vol:[['Usuários',12964,507418,3814.1],['Compradores',1197,140082,11602.8],['Transações',1494,231359,15385.9],['Receita',355547,49619042,13855.7,1]],
+      rows:[['rpu',27.38,97.51,100.8,'up',100],['conv',.0923,.2761,198.8,'up',100],['tpu',.1152,.4560,103.0,'up',100],['ticket',237.62,213.87,-10.0,'down',0],['rfpu',36.65,121.77,82.6,'up',100],['m2',5.09,14.72,70.5,'up',100],['atc',.1165,.3225,176.8,'up',100],['repet',.0003,.0023,501.0,'tup',100],
+       ['clube',.0042,.0116,173.0,'up',100],['rclube',.95,2.75,189.5,'up',100],['churnc',0,.0327,84.1,'none',27],
+       ['saude',0,0,-66.8,'tdown',14],['vidas',0,0,null,null],['rsaude',0,0,null,null],['tsaude',null,158.59,null,null],['churns',null,0,null,null]]}}},
+   mde:[['rpu',4.5],['conv',6.8],['tpu',3.4],['ticket',5.6],['rfpu',5.4],['m2',6.8],['atc',5.7],['repet',114.4],['clube',34.8],['rclube',42.0],['churnc',278.2],['saude',290.6],['vidas',null],['rsaude',null],['tsaude',null],['churns',null]],
+   daily:[['2026-09-30',350,17500],['2026-10-01',330,16500],['2026-10-02',300,15000],['2026-10-03',285,14200],['2026-10-04',220,11000],['2026-10-05',270,13500],['2026-10-06',250,12500],['2026-10-07',240,12000],['2026-10-08',220,11000],['2026-10-09',210,10500],['2026-10-10',200,10000],['2026-10-11',190,9500],['2026-10-12',120,6000],['2026-10-13',80,4000]]}},
+ {id:'e1',bu:'ecom',name:'Frete grátis em destaque no carrinho',status:'running',owner:'Squad Checkout',pages:['carrinho'],platforms:['site','android','ios'],segment:'todos',traffic:50,variants:1,start:'2026-09-30',end:'2026-10-28',primary:'conv',secondary:['ticket','atc'],guardrails:['load'],mde:5,
+  context:'Pesquisa de abandono mostrou que 41% dos clientes que saem do carrinho citam o valor do frete. Hoje a régua de frete grátis só aparece no checkout.',
+  hypothesis:'Se mostrarmos quanto falta para o frete grátis já no carrinho, a conversão do checkout vai aumentar, porque o cliente decide completar o pedido antes de ver o custo.',
+  control:'Carrinho atual, sem informação de frete',variant:'Barra de progresso “faltam R$ X para frete grátis” no topo do carrinho',
+  results:{users:{site:[66710,66820],android:[51880,51990],ios:[29620,29645]},crossed:1840,base:{conv:.032},lifts:{conv:.055,ticket:-.012,atc:.021,rpu:.042,tpu:.05,rfpu:.04,m2:.03,load:.001}}},
+ {id:'e2',bu:'ecom',name:'Upsell de Repet na página de produto',status:'running',owner:'Squad Retenção',pages:['pdp'],platforms:['android','ios'],segment:'naorepet',traffic:30,variants:1,start:'2026-10-05',end:'2026-11-02',primary:'repet',secondary:['conv','rpv'],guardrails:['cancel'],mde:8,
+  context:'Clientes não assinantes compram ração com recorrência de ~35 dias, mas só 6% conhecem o desconto do Repet na PDP.',
+  hypothesis:'Se o seletor “Compra programada” vier pré-selecionado na PDP de ração, a adesão ao Repet vai aumentar, porque reduz o esforço de escolha.',
+  control:'Compra única pré-selecionada',variant:'Compra programada (Repet) pré-selecionada com economia em destaque',
+  results:{users:{android:[38110,37960],ios:[23230,23142]},crossed:910,base:{repet:.021},lifts:{repet:.05,conv:-.008,rpu:.014,cancel:.039}}},
+ {id:'e3',bu:'saude',name:'Onboarding da Área Saúde em 3 passos',status:'running',owner:'Squad Saúde',pages:['saude','home'],platforms:['android','ios'],segment:'novos',traffic:100,variants:1,start:'2026-10-01',end:'2026-10-29',primary:'saude',secondary:['ret30'],guardrails:['sac'],mde:15,
+  context:'Novos clientes que entram na Área Saúde abandonam o cadastro do pet em 62% dos casos no formulário único atual.',
+  hypothesis:'Se quebrarmos o cadastro em 3 passos curtos, a ativação do plano Saúde vai aumentar, porque cada passo parece menor e mais fácil.',
+  control:'Formulário único com 11 campos',variant:'Fluxo em 3 telas: pet, endereço, plano',
+  results:{users:{android:[30520,28790],ios:[18600,17620]},crossed:420,base:{saude:.015},lifts:{saude:.14,ret30:0,sac:-.02,vidas:.1}}},
+ {id:'e4',bu:'ecom',name:'Recomendação de ração por raça',status:'scheduled',owner:'Squad Descoberta',pages:['pdp','home'],platforms:['site','android'],segment:'caes',traffic:50,variants:1,start:'2026-10-21',end:'2026-11-18',primary:'ctr',secondary:['atc','rpv'],guardrails:['load'],mde:10,
+  context:'O carrossel “Você também pode gostar” usa só histórico de navegação e tem CTR de 6%.',
+  hypothesis:'Se recomendarmos rações pela raça e porte cadastrados do pet, os cliques na recomendação vão aumentar, porque a sugestão fica mais relevante.',
+  control:'Carrossel atual por navegação',variant:'Carrossel por raça e porte do pet cadastrado'},
+ {id:'e5',bu:'ecom',name:'Cupom de primeira compra no checkout',status:'finished',owner:'Squad Aquisição',pages:['checkout'],platforms:['site','android'],segment:'novos',traffic:50,variants:1,start:'2026-09-01',end:'2026-09-29',primary:'conv',secondary:['ticket'],guardrails:['devol'],mde:12,
+  context:'Novos clientes convertem 30% menos que recorrentes e o cupom de boas-vindas só é enviado por e-mail.',
+  hypothesis:'Se o cupom de primeira compra for aplicado automaticamente no checkout, a conversão de novos clientes vai aumentar, porque elimina a busca pelo código.',
+  control:'Campo de cupom vazio',variant:'Cupom aplicado automaticamente com aviso',
+  results:{users:{site:[18300,18232],android:[12200,12148]},crossed:610,base:{conv:.0397},lifts:{conv:.113,ticket:-.034,devol:.006,rpu:.07,tpu:.1}},decision:'Vencedor: Variante A. Implementado em 06/10.'},
+ {id:'e6',bu:'fintech',name:'Cashback Petlove na tela de pagamento',status:'running',owner:'Squad Fintech',pages:['checkout','conta'],platforms:['android','ios'],segment:'recorrentes',traffic:40,variants:1,start:'2026-10-02',end:'2026-10-30',primary:'conv',secondary:['rpv'],guardrails:['devol'],mde:6,
+  context:'Clientes recorrentes que usam a carteira digital têm frequência 22% maior, mas só 9% conhecem o cashback, que hoje fica escondido em Minha conta.',
+  hypothesis:'Se mostrarmos o saldo e o cashback do pedido na tela de pagamento, então a conversão do checkout vai aumentar, porque o benefício fica visível na hora da decisão.',
+  control:'Pagamento sem menção ao cashback',variant:'Bloco “Você ganha R$ X de cashback” acima dos meios de pagamento',
+  results:{users:{android:[24800,24710],ios:[15400,15360]},crossed:380,base:{conv:.041},lifts:{conv:.03,rpu:.02,devol:0}}},
+ {id:'e7',bu:'servicos',name:'Agendamento de banho e tosa na home',status:'scheduled',owner:'Squad Serviços',pages:['home'],platforms:['site'],segment:'caes',traffic:30,variants:1,start:'2026-10-26',end:'2026-11-23',primary:'ctr',secondary:['rpv'],guardrails:['load'],mde:12,
+  context:'Tutores de cães que agendam banho e tosa compram 1,6x mais no mês seguinte, mas o serviço só aparece em um menu secundário.',
+  hypothesis:'Se exibirmos um card de agendamento de banho e tosa na home, então os cliques vão aumentar, porque o serviço fica no caminho de quem já está comprando para o cão.',
+  control:'Home sem card de serviços',variant:'Card “Agende banho e tosa perto de você” abaixo do banner principal'}
+];
+
+const blank=()=>({segText:'Todos os clientes',segShare:100,segRule:'',bu:'ecom',name:'',context:'',hypothesis:'',control:'',variant:'',primary:'',secondary:[],guardrails:[],figmaBefore:'',figmaAfter:'',base:null,mde:5,variants:1,platforms:['site','android','ios'],pages:[],segment:'todos',traffic:50,start:'2026-10-19',end:'2026-11-09',owner:'',resolutions:{}});
+let S={buf:'todas',view:'list',id:null,step:1,d:blank(),nm:{open:false,name:'',type:'taxa',base:'',sd:'',def:''}};
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('pt-BR');
+const pct=(x,d=1)=>(x*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
+const sgn=(x,d=1)=>(x>0?'+':'')+pct(x,d);
+const dm=s=>s.slice(8,10)+'/'+s.slice(5,7);
+const days=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),3200)}
+
+function phi(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);const p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p}
+function abtest(c,v){const pc=c.c/c.v,pv=v.c/v.v,p=(c.c+v.c)/(c.v+v.v);const se=Math.sqrt(p*(1-p)*(1/c.v+1/v.v));const z=(pv-pc)/se;const pval=2*(1-phi(Math.abs(z)));const seD=Math.sqrt(pc*(1-pc)/c.v+pv*(1-pv)/v.v);return{pc,pv,lift:(pv-pc)/pc,lo:(pv-pc-1.96*seD)/pc,hi:(pv-pc+1.96*seD)/pc,pval}}
+function srm(arms){const tot=arms.reduce((s,a)=>s+a.v,0),e=tot/arms.length;const chi=arms.reduce((s,a)=>s+(a.v-e)**2/e,0);return 2*(1-phi(Math.sqrt(chi)))}
+function sampleSize(metric,mde,ov){const m=METRICS[metric];if(!m||!mde)return 0;if(m.cv!=null){const cv=ov>0?ov:m.cv;return Math.ceil(15.7*cv*cv/((mde/100)**2))}const p=ov>0&&ov<100?ov/100:m.base,d=p*mde/100;return Math.ceil(15.7*p*(1-p)/(d*d))}
+function eligible(x){if(!x.pages.length||!x.platforms.length)return 0;const mp=Math.max(...x.pages.map(p=>PAGES[p].daily));const pl=x.platforms.reduce((s,p)=>s+PLATS[p].share,0);return Math.round(mp*pl*segOf(x).share*x.traffic/100)}
+function segInter(A,B){const a=A.segment,b=B.segment,sa=segOf(A),sb=segOf(B);if(a==='todos')return sb.share;if(b==='todos')return sa.share;
+  if(a!=='custom'&&b!=='custom'){if(a===b)return sa.share;if(DISJOINT.some(([p,q])=>(p===a&&q===b)||(p===b&&q===a)))return 0;return sa.share*sb.share}
+  if(sa.n.toLowerCase()===sb.n.toLowerCase())return Math.min(sa.share,sb.share);return sa.share*sb.share}
+function overlap(a,b){
+  if(a.end<b.start||b.end<a.start)return null;
+  const pages=a.pages.filter(p=>b.pages.includes(p));if(!pages.length)return null;
+  const plats=a.platforms.filter(p=>b.platforms.includes(p));if(!plats.length)return null;
+  const seg=segInter(a,b);if(!seg)return null;
+  const ps=plats.reduce((s,p)=>s+PLATS[p].share,0);
+  const daily=Math.round(Math.max(...pages.map(p=>PAGES[p].daily))*ps*seg*(a.traffic/100)*(b.traffic/100));
+  let sev='medio';
+  if(a.primary&&a.primary===b.primary||pages.some(p=>p==='carrinho'||p==='checkout'))sev='alto';else if(daily<2000)sev='baixo';
+  return{pages,plats,daily,sev,from:a.start>b.start?a.start:b.start,to:a.end<b.end?a.end:b.end};
+}
+const SEVL={alto:['Risco alto','risk'],medio:['Risco médio','warnp'],baixo:['Risco baixo','okp']};
+function conflictsOf(x,pool){return pool.filter(o=>o.id!==x.id&&o.status!=='finished').map(o=>({o,ov:overlap(x,o)})).filter(r=>r.ov)}
+
+const isFigma=u=>/^https:\/\/([a-z0-9-]+\.)?figma\.com\/\S+$/i.test((u||'').trim());
+const figErr=u=>u&&u.trim()&&!isFigma(u)?'Use um link do Figma (https://www.figma.com/…).':'';
+const FIGICON='<svg width="12" height="18" viewBox="0 0 12 18" aria-hidden="true"><rect x="0" y="0" width="6" height="6" rx="3" fill="#F24E1E"/><rect x="6" y="0" width="6" height="6" rx="3" fill="#FF7262"/><rect x="0" y="6" width="6" height="6" rx="3" fill="#A259FF"/><circle cx="9" cy="9" r="3" fill="#1ABCFE"/><rect x="0" y="12" width="6" height="6" rx="3" fill="#0ACF83"/></svg>';
+function figLinks(x){const l=[];if(isFigma(x.figmaBefore))l.push(`<a class="figlink" href="${esc(x.figmaBefore.trim())}" target="_blank" rel="noopener">${FIGICON}Antes (controle)</a>`);if(isFigma(x.figmaAfter))l.push(`<a class="figlink" href="${esc(x.figmaAfter.trim())}" target="_blank" rel="noopener">${FIGICON}Depois (variante)</a>`);return l.length?`<div class="figlinks">${l.join('')}</div>`:''}
+function designChecks(d){return[
+  ['Nome do experimento',d.name.trim().length>=4],
+  ['Contexto do problema, com evidência (mín. 60 caracteres)',d.context.trim().length>=60],
+  ['Hipótese no formato “se… então… porque…”',/se\b/i.test(d.hypothesis)&&/então|entao/i.test(d.hypothesis)&&/porque/i.test(d.hypothesis)],
+  ['O que muda: controle e variante descritos',d.control.trim().length>=3&&d.variant.trim().length>=3],
+  ['Uma métrica primária',!!d.primary],
+  ['Pelo menos uma métrica secundária',d.secondary.length>0],
+  ['Efeito mínimo detectável definido',d.mde>0]
+]}
+const designOk=d=>designChecks(d).every(c=>c[1]);
+const audienceOk=d=>(d.segText||'').trim().length>=3&&d.pages.length>0&&d.platforms.length>0&&d.start&&d.end&&d.end>d.start;
+function unresolved(d){return conflictsOf(d,EXPS).filter(r=>r.ov.sev!=='baixo'&&!d.resolutions[r.o.id])}
+function canGo(step){const d=S.d;if(step<=1)return true;if(!designOk(d))return false;if(step===2)return true;if(!audienceOk(d))return false;if(step===3)return true;return unresolved(d).length===0}
+
+/* ---------- views ---------- */
+function render(){
+  document.querySelectorAll('#nav button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.go===S.view||(S.view==='detail'&&b.dataset.go==='list'))));
+  const m=$('#main');
+  m.innerHTML=S.view==='list'?vList():S.view==='new'?vNew():S.view==='map'?vMap():vDetail();
+  const k=S.view+S.step+S.id;if(k!==S._k){S._k=k;window.scrollTo({top:0})}
+}
+function statusPill(s){return `<span class="pill s-${s}">${STATUS[s]}</span>`}
+
+function vList(){
+  const list=EXPS.filter(e=>inBU(e,S.buf));
+  const rows=list.map(e=>{
+    const c=e.status==='finished'?[]:conflictsOf(e,EXPS);
+    const worst=c.some(r=>r.ov.sev==='alto')?'alto':c.length?'medio':null;
+    return `<tr data-open="${e.id}">
+      <td><b>${esc(e.name)}</b>${e.real?' <span class="tg tg-real">Dados reais do DY</span>':''}<div class="small muted">${BUS[e.bu||'ecom'].n} · ${esc(e.owner||'')}</div></td>
+      <td>${statusPill(e.status)}</td>
+      <td>${e.pages.map(p=>PAGES[p].n).join(', ')}<div class="small muted">${e.platforms.map(p=>PLATS[p].n).join(', ')}</div></td>
+      <td>${esc(segOf(e).n)}<div class="small muted">${e.traffic}% do tráfego</div></td>
+      <td>${METRICS[e.primary].n}</td>
+      <td>${dm(e.start)} a ${dm(e.end)}</td>
+      <td>${worst?`<span class="pill ${SEVL[worst][1]}">${c.length} ${c.length>1?'testes':'teste'}</span>`:'<span class="small muted">Nenhuma</span>'}</td>
+    </tr>`}).join('');
+  const running=list.filter(e=>e.status==='running').length;
+  return `<div class="spread"><div><h1>Experimentos</h1><p class="lead">${running} testes rodando agora. Todo teste aqui nasceu de um design aprovado, com contexto, hipótese e métricas antes de qualquer configuração no DY.</p></div>
+  <button class="btn" data-go="new">Novo experimento</button></div>
+  <div style="margin-bottom:16px">${buFilter()}</div>
+  <div class="table-wrap"><table><thead><tr><th>Experimento</th><th>Status</th><th>Onde</th><th>Público</th><th>Métrica primária</th><th>Período</th><th>Sobreposição</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Nenhum experimento nesta BU. Crie o primeiro em Novo experimento.</td></tr>'}</tbody></table></div>`;
+}
+function buFilter(){return `<div class="seg" role="group" aria-label="Filtro de BU">${BUF.map(([v,t])=>`<button type="button" data-act="dset" data-k="buf" data-v="${v}" aria-pressed="${S.buf===v}">${t}</button>`).join('')}</div>`}
+
+function stepsBar(){
+  const L=['Design do experimento','Público','Sobreposição','Revisão'];
+  return `<div class="steps" role="tablist">${L.map((l,i)=>{const n=i+1,ok=canGo(n),cur=S.step===n,done=n<S.step&&canGo(n+1);
+    return `<button class="step ${done?'done':''} ${ok?'':'locked'}" role="tab" aria-current="${cur}" ${ok?`data-step="${n}"`:'aria-disabled="true"'}><span class="n">${ok?n:'🔒'}</span>${l}</button>`}).join('')}</div>`;
+}
+function vNew(){
+  const body=S.step===1?stepDesign():S.step===2?stepAudience():S.step===3?stepOverlap():stepReview();
+  return `<h1>Novo experimento</h1><p class="lead">Comece pelo design. Público, sobreposição e envio ao DY só liberam quando o design estiver completo.</p>${stepsBar()}${body}`;
+}
+function chipsHTML(field,opts,sel,multi,disabled=[],extra=''){
+  return `<div class="chips">${Object.entries(opts).map(([k,v])=>`<button type="button" class="chip" data-chip="${field}" data-val="${k}" data-multi="${multi?1:0}" aria-pressed="${multi?sel.includes(k):sel===k}" ${disabled.includes(k)?'disabled':''} ${v.def?`title="${esc(v.def)}"`:''}>${esc(v.n||v)}${v.custom?' <span class="muted small">· nova</span>':''}</button>`).join('')}${extra}</div>`;
+}
+function metricForm(){const m=S.nm,val=m.type==='valor';
+  return `<div class="mform" id="mform"><h3>Nova métrica</h3><p class="small muted" style="margin:0">Fica disponível como primária ou secundária neste e nos próximos experimentos.</p>
+  <div class="pair"><div><div class="sub">Nome</div><input type="text" data-nm="name" value="${esc(m.name)}" placeholder="Ex.: Pedidos com 2+ itens"></div>
+  <div><div class="sub">Tipo</div><select data-nm="type"><option value="taxa" ${!val?'selected':''}>Taxa (% de usuários que fazem algo)</option><option value="valor" ${val?'selected':''}>Valor médio (R$, itens, minutos)</option></select></div></div>
+  <div class="sub">Como é calculada</div><input type="text" data-nm="def" value="${esc(m.def)}" placeholder="${val?'Ex.: receita total ÷ usuários expostos':'Ex.: usuários com pedido de 2+ itens ÷ usuários expostos'}">
+  ${val?`<div class="pair"><div><div class="sub">Média atual</div><input type="number" step="any" min="0" data-nm="base" value="${esc(m.base)}" placeholder="Ex.: 189"></div><div><div class="sub">Desvio padrão</div><input type="number" step="any" min="0" data-nm="sd" value="${esc(m.sd)}" placeholder="Ex.: 240"></div></div>`
+  :`<div class="sub">Taxa atual (%)</div><input type="number" step="any" min="0.01" max="99" data-nm="base" value="${esc(m.base)}" placeholder="Ex.: 12,5" style="max-width:200px">`}
+  <p class="fig-err" id="nm-err"></p>
+  <div class="row"><button class="btn" data-act="savemetric">Adicionar métrica</button><button class="btn ghost" data-act="cancelmetric">Cancelar</button></div></div>`}
+function baseBox(d){const m=METRICS[d.primary];if(!m)return'';const cvm=m.cv!=null;const cur=d.base!=null?d.base:(cvm?m.cv:+(m.base*100).toFixed(2));
+  return `<div class="basebox"><div><label for="f-base" class="sub" style="display:block;font-weight:700">${cvm?'Variabilidade (desvio ÷ média)':'Linha de base atual (%)'}</label><input id="f-base" type="number" step="any" min="0" data-f="base" value="${cur}"></div>
+  <p class="small muted" style="margin:0;flex:1;min-width:200px">${m.def?`<b>Definição:</b> ${esc(m.def)}<br>`:''}Ajuste com o valor real da página e do público deste teste. A amostra é recalculada.</p></div>`}
+function gatePanel(){
+  const c=designChecks(S.d),ok=c.filter(x=>x[1]).length,all=ok===c.length;
+  return `<div class="gatebox" id="gate">
+    <h2>${all?'Design completo':'Design obrigatório'}</h2>
+    <p class="small muted" style="margin:0">${all?'Público e sobreposição liberados.':'Preencha os itens abaixo para liberar o restante da ferramenta.'}</p>
+    <div class="meter"><span style="width:${ok/c.length*100}%"></span></div>
+    <ul class="checks">${c.map(([l,v])=>`<li class="${v?'ok':''}"><span class="tick"></span>${l}</li>`).join('')}</ul>
+    <button class="btn gate" data-step="2" ${all?'':'disabled'} style="width:100%">Liberar público</button>
+  </div>`;
+}
+function stepDesign(){
+  const d=S.d,n=sampleSize(d.primary,d.mde,d.base);
+  return `<div class="grid2"><div class="panel">
+    <div class="spread" style="margin-bottom:18px"><div><h2>Design do experimento</h2><p class="small muted" style="margin:0">É o documento do teste. Ele acompanha o experimento até a decisão final.</p></div><button class="btn ghost" data-act="example">Preencher com exemplo</button></div>
+    <div class="field"><label for="f-name">Nome do experimento</label><input id="f-name" type="text" data-f="name" value="${esc(d.name)}" placeholder="Ex.: Selo de entrega rápida na busca"></div>
+    <div class="field"><label for="f-owner">Squad responsável</label><input id="f-owner" type="text" data-f="owner" value="${esc(d.owner)}" placeholder="Ex.: Squad Descoberta"></div>
+    <div class="field"><span class="lbl">BU</span><p class="hint">Use Ecossistema quando o teste afeta mais de uma BU (ex.: home do app).</p>${chipsHTML('bu',BUS,d.bu,false)}</div>
+    <div class="field"><label for="f-ctx">Contexto</label><p class="hint">Qual problema você observou e qual evidência sustenta isso (dado, pesquisa, benchmark).</p><textarea id="f-ctx" data-f="context" placeholder="Ex.: 38% das buscas por ração terminam sem clique quando o prazo de entrega não aparece…">${esc(d.context)}</textarea></div>
+    <div class="field"><label for="f-hyp">Hipótese</label><p class="hint">Se [mudança], então [métrica] vai [direção], porque [motivo].</p><textarea id="f-hyp" data-f="hypothesis" placeholder="Se mostrarmos…, então… vai aumentar, porque…">${esc(d.hypothesis)}</textarea></div>
+    <div class="field"><span class="lbl">O que vai mudar</span><p class="hint">Descreva cada versão e, se tiver, cole o link do Figma do antes e do depois.</p><div class="pair"><div><div class="sub">Controle (como é hoje)</div><textarea data-f="control" aria-label="Controle">${esc(d.control)}</textarea><input class="figin" type="url" data-f="figmaBefore" value="${esc(d.figmaBefore)}" placeholder="Figma do antes: https://www.figma.com/…" aria-label="Link do Figma do antes"><p class="fig-err" id="err-figmaBefore">${figErr(d.figmaBefore)}</p></div><div><div class="sub">Variante (o que muda)</div><textarea data-f="variant" aria-label="Variante">${esc(d.variant)}</textarea><input class="figin" type="url" data-f="figmaAfter" value="${esc(d.figmaAfter)}" placeholder="Figma do depois: https://www.figma.com/…" aria-label="Link do Figma do depois"><p class="fig-err" id="err-figmaAfter">${figErr(d.figmaAfter)}</p></div></div></div>
+    <div class="field"><span class="lbl">Métrica primária</span><p class="hint">Só uma. É ela que decide se o teste ganhou.</p>${chipsHTML('primary',METRICS,d.primary,false,[],S.nm.open?'':'<button type="button" class="chip add" data-act="newmetric">+ Criar métrica</button>')}${S.nm.open?metricForm():''}${baseBox(d)}</div>
+    <div class="field"><span class="lbl">Métricas secundárias</span><p class="hint">Ajudam a explicar o resultado, mas não decidem sozinhas.</p>${chipsHTML('secondary',METRICS,d.secondary,true,d.primary?[d.primary]:[])}</div>
+    <div class="field"><span class="lbl">Guardrails (opcional)</span><p class="hint">Métricas que não podem piorar.</p>${chipsHTML('guardrails',GUARDS,d.guardrails,true)}</div>
+    <div class="field"><label for="f-mde">Efeito mínimo detectável: <span id="mde-v">${d.mde}%</span></label><p class="hint">Menor melhora relativa que vale a pena detectar. Quanto menor, mais tráfego e mais dias.</p><input id="f-mde" type="range" min="1" max="30" step="1" data-f="mde" value="${d.mde}" style="width:100%;accent-color:var(--brand)">
+    <p class="small muted" id="ss">${n?`Amostra necessária: <b>${fmt(n)}</b> usuários por grupo.`:'Escolha a métrica primária para calcular a amostra.'}</p></div>
+  </div><div class="sticky">${gatePanel()}</div></div>`;
+}
+function estimatePanel(){
+  const d=S.d,el=eligible(d),n=sampleSize(d.primary,d.mde,d.base),tot=n*(d.variants+1),dur=el?Math.ceil(tot/el):0,win=days(d.start,d.end);
+  let msg='';
+  if((d.segText||'').trim().length<3)msg='<div class="callout warnp">Descreva quem entra no teste.</div>';
+  else if(!el)msg='<div class="callout warnp">Escolha ao menos uma página e uma plataforma.</div>';
+  else if(dur>win)msg=`<div class="callout risk">O período escolhido tem ${win} dias, mas o teste precisa de ${dur}. Aumente o tráfego, amplie o público ou aceite um efeito mínimo maior.</div>`;
+  else if(dur<7)msg='<div class="callout warnp">Rode por pelo menos 7 dias para cobrir o ciclo semanal de compras, mesmo atingindo a amostra antes.</div>';
+  else msg=`<div class="callout okp">Cabe no período, com ${win-dur} dias de folga.</div>`;
+  return `<div class="panel" id="est"><h2>Estimativa</h2>
+   <div class="stat"><span class="small muted">Usuários elegíveis por dia</span><b>${fmt(el)}</b></div>
+   <div class="stat"><span class="small muted">Amostra total (${d.variants+1} grupos)</span><b>${fmt(tot)}</b></div>
+   <div class="stat"><span class="small muted">Duração mínima</span><b>${dur?dur+' dias':'–'}</b></div>${msg}
+   <button class="btn" data-step="3" ${canGo(3)?'':'disabled'} style="width:100%;margin-top:16px">Checar sobreposição</button></div>`;
+}
+function stepAudience(){
+  const d=S.d;
+  return `<div class="grid2"><div class="panel">
+   <h2>Público e alocação</h2><p class="small muted" style="margin:0 0 18px">Onde o teste aparece e para quem.</p>
+   <div class="field"><span class="lbl">Plataformas</span>${chipsHTML('platforms',PLATS,d.platforms,true)}</div>
+   <div class="field"><span class="lbl">Páginas</span>${chipsHTML('pages',PAGES,d.pages,true)}</div>
+   <div class="field"><label for="f-seg">Quem entra no teste</label><p class="hint">Descreva o público com as palavras do seu time. Vale qualquer recorte: categoria comprada, espécie, plano, região, comportamento.</p>
+     <input id="f-seg" type="text" data-f="segText" value="${esc(d.segText)}" placeholder="Ex.: pessoas que compraram tapete higiênico nos últimos 90 dias">
+     <p class="small muted" style="margin:10px 0 6px">Atalhos</p>${chipsHTML('segment',SEG,d.segment,false)}</div>
+   <div class="pair"><div class="field"><label for="f-segshare">Tamanho estimado (% da base)</label><p class="hint">Se não souber, deixe 100 e o time de dados ajusta.</p><input id="f-segshare" type="number" min="0.1" max="100" step="any" data-f="segShare" value="${d.segShare??''}"></div>
+   <div class="field"><label for="f-segrule">Regra para montar no DY ou CRM (opcional)</label><p class="hint">Como o público é identificado na base.</p><input id="f-segrule" type="text" data-f="segRule" value="${esc(d.segRule||'')}" placeholder="Ex.: comprou Higiene › Tapete higiênico em 90 dias"></div></div>
+   <div class="field"><label for="f-tr">Tráfego no experimento: <span id="tr-v">${d.traffic}%</span></label><p class="hint">Parte do público elegível que entra no teste. O restante fica livre para outros testes.</p><input id="f-tr" type="range" min="5" max="100" step="5" data-f="traffic" value="${d.traffic}" style="width:100%;accent-color:var(--brand)"></div>
+   <div class="field"><span class="lbl">Número de variantes</span>${chipsHTML('variants',{1:{n:'A/B (1 variante)'},2:{n:'A/B/C (2 variantes)'}},String(d.variants),false)}</div>
+   <div class="pair"><div class="field"><label for="f-st">Início</label><input id="f-st" type="date" data-f="start" value="${d.start}"></div><div class="field"><label for="f-en">Fim</label><input id="f-en" type="date" data-f="end" value="${d.end}"></div></div>
+  </div><div class="sticky">${estimatePanel()}</div></div>`;
+}
+const RES={exclusao:['Exclusão mútua','Cada usuário cai em só um dos testes. Resultados limpos, mas cada teste recebe menos tráfego.'],paralelo:['Rodar em paralelo','Usuários podem ver os dois testes. Aceitável quando as mudanças não interagem.'],reagendar:['Reagendar','Começar este teste depois que o outro terminar.']};
+function stepOverlap(){
+  const d=S.d,cs=conflictsOf(d,EXPS);
+  const list=cs.length?cs.map(({o,ov})=>`<div class="conf ${ov.sev}">
+    <div class="spread"><div><h3>${esc(o.name)}</h3><div class="small muted">${esc(o.owner)} · ${STATUS[o.status]} de ${dm(o.start)} a ${dm(o.end)}</div></div><span class="pill ${SEVL[ov.sev][1]}">${SEVL[ov.sev][0]}</span></div>
+    <p class="small" style="margin:12px 0 0">Compartilham <b>${ov.pages.map(p=>PAGES[p].n).join(', ')}</b> em ${ov.plats.map(p=>PLATS[p].n).join(', ')}, de ${dm(ov.from)} a ${dm(ov.to)}. Cerca de <b>${fmt(ov.daily)}</b> usuários por dia veriam os dois testes (${pct(ov.daily/Math.max(1,eligible(d)))} do público deste teste).${o.primary===d.primary?` Os dois usam <b>${METRICS[d.primary].n}</b> como métrica primária, então um pode contaminar o resultado do outro.`:''}</p>
+    ${ov.sev==='baixo'?'<p class="small muted" style="margin:8px 0 0">Impacto pequeno. Pode seguir sem ação.</p>':`<div class="radio" role="radiogroup" aria-label="Como resolver">${Object.entries(RES).map(([k,[t,h]])=>`<label><input type="radio" name="r-${o.id}" data-res="${o.id}" value="${k}" ${d.resolutions[o.id]===k?'checked':''}><span><b>${t}</b><br><span class="muted">${h}</span></span></label>`).join('')}</div>`}
+  </div>`).join(''):`<div class="panel"><h2>Sem sobreposição</h2><p class="muted" style="margin:0">Nenhum teste ativo ou agendado disputa as mesmas páginas, plataformas e público nesse período.</p></div>`;
+  const pend=unresolved(d).length;
+  return `<div class="grid2"><div>${list}</div><div class="sticky"><div class="panel"><h2>Sobreposição</h2>
+   <div class="stat"><span class="small muted">Testes que cruzam com este</span><b>${cs.length}</b></div>
+   <div class="stat"><span class="small muted">Pendentes de decisão</span><b>${pend}</b></div>
+   <p class="small muted">Riscos médio e alto precisam de uma decisão antes da revisão.</p>
+   <button class="btn" data-step="4" ${canGo(4)?'':'disabled'} style="width:100%">Revisar experimento</button></div></div></div>`;
+}
+function stepReview(){
+  const d=S.d,cs=conflictsOf(d,EXPS),el=eligible(d),n=sampleSize(d.primary,d.mde,d.base);
+  return `<div class="panel"><h2>${esc(d.name)}</h2><p class="small muted" style="margin:0 0 20px">Confira antes de enviar. O design fica anexado ao teste e aparece na tela de resultados.</p>
+  <dl class="sum">
+   <dt>Contexto</dt><dd>${esc(d.context)}</dd>
+   <dt>Hipótese</dt><dd>${esc(d.hypothesis)}</dd>
+   <dt>Controle</dt><dd>${esc(d.control)}</dd>
+   <dt>Variante</dt><dd>${esc(d.variant)}</dd>
+   <dt>Figma</dt><dd>${figLinks(d)||'<span class="muted">Sem links de antes e depois</span>'}</dd>
+   <dt>Métrica primária</dt><dd>${METRICS[d.primary].n} · ${METRICS[d.primary].cv!=null?'variabilidade '+(d.base??METRICS[d.primary].cv):'base de '+(d.base??+(METRICS[d.primary].base*100).toFixed(2))+'%'} · efeito mínimo de ${d.mde}%${METRICS[d.primary].def?`<br><span class="muted small">${esc(METRICS[d.primary].def)}</span>`:''}</dd>
+   <dt>Secundárias</dt><dd>${d.secondary.map(m=>METRICS[m].n).join(', ')}</dd>
+   <dt>Guardrails</dt><dd>${d.guardrails.length?d.guardrails.map(g=>gName(g)).join(', '):'Nenhum'}</dd>
+   <dt>Onde</dt><dd>${d.pages.map(p=>PAGES[p].n).join(', ')} em ${d.platforms.map(p=>PLATS[p].n).join(', ')}</dd>
+   <dt>Público</dt><dd>${esc(segOf(d).n)} (~${pct(segOf(d).share,0)} da base), ${d.traffic}% do tráfego, ${d.variants+1} grupos${d.segRule?`<br><span class="small muted">Regra: ${esc(d.segRule)}</span>`:''}</dd>
+   <dt>Período</dt><dd>${dm(d.start)} a ${dm(d.end)} · ~${fmt(el)} usuários/dia · ${fmt(n)} por grupo</dd>
+   <dt>Sobreposição</dt><dd>${cs.length?cs.map(({o,ov})=>`${esc(o.name)}: ${d.resolutions[o.id]?RES[d.resolutions[o.id]][0]:'sem ação (risco baixo)'}`).join('<br>'):'Nenhuma'}</dd>
+  </dl>
+  <div class="row" style="margin-top:24px"><button class="btn" data-act="create">Criar e enviar ao DY</button><button class="btn ghost" data-step="1">Editar design</button></div></div>`;
+}
+
+/* map */
+function vMap(){
+  const A='2026-09-01',B='2026-11-30',span=days(A,B);
+  const x=s=>Math.max(0,Math.min(100,days(A,s)/span*100));
+  const own=EXPS.filter(e=>inBU(e,S.buf));
+  const ext=S.buf==='todas'?[]:EXPS.filter(e=>!own.includes(e)&&e.status!=='finished'&&own.some(o=>o.status!=='finished'&&overlap(e,o)));
+  const pool=[...own,...ext];
+  const used=Object.keys(PAGES).filter(p=>pool.some(e=>e.pages.includes(p)));
+  const weeks=[];for(let i=0;i<=span;i+=14){const dt=new Date(new Date(A).getTime()+i*864e5).toISOString().slice(0,10);weeks.push(`<span style="left:${i/span*100}%">${dm(dt)}</span>`)}
+  const lanes=used.map(p=>{
+    const es=pool.filter(e=>e.pages.includes(p)&&(!ext.includes(e)||own.some(o=>{const v=o.status!=='finished'&&overlap(e,o);return v&&v.pages.includes(p)}))).sort((a,b)=>a.start.localeCompare(b.start));const rows=[];
+    const bars=es.map(e=>{let r=rows.findIndex(end=>end<e.start);if(r<0){r=rows.length;rows.push(e.end)}else rows[r]=e.end;
+      const clash=e.status!=='finished'&&es.some(o=>o!==e&&o.status!=='finished'&&overlap(e,o));
+      const isExt=ext.includes(e);return `<div class="bar ${e.status} ${clash?'clash':''} ${isExt?'ext':''}" data-open="${e.id}" title="${esc(e.name)} (${BUS[e.bu].n})" style="left:${x(e.start)}%;width:${x(e.end)-x(e.start)}%;top:${8+r*34}px">${isExt?BUS[e.bu].n+': ':''}${esc(e.name)}</div>`}).join('');
+    return `<div class="mrow"><div class="mlabel">${PAGES[p].n}</div><div class="mtrack" style="height:${16+rows.length*34}px"><div class="today" style="left:${x(TODAY)}%"></div>${bars}</div></div>`}).join('');
+  const clashes=[];EXPS.forEach((a,i)=>EXPS.slice(i+1).forEach(b=>{if(a.status!=='finished'&&b.status!=='finished'&&(inBU(a,S.buf)||inBU(b,S.buf))){const o=overlap(a,b);if(o)clashes.push({a,b,o})}}));
+  return `<h1>Mapa de sobreposição</h1><p class="lead">Testes por página ao longo do tempo. Contorno tracejado indica que o teste divide público com outro na mesma página. A linha amarela é hoje. Ao filtrar uma BU, testes de outras BUs que cruzam com ela aparecem esmaecidos, com o nome da BU.</p>
+  <div style="margin-bottom:16px">${buFilter()}</div>
+  <div class="map"><div class="map-inner"><div class="weeks"><div></div><div class="t">${weeks.join('')}</div></div>${lanes}</div></div>
+  <h2 style="margin-top:32px">Conflitos ativos</h2>
+  ${clashes.length?clashes.map(({a,b,o})=>`<div class="conf ${o.sev}"><div class="spread"><div><h3>${esc(a.name)} × ${esc(b.name)}</h3>${a.bu!==b.bu?`<span class="tg tg-warn" style="margin-top:4px">Entre BUs: ${BUS[a.bu].n} × ${BUS[b.bu].n}</span>`:''}<p class="small muted" style="margin:4px 0 0">${o.pages.map(p=>PAGES[p].n).join(', ')} em ${o.plats.map(p=>PLATS[p].n).join(', ')} · ${dm(o.from)} a ${dm(o.to)} · ~${fmt(o.daily)} usuários/dia nos dois (${pct(o.daily/Math.max(1,eligible(a)))} de um, ${pct(o.daily/Math.max(1,eligible(b)))} do outro)</p></div><span class="pill ${SEVL[o.sev][1]}">${SEVL[o.sev][0]}</span></div></div>`).join(''):'<p class="muted">Nenhum conflito.</p>'}`;
+}
+
+/* detail */
+function ciBar(lo,lift,hi,col){
+  const m=Math.max(Math.abs(lo),Math.abs(hi),.05)*1.25,X=v=>(v+m)/(2*m)*100;
+  return `<div class="ci" aria-hidden="true"><div class="axis"></div><div class="zero" style="left:${X(0)}%"></div><div class="rng" style="left:${X(lo)}%;width:${X(hi)-X(lo)}%;background:color-mix(in srgb,${col} 30%,transparent)"></div><div class="pt" style="left:${X(lift)}%;background:${col}"></div></div>`;
+}
+/* ---------- resultados (formato bench Testes A/B) ---------- */
+const ROWS={
+ rpu:{n:'Receita por usuário',sec:'eCom',kind:'val',base:24.5,cv:6,fmt:'money'},
+ conv:{n:'Conversão',sec:'eCom',kind:'rate',base:.032},
+ tpu:{n:'Transações por usuário',sec:'eCom',kind:'val',base:.092,cv:4,fmt:'n4'},
+ ticket:{n:'Ticket médio',sec:'eCom',kind:'val',base:232,cv:.8,fmt:'money',perBuyer:true,noSess:true},
+ rfpu:{n:'Receita faturada por usuário',sec:'eCom',kind:'val',base:29.4,cv:6,fmt:'money'},
+ m2:{n:'Margem 2 por usuário',sec:'eCom',kind:'val',base:4.1,cv:7,fmt:'money'},
+ atc:{n:'Conversão para o carrinho',sec:'eCom',kind:'rate',base:.11},
+ repet:{n:'Conversão em Repet nova',sec:'eCom',kind:'rate',base:.021},
+ ctr:{n:'Cliques na recomendação',sec:'eCom',kind:'rate',base:.06},
+ clube:{n:'Conversão no clube',sec:'Clube',kind:'rate',base:.0042},
+ rclube:{n:'Receita do clube por usuário',sec:'Clube',kind:'val',base:.71,cv:12,fmt:'money'},
+ tsaude:{n:'Ticket de saúde',sec:'Saúde',kind:'val',base:150,cv:.8,fmt:'money',perBuyer:true,noSess:true,skip:true},
+ churns:{n:'Churn de saúde',sec:'Saúde',kind:'rate',base:.02,lower:true,noSess:true,skip:true},
+ churnc:{n:'Churn do clube',sec:'Clube',kind:'rate',base:.031,lower:true,noSess:true},
+ saude:{n:'Conversão em saúde',sec:'Saúde',kind:'rate',base:.015},
+ vidas:{n:'Vidas por usuário',sec:'Saúde',kind:'val',base:.021,cv:8,fmt:'n4'},
+ rsaude:{n:'Receita de saúde por usuário',sec:'Saúde',kind:'val',base:1.12,cv:10,fmt:'money'},
+ ret30:{n:'Retenção em 30 dias',sec:'Retenção',kind:'rate',base:.41,noSess:true},
+ load:{n:'Tempo de carregamento',sec:'Operação',kind:'val',base:1.82,cv:.45,fmt:'sec',lower:true,noSess:true},
+ sac:{n:'Chamados no SAC',sec:'Operação',kind:'rate',base:.006,lower:true},
+ cancel:{n:'Cancelamento de Repet',sec:'Operação',kind:'rate',base:.042,lower:true,noSess:true},
+ devol:{n:'Taxa de devolução',sec:'Operação',kind:'rate',base:.018,lower:true,noSess:true}
+};
+const MAPROW={conv:'conv',rpv:'rpu',ticket:'ticket',repet:'repet',atc:'atc',ctr:'ctr',saude:'saude',ret30:'ret30'};
+const FETCHED='14/10 09:40',DATA_END='2026-10-13';
+function rng(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>(s=s*16807%2147483647)/2147483647}
+function hash(t){let h=7;for(const ch of t)h=(h*31+ch.charCodeAt(0))%2147483647;return h}
+function gauss(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function rowsFor(e){const u=new Set(['rpu','conv','tpu','ticket','rfpu','m2','atc','repet','clube','rclube','churnc','saude','vidas','rsaude']);[e.primary,...e.secondary].forEach(m=>MAPROW[m]&&u.add(MAPROW[m]));e.guardrails.forEach(g=>ROWS[g]&&u.add(g));return Object.keys(ROWS).filter(k=>u.has(k))}
+function tagOf(e,k){if(MAPROW[e.primary]===k)return'norte';if(e.guardrails.includes(k))return'guarda';if(e.secondary.some(m=>MAPROW[m]===k))return'sec';return''}
+const nEff=(r,n)=>r.perBuyer?n*.05:n;
+function gen(e,grain){
+  e._c=e._c||{};if(e._c[grain])return e._c[grain];
+  const R=e.results,sess=grain==='sessao',nf=sess?1.7:1,plats={};
+  for(const p of e.platforms){const u=R.users[p];if(!u)continue;const n=[Math.round(u[0]*nf),Math.round(u[1]*nf)],rows={};
+    for(const k in ROWS){const r=ROWS[k];let b=(R.base&&R.base[k])??r.base;
+      if(sess&&!r.noSess)b/=r.kind==='rate'?1.55:nf;
+      const rnd=rng(hash(e.id+k+p+grain)),c=b*(1+gauss(rnd)*.05),n0=nEff(r,Math.min(...n));
+      const se=r.kind==='rate'?Math.sqrt((1-c)/c*2/n0):r.cv*Math.sqrt(2/n0);
+      rows[k]=[c,c*(1+(R.lifts[k]||0)+gauss(rnd)*se*.3)]}
+    plats[p]={n,rows}}
+  const ps=Object.values(plats),n=[0,1].map(i=>ps.reduce((s,x)=>s+x.n[i],0)),rows={};
+  for(const k in ROWS)rows[k]=[0,1].map(i=>ps.reduce((s,x)=>s+x.rows[k][i]*x.n[i],0)/n[i]);
+  return e._c[grain]={plats,all:{n,rows}};
+}
+function rstat(r,[c,v],[nc,nv]){if(!c)return null;const a=nEff(r,nc),b=nEff(r,nv);
+  const se=r.kind==='rate'?Math.sqrt(c*(1-c)/a+v*(1-v)/b):Math.sqrt((c*r.cv)**2/a+(c*r.cv)**2/b);
+  const z=(v-c)/se;return{delta:(v-c)/c,P:r.lower?phi(-z):phi(z),better:r.lower?v<c:v>c}}
+function sig(P){const pp=Math.round(P*100);
+  if(P>=.95)return{t:'Melhora confirmada',c:'sg-up',a:'▲',pp,w:'melhora confirmada'};
+  if(P<=.05)return{t:'Queda confirmada',c:'sg-down',a:'▼',pp,w:'queda confirmada'};
+  if(P>=.8)return{t:'Tendência de melhora',c:'sg-tup',a:'▲',pp,w:'tendência de melhora'};
+  if(P<=.2)return{t:'Tendência de queda',c:'sg-tdown',a:'▼',pp,w:'tendência de queda'};
+  return{t:'Sem tendência',c:'sg-none',a:'',pp,w:'sem tendência'}}
+function fv(r,x){if(x==null||isNaN(x))return'–';if(r.kind==='rate')return pct(x,2);
+  if(r.fmt==='money')return'R$ '+x.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(r.fmt==='sec')return x.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' s';
+  return x.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})}
+const TAGH={norte:'<span class="tg tg-norte">NORTE</span>',guarda:'<span class="tg tg-guarda">GUARDA</span>',sec:'<span class="tg tg-sec">SECUNDÁRIA</span>'};
+const lbl=(s,g)=>g==='sessao'?s.replace('por usuário','por sessão'):s;
+function deltaCell(d,good){return `<td class="num" style="color:${good?'var(--ok)':'var(--risk)'}">${d>0?'+':''}${(d*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</td>`}
+function metricTable(e,D,grain){
+  const[nc,nv]=D.n,R=D.rows,money0=x=>'R$ '+fmt(x);
+  const vol=[[grain==='sessao'?'Sessões':'Usuários',nc,nv,fmt],['Compradores',nc*R.conv[0],nv*R.conv[1],fmt],['Transações',nc*R.tpu[0],nv*R.tpu[1],fmt],['Receita',nc*R.rpu[0],nv*R.rpu[1],money0]];
+  let h=vol.map(([n,a,b,f])=>`<tr><td><b>${n}</b></td><td class="num">${f(a)}</td><td class="num vline">${f(b)}</td>${deltaCell((b-a)/a,b>=a)}<td class="muted">—</td></tr>`).join('');
+  let sec='';
+  for(const k of rowsFor(e)){const r=ROWS[k],t=tagOf(e,k),s=rstat(r,R[k],D.n);
+    if(r.sec!==sec){sec=r.sec;h+=`<tr class="msec"><td colspan="5">${sec}</td></tr>`}
+    const g=s&&sig(s.P);
+    h+=`<tr class="${t==='norte'?'norte':''}"><td><b>${lbl(r.n,grain)}</b> ${TAGH[t]||''}</td><td class="num">${fv(r,R[k][0])}</td><td class="num vline">${fv(r,R[k][1])}</td>${s?deltaCell(s.delta,s.better):'<td class="num muted">—</td>'}<td>${g?`<span class="sg ${g.c}">${g.a} ${g.t} <span class="pp">(${g.pp}%)</span></span>`:'—'}</td></tr>`}
+  return `<div class="table-wrap"><table class="mt"><thead><tr><th>Métrica</th><th class="num">Controle</th><th class="num vline">Variante A</th><th class="num">Delta</th><th>Significância <span class="small">(chance de a variante ser melhor)</span></th></tr></thead><tbody>${h}</tbody></table></div>`;
+}
+function daily(e,plat){const R=e.results,end=e.status==='finished'?e.end:DATA_END,run=Math.max(1,days(e.start,end)+1),out=[];
+  for(let i=13;i>=0;i--){const dt=new Date(new Date(end).getTime()-i*864e5).toISOString().slice(0,10);if(dt<e.start)continue;
+    const rnd=rng(hash(e.id+dt+plat)),wf=[.82,1.1,1.05,1,1,.96,.86][new Date(dt).getUTCDay()];let a=0,b=0;
+    (plat==='all'?e.platforms:[plat]).forEach(p=>{const u=R.users[p];if(u){a+=u[0]/run*wf*(.9+rnd()*.2);b+=u[1]/run*wf*(.9+rnd()*.2)}});
+    const D=gen(e,'usuario'),src=plat==='all'?D.all:D.plats[plat],k=MAPROW[e.primary],r=ROWS[k];
+    out.push({dt,a,b,pa:src.rows[k][0]*(1+gauss(rnd)*.09),pb:src.rows[k][1]*(1+gauss(rnd)*.09),r})}
+  return out}
+function chart(pts,mode){
+  const W=620,H=230,L=46,B=28,T=12,iw=W-L-8,step=iw/pts.length;
+  const vals=mode==='users'?pts.flatMap(p=>[p.a,p.b]):pts.flatMap(p=>[p.pa,p.pb]);
+  const lo=mode==='users'?0:Math.min(...vals)*.9,hi=Math.max(...vals)*1.08,y=v=>H-B-(v-lo)/(hi-lo)*(H-B-T);
+  const r=pts[0].r,tk=v=>mode==='users'?(v>=1000?(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+'k':fmt(v)):fv(r,v);
+  let g='';for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;g+=`<line x1="${L}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${tk(v)}</text>`}
+  pts.forEach((p,i)=>{if(i%2===0)g+=`<text x="${L+step*i+step/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${dm(p.dt)}</text>`});
+  if(mode==='users'){const bw=step*.34;pts.forEach((p,i)=>{const x=L+step*i+step/2;g+=`<rect x="${x-bw-1}" y="${y(p.a)}" width="${bw}" height="${H-B-y(p.a)}" rx="2" fill="var(--muted)"><title>${dm(p.dt)} controle: ${fmt(p.a)}</title></rect><rect x="${x+1}" y="${y(p.b)}" width="${bw}" height="${H-B-y(p.b)}" rx="2" fill="var(--brand)"><title>${dm(p.dt)} variante: ${fmt(p.b)}</title></rect>`})}
+  else{const line=(k,c)=>`<polyline fill="none" stroke="${c}" stroke-width="2.5" points="${pts.map((p,i)=>`${L+step*i+step/2},${y(p[k])}`).join(' ')}"/>`+pts.map((p,i)=>`<circle cx="${L+step*i+step/2}" cy="${y(p[k])}" r="3" fill="${c}"><title>${dm(p.dt)}: ${fv(r,p[k])}</title></circle>`).join('');g+=line('pa','var(--muted)')+line('pb','var(--brand)')}
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${mode==='users'?'Usuários expostos por dia':'Métrica norte por dia'}" style="width:100%;height:auto;display:block">${g}</svg>`}
+function seg(k,opts){return `<div class="seg" role="group">${opts.map(([v,t])=>`<button type="button" data-act="dset" data-k="${k}" data-v="${v}" aria-pressed="${S[k]===v}">${t}</button>`).join('')}</div>`}
+function vDetail(){
+  const e=EXPS.find(x=>x.id===S.id);if(!e)return'';
+  ['plat','hplat'].forEach(k=>{if(!S[k]||(S[k]!=='all'&&!e.platforms.includes(S[k])))S[k]='all'});if(!S.grain)S.grain='usuario';if(!S.hmode)S.hmode='users';
+  const cross=e.status==='finished'?[]:conflictsOf(e,EXPS),end=e.status==='finished'?e.end:DATA_END;
+  const chips=[statusPill(e.status),`<span class="tg">${BUS[e.bu||'ecom'].n}</span>`,`<span class="tg">${e.variants+1} variantes</span>`,...e.platforms.map(p=>`<span class="tg">${PLATS[p].n}</span>`),`<span class="tg">${esc(segOf(e).n)}</span>`,`<span class="tg">${e.traffic}% do tráfego</span>`];
+  const U=e.results&&!e.results.fixed&&gen(e,'usuario');
+  if(e.results&&e.results.fixed){chips.push(...e.results.tags.map(t=>`<span class="tg">${esc(t)}</span>`),`<span class="tg">${fmt(e.results.crossed)} usuários viram 2 variantes (${pct(e.results.crossedPct)}), excluídos</span>`)}
+  if(U&&e.results.crossed)chips.push(`<span class="tg">${fmt(e.results.crossed)} usuários viram 2 variantes (${pct(e.results.crossed/(U.all.n[0]+U.all.n[1]+e.results.crossed))}), excluídos</span>`);
+  cross.forEach(({o,ov})=>chips.push(`<span class="tg ${ov.sev==='alto'?'tg-risk':'tg-warn'}">Sobrepõe ${esc(o.name)}: ~${fmt(ov.daily)} usuários/dia em ambos</span>`));
+  const head=`<button class="back" data-go="list">← Experimentos</button><h1>${esc(e.name)}</h1>
+   <div class="chips" style="gap:6px;margin:10px 0 8px">${chips.join('')}</div>
+   <p class="small muted" style="margin:0 0 20px">${e.results&&e.results.meta?e.results.meta:e.results?`Resultado do Dynamic Yield com dados até ${dm(end)}, buscado em ${FETCHED}. Desde ${dm(e.start)} · ${days(e.start,end)+1} dias em campo.`:`Agendado para ${dm(e.start)}.`}</p>`;
+  const design=`<div class="design-card"><h3>Design do experimento</h3>
+    <p style="margin:4px 0 8px">${esc(e.context)}</p><p style="margin:0 0 8px"><b>Hipótese.</b> ${esc(e.hypothesis)}</p>
+    <p class="small muted" style="margin:0"><b>Controle:</b> ${esc(e.control)} · <b>Variante:</b> ${esc(e.variant)}<br><b>Primária:</b> ${METRICS[e.primary].n} (efeito mínimo ${e.mde}%) · <b>Secundárias:</b> ${e.secondary.map(m=>METRICS[m].n).join(', ')}${e.guardrails.length?` · <b>Guardrails:</b> ${e.guardrails.map(g=>gName(g)).join(', ')}`:''}</p>${figLinks(e)}</div>`;
+  if(e.results&&e.results.fixed)return head+design+vReal(e);
+  if(!e.results)return head+design+`<div class="panel"><h2>Aguardando início</h2><p class="muted" style="margin:0">Começa em ${dm(e.start)}. Os dados aparecem aqui assim que o DY registrar as primeiras exposições.</p></div>`;
+  const pk=MAPROW[e.primary],pr=ROWS[pk],ps=rstat(pr,U.all.rows[pk],U.all.n),pg=sig(ps.P);
+  const need=sampleSize(e.primary,e.mde,e.base),prog=Math.min(1,Math.min(...U.all.n)/need);
+  const sr=srm([{v:U.all.n[0]},{v:U.all.n[1]}]),share=U.all.n[0]/(U.all.n[0]+U.all.n[1]);
+  const guardBad=e.guardrails.filter(g=>{const s=rstat(ROWS[g],U.all.rows[g],U.all.n);return s&&s.P<=.05});
+  let act,acls;
+  if(sr<.001){act=['Investigar a alocação antes de decidir',`Os grupos estão em ${pct(share)} × ${pct(1-share)} quando deveriam estar em 50% × 50% (SRM). Qualquer leitura agora pode estar enviesada. Verifique regras de exibição e gatilhos no DY.`];acls='do-risk'}
+  else if(e.status==='finished'){act=[e.decision||'Encerrado','Teste encerrado. Campanha desligada no DY.'];acls='do-ok'}
+  else if(guardBad.length){act=['Avaliar o trade-off com o guardrail',`${guardBad.map(g=>ROWS[g].n).join(', ')} piorou de forma confirmada. Discuta com o time antes de implementar.`];acls='do-warn'}
+  else if(ps.P>=.95&&prog>=1){act=['Implementar a variante e desligar a campanha no DY','A métrica norte melhorou de forma confirmada e a amostra planejada foi atingida.'];acls='do-ok'}
+  else if(ps.P>=.95){act=['Manter rodando até a amostra planejada',`A métrica norte já aparece como melhora confirmada, mas só ${pct(prog,0)} da amostra planejada foi coletada (${fmt(Math.min(...U.all.n))} de ${fmt(need)} por grupo). Parar agora aumenta o risco de falso positivo.`];acls='do-warn'}
+  else if(ps.P<=.05){act=['Desligar a variante','A métrica norte piorou de forma confirmada.'];acls='do-risk'}
+  else if(prog>=1){act=['Encerrar sem vencedor','A amostra planejada foi atingida e a métrica norte não mostrou diferença confiável.'];acls='do-warn'}
+  else{act=['Manter rodando',`Ainda sem leitura conclusiva na métrica norte. ${pct(prog,0)} da amostra planejada coletada.`];acls='do-warn'}
+  const others=rowsFor(e).filter(k=>k!==pk).map(k=>({k,s:rstat(ROWS[k],U.all.rows[k],U.all.n)})).filter(x=>x.s&&(x.s.P>=.95||x.s.P<=.2)).sort((a,b)=>Math.abs(b.s.delta)-Math.abs(a.s.delta)).slice(0,3);
+  const piece=(k,s,tag)=>{const g=sig(s.P);return `${tag||''}${ROWS[k].n.toLowerCase()} <b style="color:${s.better?'var(--ok)':'var(--risk)'}">${s.delta>0?'+':''}${(s.delta*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%</b> (${g.w}, ${g.pp}%)`};
+  const sintese=`<b>Variante A</b> (consolidado): ${piece(pk,ps,'<span class="tg tg-norte">NORTE</span> ')}${others.map(o=>' · '+piece(o.k,o.s)).join('')}`;
+  const D=gen(e,S.grain),view=S.plat==='all'?D.all:D.plats[S.plat];
+  const pts=daily(e,S.hplat);
+  const nMin=Math.min(...U.all.n);
+  const mdeRows=rowsFor(e).map(k=>{const r=ROWS[k],c=U.all.rows[k][0],n=nEff(r,nMin);const m=r.kind==='rate'?2.8*Math.sqrt(2*(1-c)/(c*n)):2.8*r.cv*Math.sqrt(2/n);const t=tagOf(e,k);
+    return `<tr class="${t==='norte'?'norte':''}"><td>${r.n} ${t==='norte'?TAGH.norte:''}</td><td class="num">${pct(m,1)}</td></tr>`}).join('');
+  return head+design+`
+   ${sr<.001?`<div class="banner">Split instável detectado: ${pct(share)} × ${pct(1-share)} (p ${sr<.0001?'< 0,0001':'= '+sr.toFixed(4)}).</div>`:''}
+   <div class="vars"><div class="sub">Variantes</div>
+    <div><span class="dot" style="background:var(--muted)"></span><b>Controle</b> <span class="muted">${esc(e.control)}</span> <span class="tg">${pct(share,0)}</span></div>
+    <div><span class="dot" style="background:var(--brand)"></span><b>Variante A</b> <span class="muted">${esc(e.variant)}</span> <span class="tg">${pct(1-share,0)}</span></div></div>
+   <div class="sub" style="margin-top:20px">Síntese</div><div class="sintese">${sintese}</div>
+   <div class="sub" style="margin-top:20px">O que fazer <span class="muted" style="font-weight:500">· grão usuário, consolidado, decide por ${pr.n.toLowerCase()}</span></div>
+   <div class="doit ${acls}"><b>${act[0]}</b><p>${act[1]}</p></div>
+   <div class="spread" style="margin:28px 0 12px;align-items:center"><h2 style="margin:0">Métricas</h2><div class="row">${seg('grain',[['usuario','Usuário'],['sessao','Sessão']])}${seg('plat',[['all','Consolidado'],...e.platforms.map(p=>[p,PLATS[p].n])])}</div></div>
+   ${metricTable(e,view,S.grain)}
+   <div class="sub" style="margin-top:32px">Saúde do teste</div>
+   <div class="health">
+    <div class="panel"><div class="row" style="justify-content:space-between;margin-bottom:10px">${seg('hmode',[['users','Usuários expostos'],['norte','Métrica norte dia a dia']])}${seg('hplat',[['all','Todos'],...e.platforms.map(p=>[p,PLATS[p].n])])}</div>
+     <p class="small muted" style="margin:0 0 6px">${S.hmode==='users'?'Novos usuários expostos por dia, últimos 14 dias.':`${pr.n} por dia, por variante.`}</p>
+     ${chart(pts,S.hmode)}
+     <div class="row small muted" style="gap:16px;margin-top:6px"><span><span class="dot" style="background:var(--muted)"></span>Controle</span><span><span class="dot" style="background:var(--brand)"></span>Variante A</span></div>
+     <p class="small muted" style="margin:8px 0 0">${S.hmode==='users'?'Barras desiguais num mesmo dia indicam gatilho de exibição diferente entre variantes ou rampa de tráfego.':'Linhas que se cruzam muito indicam efeito instável; espere a amostra antes de ler.'}</p></div>
+    <div class="panel"><h3>Detectabilidade hoje</h3><p class="small muted" style="margin:0 0 10px">Menor diferença relativa que o teste consegue detectar com a amostra atual (80% de poder). Efeito abaixo disso ainda é ruído.</p>
+     <div class="table-wrap" style="border:0"><table style="min-width:0"><thead><tr><th>Métrica</th><th class="num">MDE</th></tr></thead><tbody>${mdeRows}</tbody></table></div>
+     <p class="small muted" style="margin:10px 0 0">No design, o efeito mínimo planejado para a norte é ${e.mde}%.</p></div>
+   </div>
+   <details class="how"><summary>Como os números são calculados</summary><p>Usuários que viram mais de uma variante são excluídos. Taxas usam teste de proporções; valores por usuário usam aproximação normal com a variância observada. "Chance de ser melhor" é a probabilidade de a variante superar o controle; acima de 95% é melhora confirmada, abaixo de 5% é queda confirmada, entre 80% e 95% (ou 5% e 20%) é tendência. Para métricas em que menor é melhor (churn, tempo de carregamento, chamados), a direção é invertida. SRM é um qui-quadrado sobre a divisão esperada de 50% × 50%.</p></details>`;
+}
+
+/* ---------- teste real (export do DY, 13/10) ---------- */
+const SGC={up:['Melhora confirmada','sg-up','▲'],down:['Queda confirmada','sg-down','▼'],tup:['Tendência de melhora','sg-tup','▲'],tdown:['Tendência de queda','sg-tdown','▼'],none:['Sem tendência','sg-none','—']};
+function gName(g){return GUARDS[g]||(ROWS[g]&&ROWS[g].n)||g}
+const fd=d=>(d>0?'+':'')+d.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+function realTable(e,D){
+  const[an,bn]=e.results.armNames;
+  let h=D.vol.map(([n,a,b,dl,money])=>`<tr><td><b>${n}</b></td><td class="num">${money?'R$ ':''}${fmt(a)}</td><td class="num vline">${money?'R$ ':''}${fmt(b)}</td><td class="num" style="color:${dl>0?'var(--ok)':'var(--risk)'}">${fd(dl)}</td><td class="muted">—</td></tr>`).join('');
+  let sec='';
+  for(const[k,c,v,dl,sg,pp]of D.rows){const r=ROWS[k],t=tagOf(e,k);
+    if(r.sec!==sec){sec=r.sec;h+=`<tr class="msec"><td colspan="5">${sec}</td></tr>`}
+    const good=dl==null?null:(r.lower?dl<0:dl>0),g=sg&&SGC[sg];
+    h+=`<tr class="${t==='norte'?'norte':''}"><td><b>${r.n}</b> ${TAGH[t]||''}</td><td class="num">${c==null?'—':fv(r,c)}</td><td class="num vline">${v==null?'—':fv(r,v)}</td>${dl==null?'<td class="num muted">—</td>':`<td class="num" style="color:${good?'var(--ok)':'var(--risk)'}">${fd(dl)}</td>`}<td>${g?`<span class="sg ${g[1]}">${g[2]} ${g[0]} <span class="pp">(${pp}%)</span></span>`:'—'}</td></tr>`}
+  return `<div class="table-wrap"><table class="mt"><thead><tr><th>Métrica</th><th class="num">${esc(an)} (controle)</th><th class="num vline">${esc(bn)}</th><th class="num">Delta</th><th>Significância <span class="small">(chance de a variante ser melhor)</span></th></tr></thead><tbody>${h}</tbody></table></div>`;
+}
+function vReal(e){
+  const R=e.results,[an,bn]=R.armNames;
+  if(S.plat!=='all'&&!R.fixed.plats[S.plat])S.plat='all';
+  const D=S.plat==='all'?R.fixed.all:R.fixed.plats[S.plat];
+  const pts=R.daily.map(([dt,a,b])=>({dt,a,b}));
+  const mde=R.mde.map(([k,m])=>{const t=tagOf(e,k);return `<tr class="${t==='norte'?'norte':''}"><td>${ROWS[k].n} ${t==='norte'?TAGH.norte:''}</td><td class="num">${m==null?'—':m.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%'}</td></tr>`}).join('');
+  return `
+   <div class="banner">${R.banner}</div>
+   <div class="vars"><div class="sub">Variantes</div>
+    <div><span class="dot" style="background:var(--muted)"></span><b>${esc(an)}</b> <span class="muted">(controle, pelo nome)</span> <span class="tg">${R.split[0]}%</span></div>
+    <div><span class="dot" style="background:var(--brand)"></span><b>${esc(bn)}</b> <span class="tg">${R.split[1]}%</span></div></div>
+   <div class="sub" style="margin-top:20px">Síntese</div><div class="sintese">${R.sintese}</div>
+   <div class="sub" style="margin-top:20px">O que fazer <span class="muted" style="font-weight:500">· grão usuário, consolidado, decide por receita por usuário</span></div>
+   <div class="doit do-warn"><b>${R.decision[0]}</b><p>${R.decision[1]}</p></div>
+   <div class="spread" style="margin:28px 0 12px;align-items:center"><h2 style="margin:0">Métricas</h2><div class="row"><div class="seg"><button type="button" aria-pressed="true">Usuário</button><button type="button" disabled title="O export atual do DY traz só grão usuário" style="opacity:.45;cursor:not-allowed">Sessão</button></div>${seg('plat',[['all','Consolidado'],...Object.keys(R.fixed.plats).map(p=>[p,PLATS[p].n])])}</div></div>
+   ${realTable(e,D)}
+   <div class="sub" style="margin-top:32px">Saúde do teste</div>
+   <div class="health">
+    <div class="panel"><h3>Usuários expostos</h3><p class="small muted" style="margin:0 0 6px">Novos usuários expostos por dia, 30/09 a 13/10, app (Android e iOS).</p>
+     ${chart(pts,'users')}
+     <div class="row small muted" style="gap:16px;margin-top:6px"><span><span class="dot" style="background:var(--muted)"></span>${esc(an)}</span><span><span class="dot" style="background:var(--brand)"></span>${esc(bn)}</span></div>
+     <p class="small muted" style="margin:8px 0 0">Valores diários aproximados, lidos do gráfico do visualizador. Com 98% do tráfego na home nova, o controle quase não aparece.</p></div>
+    <div class="panel"><h3>Detectabilidade hoje</h3><p class="small muted" style="margin:0 0 10px">Menor diferença relativa que o teste consegue detectar com a base atual (80% de poder). Efeito observado abaixo do MDE é ruído até prova em contrário.</p>
+     <div class="table-wrap" style="border:0"><table style="min-width:0"><thead><tr><th>Métrica</th><th class="num">MDE</th></tr></thead><tbody>${mde}</tbody></table></div></div>
+   </div>
+   <details class="how"><summary>Como os números são calculados</summary><p>Dados do export D-1 do Dynamic Yield, grão usuário, janela de leitura de 31/08 a 12/10 (split estável). Usuários que viram as duas variantes são excluídos. "Chance de ser melhor" acima de 95% é melhora confirmada e abaixo de 5% é queda confirmada; entre 80% e 95% (ou 5% e 20%) é tendência. Os deltas das métricas por usuário vêm do cálculo do visualizador, por isso não batem com a simples razão entre os valores exibidos.</p></details>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-go],[data-open],[data-step],[data-chip],[data-act]');if(!t)return;
+  if(t.dataset.go){S.view=t.dataset.go;if(S.view==='new'&&S.step>1&&!designOk(S.d))S.step=1;render();return}
+  if(t.dataset.open){S.view='detail';S.id=t.dataset.open;render();return}
+  if(t.dataset.step){const n=+t.dataset.step;if(canGo(n)){S.step=n;render();if(n===2&&S._first!==true){S._first=true;toast('Design completo. Público liberado.')}}return}
+  if(t.dataset.chip){const f=t.dataset.chip,v=t.dataset.val,d=S.d;
+    if(t.dataset.multi==='1'){d[f]=d[f].includes(v)?d[f].filter(x=>x!==v):[...d[f],v]}
+    else{d[f]=f==='variants'?+v:(d[f]===v&&f==='primary'?'':v);if(f==='primary'){d.secondary=d.secondary.filter(x=>x!==d.primary);d.base=null}if(f==='segment'&&SEG[v]){d.segText=SEG[v].n;d.segShare=Math.round(SEG[v].share*100)}}
+    render();return}
+  if(t.dataset.act==='example'){Object.assign(S.d,{name:'Selo de entrega rápida na busca',owner:'Squad Descoberta',context:'Dados de busca mostram que 38% das sessões que buscam ração terminam sem clique em produto, e no NPS o prazo de entrega é o 2º motivo de reclamação. Hoje o prazo só aparece na página de produto.',hypothesis:'Se mostrarmos o selo “chega amanhã” nos cards da busca, então a adição ao carrinho vai aumentar, porque o cliente sabe o prazo antes de abrir o produto.',control:'Card da busca sem informação de entrega',variant:'Card com selo “Chega amanhã” quando o CEP permite',base:null,primary:'atc',secondary:['conv','rpv'],guardrails:['load'],mde:5,pages:['busca','carrinho'],platforms:['site','android','ios']});render();return}
+  if(t.dataset.act==='dset'){S[t.dataset.k]=t.dataset.v;render();return}
+  if(t.dataset.act==='newmetric'){S.nm={open:true,name:'',type:'taxa',base:'',sd:'',def:''};render();const i=document.querySelector('[data-nm="name"]');if(i)i.focus();return}
+  if(t.dataset.act==='cancelmetric'){S.nm.open=false;render();return}
+  if(t.dataset.act==='savemetric'){const m=S.nm,b=parseFloat(String(m.base).replace(',','.')),sd=parseFloat(String(m.sd).replace(',','.')),err=$('#nm-err');
+    if(m.name.trim().length<3){err.textContent='Dê um nome com pelo menos 3 caracteres.';return}
+    if(Object.values(METRICS).some(x=>x.n.toLowerCase()===m.name.trim().toLowerCase())){err.textContent='Já existe uma métrica com esse nome.';return}
+    if(!(b>0)||(m.type==='taxa'&&b>=100)){err.textContent=m.type==='taxa'?'Informe a taxa atual entre 0 e 100%.':'Informe a média atual.';return}
+    if(m.type==='valor'&&!(sd>0)){err.textContent='Informe o desvio padrão.';return}
+    const k='c'+Date.now();METRICS[k]=m.type==='taxa'?{n:m.name.trim(),base:b/100,def:m.def.trim(),custom:true}:{n:m.name.trim(),cv:+(sd/b).toFixed(2),def:m.def.trim(),custom:true};
+    if(!S.d.primary){S.d.primary=k;S.d.base=null}S.nm.open=false;render();toast(`Métrica “${m.name.trim()}” criada.`);return}
+  if(t.dataset.act==='create'){const d=S.d;EXPS.unshift({...d,id:'e'+Date.now(),status:'scheduled',owner:d.owner||'Meu squad',resolutions:{...d.resolutions}});S.d=blank();S.step=1;S._first=false;S.view='list';render();toast('Experimento criado e configuração enviada ao Dynamic Yield.');return}
+});
+document.addEventListener('input',ev=>{
+  const t=ev.target;
+  if(t.dataset.res){S.d.resolutions[t.dataset.res]=t.value;render();return}
+  if(t.dataset.nm){S.nm[t.dataset.nm]=t.value;if(t.dataset.nm==='type'){S.nm.base='';S.nm.sd='';render()}return}
+  const f=t.dataset.f;if(!f)return;const d=S.d;
+  d[f]=(f==='mde'||f==='traffic')?+t.value:(f==='base'||f==='segShare')?(t.value===''?null:+t.value):t.value;
+  if(f==='segText'){const k=Object.keys(SEG).find(k=>SEG[k].n.toLowerCase()===t.value.trim().toLowerCase());d.segment=k||'custom';document.querySelectorAll('[data-chip="segment"]').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.val===d.segment)))}
+  if(S.step===1){
+    if(f==='mde'||f==='base'){if(f==='mde')$('#mde-v').textContent=d.mde+'%';const n=sampleSize(d.primary,d.mde,d.base);$('#ss').innerHTML=n?`Amostra necessária: <b>${fmt(n)}</b> usuários por grupo.`:'Escolha a métrica primária para calcular a amostra.'}
+    if(f==='figmaBefore'||f==='figmaAfter'){const er=document.getElementById('err-'+f);if(er)er.textContent=figErr(d[f])}
+    $('#gate').outerHTML=gatePanel();
+    const sb=document.querySelector('.steps');sb.outerHTML=stepsBar();
+  }else if(S.step===2){
+    if(f==='traffic')$('#tr-v').textContent=d.traffic+'%';
+    $('#est').outerHTML=estimatePanel();document.querySelector('.steps').outerHTML=stepsBar();
+  }
+});
+render();
+</script>
+</body>
+</html>

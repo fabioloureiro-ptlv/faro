@@ -1,0 +1,54 @@
+import Fastify, { type FastifyInstance } from 'fastify';
+import cors from '@fastify/cors';
+import { ZodError } from 'zod';
+import type { Db } from './db/client.ts';
+import { HttpError } from './errors.ts';
+import { catalogRoutes } from './catalog/routes.ts';
+import { experimentRoutes } from './experiments/routes.ts';
+import { createExperimentService } from './experiments/service.ts';
+import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
+import { mockAudience } from './mocks/audience.ts';
+import { mockDyExport } from './mocks/dy-export.ts';
+import { mockMetricCatalog } from './mocks/metric-catalog.ts';
+import { mockOverlap } from './mocks/overlap.ts';
+import { mockTemplates } from './mocks/templates.ts';
+import type { Ports } from './ports.ts';
+
+export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports {
+  return {
+    metrics: mockMetricCatalog(db, now),
+    audience: mockAudience(),
+    overlap: mockOverlap(),
+    templates: mockTemplates(),
+    // Export real quando o sync já rodou (npm run job:sync-dy); mock caso contrário.
+    dyExport: hasDyExportFile() ? fileDyExport() : mockDyExport(),
+    now,
+  };
+}
+
+export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; corsOrigin?: string[] } = {}): Promise<FastifyInstance> {
+  // Logs sem corpo de requisição: nada de dado pessoal em log.
+  const app = Fastify({ logger: opts.logger ?? false });
+  await app.register(cors, { origin: opts.corsOrigin ?? false, methods: ['GET', 'POST', 'PATCH'] });
+
+  app.setErrorHandler((err, _req, reply) => {
+    if (err instanceof HttpError)
+      return reply.code(err.status).send({ error: err.code, message: err.message, ...(err.details ? { details: err.details } : {}) });
+    if (err instanceof ZodError)
+      return reply.code(400).send({
+        error: 'entrada_invalida',
+        message: 'Há campos inválidos.',
+        details: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+      });
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status && status < 500) return reply.code(status).send({ error: 'requisicao_invalida', message: (err as Error).message });
+    app.log.error(err);
+    return reply.code(500).send({ error: 'erro_interno', message: 'Erro inesperado. Tente de novo.' });
+  });
+
+  app.get('/health', async () => ({ ok: true }));
+  const svc = createExperimentService(db, ports);
+  await experimentRoutes(app, svc, db);
+  await catalogRoutes(app, ports);
+  return app;
+}

@@ -1,0 +1,44 @@
+{
+  "pages": [
+    {
+      "id": "home",
+      "name": "Home",
+      "dailyUsers": 180000
+    },
+    {
+      "id": "busca",
+      "name": "Busca",
+      "dailyUsers": 95000
+    },
+    {
+      "id": "pdp",
+      "name": "Página de produto",
+      "dailyUsers": 140000
+    },
+    {
+      "id": "carrinho",
+      "name": "Carrinho",
+      "dailyUsers": 42000
+    },
+    {
+      "id": "checkout",
+      "name": "Checkout",
+      "dailyUsers": 21000
+    },
+    {
+      "id": "saude",
+      "name": "Área Saúde",
+      "dailyUsers": 16000
+    },
+    {
+      "id": "conta",
+      "name": "Minha conta",
+      "dailyUsers": 30000
+    }
+  ],
+  "platformShare": {
+    "site": 0.45,
+    "android": 0.35,
+    "ios": 0.2
+  }
+}

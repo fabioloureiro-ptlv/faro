@@ -1,0 +1,61 @@
+[
+  {
+    "id": "todos",
+    "name": "Todos os clientes",
+    "share": 1
+  },
+  {
+    "id": "novos",
+    "name": "Novos clientes",
+    "share": 0.28,
+    "dyAttribute": "faro_publico_novos"
+  },
+  {
+    "id": "recorrentes",
+    "name": "Clientes recorrentes",
+    "share": 0.72,
+    "dyAttribute": "faro_publico_recorrentes"
+  },
+  {
+    "id": "repet",
+    "name": "Assinantes Repet",
+    "share": 0.38,
+    "dyAttribute": "faro_publico_repet"
+  },
+  {
+    "id": "naorepet",
+    "name": "Não assinantes Repet",
+    "share": 0.62,
+    "dyAttribute": "faro_publico_naorepet"
+  },
+  {
+    "id": "caes",
+    "name": "Tutores de cães",
+    "share": 0.68,
+    "dyAttribute": "faro_publico_caes"
+  },
+  {
+    "id": "gatos",
+    "name": "Tutores de gatos",
+    "share": 0.44,
+    "dyAttribute": "faro_publico_gatos"
+  },
+  {
+    "id": "tapete",
+    "name": "Compradores de tapete higiênico",
+    "share": 0.09,
+    "dyAttribute": "faro_publico_tapete"
+  },
+  {
+    "id": "areia",
+    "name": "Compradores de areia para gatos",
+    "share": 0.14,
+    "dyAttribute": "faro_publico_areia"
+  },
+  {
+    "id": "antipulgas",
+    "name": "Compradores de antipulgas",
+    "share": 0.12,
+    "dyAttribute": "faro_publico_antipulgas"
+  }
+]

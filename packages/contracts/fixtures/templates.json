@@ -1,0 +1,87 @@
+[
+  {
+    "id": "tpl-banner-home",
+    "name": "Banner de home",
+    "description": "Troca de banner ou bloco de destaque na home. Mede cliques e conversão.",
+    "design": {
+      "primaryMetricId": "cliques_recomendacao",
+      "secondaryMetricIds": [
+        "conversao",
+        "receita_por_usuario"
+      ],
+      "guardrailMetricIds": [
+        "tempo_carregamento"
+      ],
+      "mdeRelative": 0.1,
+      "control": {
+        "name": "Controle",
+        "description": "Banner atual da home"
+      },
+      "variants": [
+        {
+          "key": "a",
+          "name": "Variante A",
+          "description": ""
+        }
+      ]
+    },
+    "allocation": {
+      "pages": [
+        "home"
+      ],
+      "platforms": [
+        "site",
+        "android",
+        "ios"
+      ],
+      "trafficPercent": 50,
+      "split": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "tpl-teste-preco",
+    "name": "Teste de preço",
+    "description": "Variação de preço ou desconto exibido. Decide por receita por usuário e protege a margem.",
+    "design": {
+      "primaryMetricId": "receita_por_usuario",
+      "secondaryMetricIds": [
+        "conversao",
+        "ticket_medio"
+      ],
+      "guardrailMetricIds": [
+        "margem_2_por_usuario"
+      ],
+      "mdeRelative": 0.05,
+      "control": {
+        "name": "Controle",
+        "description": "Preço atual"
+      },
+      "variants": [
+        {
+          "key": "a",
+          "name": "Variante A",
+          "description": ""
+        }
+      ]
+    },
+    "allocation": {
+      "pages": [
+        "pdp",
+        "carrinho"
+      ],
+      "platforms": [
+        "site",
+        "android",
+        "ios"
+      ],
+      "trafficPercent": 50,
+      "split": [
+        0.5,
+        0.5
+      ]
+    }
+  }
+]

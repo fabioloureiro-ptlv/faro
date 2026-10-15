@@ -1,0 +1,26 @@
+{
+  "name": "@faro/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.ts",
+    "start": "node src/server.ts",
+    "job:dy-consistency": "node src/jobs/dy-consistency.ts",
+    "job:sync-dy": "node src/jobs/sync-dy-campaigns.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@faro/config-core": "0.1.0",
+    "@faro/contracts": "0.1.0",
+    "@fastify/cors": "^11.3.1",
+    "@google-cloud/bigquery": "^9.3.0",
+    "drizzle-orm": "^0.45.4",
+    "fastify": "^5.12.7",
+    "zod": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0"
+  }
+}

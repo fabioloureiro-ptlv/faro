@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "faro-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@faro/api"],
+      "port": 4000
+    },
+    {
+      "name": "faro-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@faro/web"],
+      "port": 3000
+    }
+  ]
+}

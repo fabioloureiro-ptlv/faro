@@ -1,0 +1,378 @@
+[
+  {
+    "id": "receita_por_usuario",
+    "name": "Receita por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita total ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/receita_por_usuario.sql",
+    "baseline": 24.5,
+    "cv": 6,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "conversao",
+    "name": "Conversão",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários com ao menos um pedido ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/conversao.sql",
+    "baseline": 0.032,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "transacoes_por_usuario",
+    "name": "Transações por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "count",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Pedidos ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/transacoes_por_usuario.sql",
+    "baseline": 0.092,
+    "cv": 4,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "ticket_medio",
+    "name": "Ticket médio",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user"
+    ],
+    "definition": "Receita ÷ pedidos.",
+    "sqlTemplateRef": "data/models/metrics/ticket_medio.sql",
+    "baseline": 232,
+    "cv": 0.8,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "receita_faturada_por_usuario",
+    "name": "Receita faturada por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita faturada ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/receita_faturada_por_usuario.sql",
+    "baseline": 29.4,
+    "cv": 6,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "margem_2_por_usuario",
+    "name": "Margem 2 por usuário",
+    "section": "eCom",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Margem 2 ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/margem_2_por_usuario.sql",
+    "baseline": 4.1,
+    "cv": 7,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "conversao_carrinho",
+    "name": "Conversão para o carrinho",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que adicionaram ao carrinho ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/conversao_carrinho.sql",
+    "baseline": 0.11,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "conversao_repet_nova",
+    "name": "Conversão em Repet nova",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que criaram uma assinatura Repet ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/conversao_repet_nova.sql",
+    "baseline": 0.021,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "cliques_recomendacao",
+    "name": "Cliques na recomendação",
+    "section": "Engajamento",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que clicaram na recomendação ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/cliques_recomendacao.sql",
+    "baseline": 0.06,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "conversao_clube",
+    "name": "Conversão no clube",
+    "section": "Clube",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que aderiram ao clube ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/conversao_clube.sql",
+    "baseline": 0.0042,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "receita_clube_por_usuario",
+    "name": "Receita do clube por usuário",
+    "section": "Clube",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita do clube ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/receita_clube_por_usuario.sql",
+    "baseline": 0.71,
+    "cv": 12,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "churn_clube",
+    "name": "Churn do clube",
+    "section": "Clube",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Assinantes do clube que cancelaram ÷ assinantes expostos.",
+    "sqlTemplateRef": "data/models/metrics/churn_clube.sql",
+    "baseline": 0.031,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "conversao_saude",
+    "name": "Conversão em saúde",
+    "section": "Saúde",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que contrataram plano de saúde ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/conversao_saude.sql",
+    "baseline": 0.015,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "vidas_por_usuario",
+    "name": "Vidas por usuário",
+    "section": "Saúde",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "count",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Pets cobertos por plano de saúde ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/vidas_por_usuario.sql",
+    "baseline": 0.021,
+    "cv": 8,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "receita_saude_por_usuario",
+    "name": "Receita de saúde por usuário",
+    "section": "Saúde",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Receita de saúde ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/receita_saude_por_usuario.sql",
+    "baseline": 1.12,
+    "cv": 10,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "ticket_saude",
+    "name": "Ticket de saúde",
+    "section": "Saúde",
+    "kind": "mean",
+    "direction": "higher_better",
+    "unit": "brl",
+    "grains": [
+      "user"
+    ],
+    "definition": "Receita de saúde ÷ contratações.",
+    "sqlTemplateRef": "data/models/metrics/ticket_saude.sql",
+    "baseline": 150,
+    "cv": 0.8,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "churn_saude",
+    "name": "Churn de saúde",
+    "section": "Saúde",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Planos de saúde cancelados ÷ planos ativos expostos.",
+    "sqlTemplateRef": "data/models/metrics/churn_saude.sql",
+    "baseline": 0.02,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "retencao_30d",
+    "name": "Retenção em 30 dias",
+    "section": "eCom",
+    "kind": "proportion",
+    "direction": "higher_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Usuários que voltam a comprar em até 30 dias ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/retencao_30d.sql",
+    "baseline": 0.41,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "tempo_carregamento",
+    "name": "Tempo de carregamento",
+    "section": "Operação",
+    "kind": "mean",
+    "direction": "lower_better",
+    "unit": "seconds",
+    "grains": [
+      "user"
+    ],
+    "definition": "Tempo médio até a página ficar interativa.",
+    "sqlTemplateRef": "data/models/metrics/tempo_carregamento.sql",
+    "baseline": 1.82,
+    "cv": 0.45,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "chamados_sac",
+    "name": "Chamados no SAC",
+    "section": "Atendimento",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user",
+      "session"
+    ],
+    "definition": "Usuários que abriram chamado ÷ usuários expostos.",
+    "sqlTemplateRef": "data/models/metrics/chamados_sac.sql",
+    "baseline": 0.006,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "cancelamento_repet",
+    "name": "Cancelamento de Repet",
+    "section": "Operação",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Assinaturas Repet canceladas ÷ assinaturas expostas.",
+    "sqlTemplateRef": "data/models/metrics/cancelamento_repet.sql",
+    "baseline": 0.042,
+    "owner": "frente-04",
+    "status": "ativa"
+  },
+  {
+    "id": "taxa_devolucao",
+    "name": "Taxa de devolução",
+    "section": "Operação",
+    "kind": "proportion",
+    "direction": "lower_better",
+    "unit": "percent",
+    "grains": [
+      "user"
+    ],
+    "definition": "Pedidos devolvidos ÷ pedidos.",
+    "sqlTemplateRef": "data/models/metrics/taxa_devolucao.sql",
+    "baseline": 0.018,
+    "owner": "frente-04",
+    "status": "ativa"
+  }
+]
