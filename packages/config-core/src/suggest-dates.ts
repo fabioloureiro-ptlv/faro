@@ -8,6 +8,10 @@ export interface BusyWindow {
   name: string;
   startDate: string; // AAAA-MM-DD
   endDate: string; // AAAA-MM-DD
+  /** De onde veio: cadastrado no Faro ou visto na DY pelo Acompanhamento. */
+  source?: 'faro' | 'dy';
+  /** Teste da DY sem data de fim planejada: `endDate` é uma estimativa. */
+  endEstimated?: boolean;
 }
 
 export interface DateSuggestionInput {
@@ -31,6 +35,8 @@ export interface DateSuggestion extends DateWindow {
   overlapping: BusyWindow[];
   /** Primeira janela sem teste interposto, quando a sugerida tem algum. */
   freeWindow?: DateWindow & { afterFaroIds: string[] };
+  /** Testes ativos da DY (os do Acompanhamento) que entraram na conta, e os que ficaram de fora por não terem página identificada. */
+  dy?: { considerados: number; semPagina: number; asOf: string };
 }
 
 // DECISAO-PENDENTE: antecedência de 1 dia e janela arredondada para semanas inteiras

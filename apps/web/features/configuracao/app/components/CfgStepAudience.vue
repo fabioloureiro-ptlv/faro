@@ -11,7 +11,7 @@ import { useExperimentDraft } from '../composables/useExperimentDraft';
 import { PLATFORM_LABEL, fmtDate, fmtInt } from '../utils/labels';
 
 const emit = defineEmits<{ next: [] }>();
-const { experiment: exp, pageCatalog, shortcuts, eligibleDaily, nPerGroup, duration, audience, saveState, suggestDates } = useExperimentDraft();
+const { experiment: exp, pageCatalog, shortcuts, nPerGroup, duration, dailyEstimate, audience, saveState, suggestDates } = useExperimentDraft();
 const api = useFaroApi();
 const e = computed(() => exp.value!);
 const a = computed(() => e.value.allocation);
@@ -136,9 +136,13 @@ function setSplit(i: number, v: number) {
   a.value.split = next;
 }
 const splitSum = computed(() => Math.round(a.value.split.reduce((s, x) => s + x, 0) * 1000) / 10);
-const failing = computed(() => audience.value.filter((c) => !c.ok && c.id !== 'viabilidade'));
-const tone = (lvl: string) => (lvl === 'bloqueio' ? 'riskp' : 'warnp');
-const slack = computed(() => (duration.value?.periodDays != null && duration.value.durationDays != null ? duration.value.periodDays - duration.value.durationDays : null));
+const failing = computed(() => audience.value.filter((c) => !c.ok));
+// Amostra e usuários por dia são estimativas informativas: o texto diz o que falta para calculá-las, sem barrar o avanço.
+const estimateHint = computed(() => {
+  if (!duration.value?.totalSample) return 'Escolha a métrica primária (NORTE) no design para calcular a amostra.';
+  if (duration.value.periodDays == null) return 'Defina início e fim na aba Definição para estimar os usuários por dia.';
+  return `Estimativa: amostra total (${fmtInt(duration.value.totalSample)}) ÷ ${duration.value.periodDays} dias do período.`;
+});
 
 // Pré-requisitos mínimos para montar o público-alvo (a viabilidade fica para a aba 2).
 const definicaoOk = computed(
@@ -351,7 +355,11 @@ async function processar() {
           <template v-if="dates.data.overlapping.length">
             <p class="small" style="margin: 8px 0 4px; color: var(--warn)"><b>Testes interpostos</b> nesse período, nas mesmas páginas e plataformas:</p>
             <ul class="small" style="margin: 0; padding-left: 18px">
-              <li v-for="b in dates.data.overlapping" :key="b.faroId">{{ b.name }} · {{ fmtDate(b.startDate) }} → {{ fmtDate(b.endDate) }} <span class="muted">({{ b.faroId }})</span></li>
+              <li v-for="b in dates.data.overlapping" :key="b.faroId">
+                {{ b.name }} · {{ fmtDate(b.startDate) }} → {{ fmtDate(b.endDate) }}<template v-if="b.endEstimated"> (fim estimado)</template>
+                <span v-if="b.source === 'dy'" class="pill warnp" title="Teste ativo na DY, visto no Acompanhamento">Na DY</span>
+                <span v-else class="muted">({{ b.faroId }})</span>
+              </li>
             </ul>
             <p v-if="dates.data.freeWindow" class="small" style="margin: 8px 0 0">
               Próxima janela livre: <b>{{ fmtDate(dates.data.freeWindow.startDate) }} → {{ fmtDate(dates.data.freeWindow.endDate) }}</b>
@@ -360,6 +368,14 @@ async function processar() {
             <p v-else class="small muted" style="margin: 8px 0 0">Sem janela livre nos próximos meses: resolva na etapa de sobreposição.</p>
           </template>
           <p v-else class="small muted" style="margin: 6px 0 0">Nenhum teste interposto nesse período.</p>
+          <p v-if="dates.data.dy" class="small muted" style="margin: 8px 0 0">
+            Considera também os testes ativos na DY que o Acompanhamento mostra (dados até {{ fmtDate(dates.data.dy.asOf) }}):
+            {{ dates.data.dy.considerados }} {{ dates.data.dy.considerados === 1 ? 'teste nas mesmas páginas e plataformas' : 'testes nas mesmas páginas e plataformas' }}.
+            Como a DY não informa a data de fim, assumimos mais 14 dias a partir do último dado.
+            <template v-if="dates.data.dy.semPagina">
+              {{ dates.data.dy.semPagina }} {{ dates.data.dy.semPagina === 1 ? 'teste ativo na DY não tem' : 'testes ativos na DY não têm' }} página identificada e não {{ dates.data.dy.semPagina === 1 ? 'entrou' : 'entraram' }} na conta.
+            </template>
+          </p>
         </template>
       </section>
 
@@ -414,13 +430,11 @@ async function processar() {
 
       <div class="sticky">
         <section class="panel" aria-labelledby="est-title" aria-live="polite">
-          <h2 id="est-title">Elegíveis</h2>
-          <div class="stat"><span class="small muted">Usuários elegíveis por dia</span><b>{{ fmtInt(eligibleDaily) }}</b><span v-if="saveState === 'saving'" class="small muted">atualizando…</span></div>
+          <h2 id="est-title">Amostra e período</h2>
           <div class="stat"><span class="small muted">Amostra por grupo</span><b>{{ nPerGroup ? fmtInt(nPerGroup) : '–' }}</b></div>
           <div class="stat"><span class="small muted">Amostra total ({{ groups.length }} grupos)</span><b>{{ duration?.totalSample ? fmtInt(duration.totalSample) : '–' }}</b></div>
-          <div class="stat"><span class="small muted">Duração mínima</span><b>{{ duration?.durationDays ? `${duration.durationDays} dias` : '–' }}</b></div>
-          <div v-for="al in duration?.alerts ?? []" :key="al.code" class="callout" :class="tone(al.level)">{{ al.message }}</div>
-          <div v-if="duration && !duration.alerts.length && slack != null" class="callout okp">Cabe no período, com {{ slack }} dias de folga.</div>
+          <div class="stat"><span class="small muted">Usuários elegíveis por dia (estimativa)</span><b>{{ dailyEstimate ? fmtInt(dailyEstimate) : '–' }}</b><span v-if="saveState === 'saving'" class="small muted">atualizando…</span></div>
+          <p class="small muted estimativa">{{ estimateHint }}</p>
           <ul v-if="failing.length" class="todo small">
             <li v-for="c in failing" :key="c.id">{{ c.message }}</li>
           </ul>
@@ -433,6 +447,7 @@ async function processar() {
 </template>
 
 <style scoped>
+.estimativa { margin: 8px 0 0; }
 .param { max-width: 320px; margin-top: 12px; }
 .selecionado { margin-top: 14px; padding: 16px; border: 1px solid var(--brand); border-radius: 14px; background: var(--brand-soft); }
 .selecionado h3 { margin: 6px 0 0; font-size: 17px; }

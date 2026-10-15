@@ -140,14 +140,19 @@ describe('sobreposição, revisão e ficha (CFG-09, CFG-11)', () => {
     expect(md.body).toContain(`# Ficha de configuração do DY — ${id}`);
   });
 
-  it('duração maior que o período bloqueia a revisão', async () => {
+  it('amostra, usuários por dia e duração são informativos: duração maior que o período não bloqueia', async () => {
     const r = await readyDraft(ctx, { pages: ['saude'], platforms: ['ios'], trafficPercent: 10, endDate: '2026-10-25' });
-    expect(r.derived.unlockedSteps).toEqual([1, 2]);
+    const d = r.derived as unknown as { duration: { blocking: boolean; alerts: { code: string }[] }; audienceChecks: { id: string }[] };
+    // O cálculo continua dizendo que o período não comporta a amostra...
+    expect(d.duration.blocking).toBe(true);
+    expect(d.duration.alerts.map((a) => a.code)).toContain('periodo_insuficiente');
+    // ...mas isso não é pré-requisito: o Público libera a sobreposição.
+    expect(d.audienceChecks.map((c) => c.id)).not.toContain('viabilidade');
+    expect(r.derived.unlockedSteps).toContain(3);
     const res = await ctx.app.inject({ method: 'POST', url: `/experiments/${r.experiment.faroId}/ready`, headers: PM });
+    // O motor real da frente 3 acha sobreposição não resolvida nesse cenário; só ela barra a revisão.
     expect(res.statusCode).toBe(422);
-    // O motor real da frente 3 também acha sobreposição não resolvida nesse cenário;
-    // o bloqueio de viabilidade continua presente, que é o que este teste cobre.
-    expect(res.json().details.map((c: { id: string }) => c.id)).toContain('viabilidade');
+    expect(res.json().details.map((c: { id: string }) => c.id)).toEqual(['sobreposicao']);
   });
 
   it('editar depois de pronto e quebrar a prontidão volta a design_completo', async () => {

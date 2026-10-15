@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   audienceChecks,
-  estimateDuration,
   evaluateDesignGate,
   overlapCheck,
   statusAfterSave,
@@ -12,21 +11,19 @@ import templates from '@faro/contracts/fixtures/templates.json' with { type: 'js
 import type { Experiment, Template } from '@faro/contracts';
 import { completeExperiment } from './helpers.ts';
 
-const okDuration = estimateDuration({ nPerGroup: 1000, eligibleDaily: 200, split: [0.5, 0.5], startDate: '2026-10-19', endDate: '2026-11-09' });
-
 describe('etapas liberadas e status (CFG-01)', () => {
   it('rascunho em branco só libera a etapa 1', () => {
     const d = { ...blankDraft({ ownerEmail: 'pm@example.com' }), faroId: 'FARO-2026-0001', status: 'rascunho', createdAt: '', updatedAt: '' } as Experiment;
     const gate = evaluateDesignGate(d);
-    expect(unlockedSteps(gate, audienceChecks(d, okDuration), overlapCheck(d))).toEqual([1]);
+    expect(unlockedSteps(gate, audienceChecks(d), overlapCheck(d))).toEqual([1]);
   });
 
   it('design completo libera 2; público ok libera 3; sobreposição resolvida libera 4', () => {
     const e = completeExperiment({ overlap: [{ otherFaroId: 'FARO-2026-0001', severity: 'alto', estimatedDailyUsers: 9000 }] });
     const gate = evaluateDesignGate(e);
-    expect(unlockedSteps(gate, audienceChecks(e, okDuration), overlapCheck(e))).toEqual([1, 2, 3]);
+    expect(unlockedSteps(gate, audienceChecks(e), overlapCheck(e))).toEqual([1, 2, 3]);
     e.overlap![0]!.resolution = 'exclusao_mutua';
-    expect(unlockedSteps(gate, audienceChecks(e, okDuration), overlapCheck(e))).toEqual([1, 2, 3, 4]);
+    expect(unlockedSteps(gate, audienceChecks(e), overlapCheck(e))).toEqual([1, 2, 3, 4]);
   });
 
   it('conflito baixo não exige decisão', () => {
@@ -36,7 +33,7 @@ describe('etapas liberadas e status (CFG-01)', () => {
 
   it('split precisa ter um valor por grupo e somar 100%', () => {
     const e = completeExperiment({ allocation: { ...completeExperiment().allocation, split: [0.6, 0.3] } });
-    expect(audienceChecks(e, okDuration).find((c) => c.id === 'split')!.ok).toBe(false);
+    expect(audienceChecks(e).find((c) => c.id === 'split')!.ok).toBe(false);
   });
 
   it('transições de status pré-DY', () => {

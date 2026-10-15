@@ -1,17 +1,8 @@
 // Prontidão para configurar (etapas Público, Sobreposição e Revisão) e transições de status.
 import type { Experiment, ExperimentStatus, OverlapDecision } from '@faro/contracts';
-import type { DurationResult } from './duration.ts';
 import type { GateResult } from './design-gate.ts';
 
-export type ReadinessCheckId =
-  | 'publico'
-  | 'plataformas'
-  | 'paginas'
-  | 'trafego'
-  | 'split'
-  | 'datas'
-  | 'viabilidade'
-  | 'sobreposicao';
+export type ReadinessCheckId = 'publico' | 'plataformas' | 'paginas' | 'trafego' | 'split' | 'datas' | 'sobreposicao';
 
 export interface ReadinessCheck {
   id: ReadinessCheckId;
@@ -32,7 +23,11 @@ export function pendingOverlaps(overlap: OverlapDecision[] | undefined): Overlap
   return (overlap ?? []).filter((o) => o.severity !== 'baixo' && !o.resolution);
 }
 
-export function audienceChecks(exp: Experiment, duration: DurationResult): ReadinessCheck[] {
+/**
+ * Pré-requisitos da etapa Público. Amostra, usuários por dia e duração são estimativas informativas
+ * (ajuste de produto 15/10): não entram aqui e nunca impedem concluir o experimento.
+ */
+export function audienceChecks(exp: Experiment): ReadinessCheck[] {
   const a = exp.allocation;
   const groups = 1 + exp.design.variants.length;
   const datesOk = !!a.startDate && !!a.endDate && a.endDate > a.startDate;
@@ -45,12 +40,6 @@ export function audienceChecks(exp: Experiment, duration: DurationResult): Readi
     c('trafego', 'Tráfego no experimento', a.trafficPercent > 0 && a.trafficPercent <= 100, 'O tráfego precisa ficar entre 1% e 100%.'),
     c('split', 'Divisão entre grupos', splitIsValid(a.split, groups), `A divisão precisa ter ${groups} grupos maiores que zero somando 100%.`),
     c('datas', 'Período', datesOk, 'Defina início e fim, com o fim depois do início.'),
-    c(
-      'viabilidade',
-      'Cabe no período',
-      !duration.blocking,
-      duration.alerts.find((x) => x.level === 'bloqueio')?.message ?? '',
-    ),
   ];
 }
 
