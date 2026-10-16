@@ -5,7 +5,7 @@
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { buildApp, defaultPorts } from '../../app.ts';
-import { createDb } from '../../db/client.ts';
+import { createDbFromEnv } from '../../db/client.ts';
 import { createExperimentService } from '../../experiments/service.ts';
 import { anunciarExperimento } from '../service.ts';
 
@@ -20,7 +20,7 @@ if (!faroId) {
 }
 const dataDir =
   process.env.FARO_DATA_DIR ?? fileURLToPath(new URL('../../../.data/pglite', import.meta.url));
-const { db, close } = await createDb(dataDir);
+const { db, close } = await createDbFromEnv(dataDir);
 try {
   const ports = defaultPorts(db);
   const app = await buildApp(db, ports);

@@ -1,53 +1,63 @@
-import { bigserial, boolean, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+// Schema no dialeto MySQL (banco gerenciado do AppBuilder). O modo PGlite de dev
+// local reaproveita estas MESMAS tabelas: as colunas (varchar/text/json/boolean)
+// mapeiam valores de forma idêntica nos dois bancos, então todo o código de
+// consulta tem um único caminho. O DDL de cada banco vive em ./migrations.
+//
+// Timestamps são varchar com a string ISO-8601 UTC (ex.: 2026-10-16T12:00:00.000Z):
+// a API já trafega essas strings e nunca usa função de data no SQL — só ordenação,
+// que em ISO-UTC é lexicográfica. Isso evita a conversão frágil ISO ↔ DATETIME do MySQL.
+import { bigint, boolean, int, json, mysqlTable, text, varchar } from 'drizzle-orm/mysql-core';
 import type { Allocation, Audience, Decision, Design, DyLink, ExperimentStatus, FaroEvent, OverlapDecision } from '@faro/contracts';
 
-export const experiments = pgTable('experiments', {
-  faroId: text('faro_id').primaryKey(),
+const isoTimestamp = (name: string) => varchar(name, { length: 40 });
+
+export const experiments = mysqlTable('experiments', {
+  faroId: varchar('faro_id', { length: 32 }).primaryKey(),
   name: text('name').notNull(),
-  bu: text('bu').notNull().$type<'ecom' | 'saude' | 'fintech' | 'servicos' | 'ecossistema'>(),
+  bu: varchar('bu', { length: 16 }).notNull().$type<'ecom' | 'saude' | 'fintech' | 'servicos' | 'ecossistema'>(),
   ownerSquad: text('owner_squad').notNull(),
-  ownerEmail: text('owner_email').notNull(),
-  status: text('status').notNull().$type<ExperimentStatus>(),
-  templateId: text('template_id'),
-  design: jsonb('design').notNull().$type<Design>(),
-  audience: jsonb('audience').notNull().$type<Audience>(),
-  allocation: jsonb('allocation').notNull().$type<Allocation>(),
-  overlap: jsonb('overlap').$type<OverlapDecision[]>(),
-  dy: jsonb('dy').$type<DyLink>(),
-  decision: jsonb('decision').$type<Decision>(),
+  ownerEmail: varchar('owner_email', { length: 255 }).notNull(),
+  status: varchar('status', { length: 32 }).notNull().$type<ExperimentStatus>(),
+  templateId: varchar('template_id', { length: 64 }),
+  design: json('design').notNull().$type<Design>(),
+  audience: json('audience').notNull().$type<Audience>(),
+  allocation: json('allocation').notNull().$type<Allocation>(),
+  overlap: json('overlap').$type<OverlapDecision[]>(),
+  dy: json('dy').$type<DyLink>(),
+  decision: json('decision').$type<Decision>(),
   legacy: boolean('legacy').notNull().default(false),
-  dyCampaignId: text('dy_campaign_id').unique(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+  dyCampaignId: varchar('dy_campaign_id', { length: 64 }).unique(),
+  createdAt: isoTimestamp('created_at').notNull(),
+  updatedAt: isoTimestamp('updated_at').notNull(),
 });
 
-export const faroIdCounters = pgTable('faro_id_counters', {
-  year: integer('year').primaryKey(),
-  last: integer('last').notNull(),
+export const faroIdCounters = mysqlTable('faro_id_counters', {
+  year: int('year').primaryKey(),
+  last: int('last').notNull(),
 });
 
-export const experimentAudit = pgTable('experiment_audit', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  faroId: text('faro_id').notNull(),
-  field: text('field').notNull(),
-  before: jsonb('before'),
-  after: jsonb('after'),
-  author: text('author').notNull(),
-  at: timestamp('at', { withTimezone: true, mode: 'string' }).notNull(),
+export const experimentAudit = mysqlTable('experiment_audit', {
+  id: bigint('id', { mode: 'number' }).autoincrement().primaryKey(),
+  faroId: varchar('faro_id', { length: 32 }).notNull(),
+  field: varchar('field', { length: 255 }).notNull(),
+  before: json('before'),
+  after: json('after'),
+  author: varchar('author', { length: 255 }).notNull(),
+  at: isoTimestamp('at').notNull(),
 });
 
-export const domainEvents = pgTable('domain_events', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  type: text('type').notNull().$type<FaroEvent['type']>(),
-  faroId: text('faro_id').notNull(),
-  event: jsonb('event').notNull().$type<FaroEvent>(),
-  occurredAt: timestamp('occurred_at', { withTimezone: true, mode: 'string' }).notNull(),
+export const domainEvents = mysqlTable('domain_events', {
+  id: bigint('id', { mode: 'number' }).autoincrement().primaryKey(),
+  type: varchar('type', { length: 64 }).notNull().$type<FaroEvent['type']>(),
+  faroId: varchar('faro_id', { length: 32 }).notNull(),
+  event: json('event').notNull().$type<FaroEvent>(),
+  occurredAt: isoTimestamp('occurred_at').notNull(),
 });
 
-export const metricRequests = pgTable('metric_requests', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  metricId: text('metric_id').notNull().unique(),
-  definition: jsonb('definition').notNull(),
-  requestedBy: text('requested_by').notNull(),
-  requestedAt: timestamp('requested_at', { withTimezone: true, mode: 'string' }).notNull(),
+export const metricRequests = mysqlTable('metric_requests', {
+  id: bigint('id', { mode: 'number' }).autoincrement().primaryKey(),
+  metricId: varchar('metric_id', { length: 191 }).notNull().unique(),
+  definition: json('definition').notNull(),
+  requestedBy: varchar('requested_by', { length: 255 }).notNull(),
+  requestedAt: isoTimestamp('requested_at').notNull(),
 });

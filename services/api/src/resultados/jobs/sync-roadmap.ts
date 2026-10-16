@@ -14,7 +14,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import type { Experiment } from '@faro/contracts';
-import { createDb } from '../../db/client.ts';
+import { createDbFromEnv } from '../../db/client.ts';
 import { listExperiments } from '../../experiments/repository.ts';
 import { createClient, dryRunBytes, gb, runQuery, type Bq } from '../roadmap/bigquery.ts';
 import { buildQueries, type QueryTemplates } from '../roadmap/inject.ts';
@@ -85,7 +85,7 @@ async function cli() {
   const campanha = values.campanha?.trim();
   if (values.campanha !== undefined && !campanha) throw new Error('--campanha precisa de um nome');
   const dataDir = process.env.FARO_DATA_DIR ?? fileURLToPath(new URL('../../../.data/pglite', import.meta.url));
-  const { db, close } = await createDb(dataDir);
+  const { db, close } = await createDbFromEnv(dataDir);
   try {
     const experiments = await listExperiments(db);
     console.log(`cadastro: ${experiments.length} experimentos, ${experiments.filter((e) => e.dy?.campaignName).length} com campanha no DY`);

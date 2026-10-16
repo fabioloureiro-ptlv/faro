@@ -1,13 +1,12 @@
 import { cpSync, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { buildApp, defaultPorts } from './app.ts';
-import { createDb } from './db/client.ts';
+import { createDb, createMysqlDb, mysqlConfigFromEnv } from './db/client.ts';
 import { seedFixtures } from './seed.ts';
 
 const port = Number(process.env.FARO_API_PORT ?? 4000);
 // fileURLToPath, não .pathname: no Windows o pathname vira "/C:/..." e quebra o mkdir.
 const dataDir = process.env.FARO_DATA_DIR ?? fileURLToPath(new URL('../.data/pglite', import.meta.url));
-mkdirSync(dataDir, { recursive: true });
 
 // O PGlite em disco pode se recusar a abrir ("failed to initialize") depois que o processo é morto à
 // força (dev com --watch, parar o servidor), mesmo com os dados íntegros: sobra o `postmaster.pid` da
@@ -24,6 +23,12 @@ async function abrir(dir: string) {
 }
 
 async function openDb() {
+  // MySQL gerenciado (Cloud SQL via IAM, ou FARO_MYSQL_URL) quando configurado:
+  // persistência real entre instâncias e ~300 MB a menos de memória que o PGlite.
+  const mysqlCfg = mysqlConfigFromEnv();
+  if (mysqlCfg) return createMysqlDb(mysqlCfg);
+
+  mkdirSync(dataDir, { recursive: true });
   try {
     return await abrir(dataDir);
   } catch (e) {

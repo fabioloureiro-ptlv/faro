@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt } from 'drizzle-orm';
 import type { Experiment, FaroEvent } from '@faro/contracts';
 import { FaroEventSchema } from '@faro/contracts';
 import { formatFaroId } from '@faro/config-core';
@@ -52,22 +52,28 @@ function toRow(e: Experiment): Row {
   };
 }
 
-/** Próximo faroId do ano, atômico (upsert no contador). */
+// Contador por ano em SQL portável (PGlite e MySQL): SELECT ... FOR UPDATE tranca a
+// linha dentro da transação; upsert dialetal (onConflictDoUpdate / onDuplicateKeyUpdate)
+// e RETURNING ficam de fora porque só existem em um dos bancos.
+async function lockCounter(tx: Tx, year: number) {
+  const [row] = await tx.select().from(faroIdCounters).where(eq(faroIdCounters.year, year)).for('update');
+  return row;
+}
+
+/** Próximo faroId do ano, atômico (linha do contador travada na transação). */
 export async function nextFaroId(tx: Tx, year: number): Promise<string> {
-  const [row] = await tx
-    .insert(faroIdCounters)
-    .values({ year, last: 1 })
-    .onConflictDoUpdate({ target: faroIdCounters.year, set: { last: sql`${faroIdCounters.last} + 1` } })
-    .returning();
-  return formatFaroId(year, row!.last);
+  const row = await lockCounter(tx, year);
+  const next = (row?.last ?? 0) + 1;
+  if (row) await tx.update(faroIdCounters).set({ last: next }).where(eq(faroIdCounters.year, year));
+  else await tx.insert(faroIdCounters).values({ year, last: next });
+  return formatFaroId(year, next);
 }
 
 /** Garante que o contador do ano está pelo menos em `seq` (usado no seed de fixtures). */
 export async function bumpCounter(tx: Tx, year: number, seq: number): Promise<void> {
-  await tx
-    .insert(faroIdCounters)
-    .values({ year, last: seq })
-    .onConflictDoUpdate({ target: faroIdCounters.year, set: { last: sql`greatest(${faroIdCounters.last}, ${seq})` } });
+  const row = await lockCounter(tx, year);
+  if (!row) await tx.insert(faroIdCounters).values({ year, last: seq });
+  else if (row.last < seq) await tx.update(faroIdCounters).set({ last: seq }).where(eq(faroIdCounters.year, year));
 }
 
 export async function insertExperiment(tx: Tx, e: Experiment): Promise<void> {
