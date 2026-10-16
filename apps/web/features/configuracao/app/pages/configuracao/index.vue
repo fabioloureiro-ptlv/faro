@@ -28,6 +28,21 @@ async function run(fn: () => Promise<{ experiment: { faroId: string } }>) {
   }
 }
 
+// Cancela um draft após confirmação: vira status terminal e some das listas e do painel.
+async function cancelar(x: ExperimentSummary) {
+  if (!window.confirm(`Cancelar o rascunho "${x.name || x.faroId}"? Ele sai das listas e não pode ser retomado.`)) return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await api.cancel(x.faroId);
+    await refresh();
+  } catch (e) {
+    error.value = e instanceof ApiError ? e.message : 'Algo deu errado.';
+  } finally {
+    busy.value = false;
+  }
+}
+
 // Draft = o wizard ainda não terminou; Done = o desenho foi concluído (cancelados não aparecem aqui).
 const DRAFT = ['rascunho', 'design_completo'];
 const groups = computed(() => ({
@@ -85,6 +100,7 @@ const sections = computed(() => [
               <td class="acoes">
                 <NuxtLink v-if="s.key === 'draft'" class="btn small" :to="`/configuracao/${x.faroId}`">Continuar</NuxtLink>
                 <button type="button" class="btn ghost small" :disabled="busy" :aria-label="`Duplicar ${x.name}`" @click="run(() => api.duplicate(x.faroId))">Duplicar</button>
+                <button v-if="s.key === 'draft'" type="button" class="btn ghost small cancelar" :disabled="busy" :aria-label="`Cancelar ${x.name || x.faroId}`" @click="cancelar(x)">Cancelar</button>
               </td>
             </tr>
             <tr v-if="!s.rows.length"><td colspan="5" class="muted">{{ s.empty }}</td></tr>
@@ -109,4 +125,5 @@ a { color: var(--ink); }
 .acoes { display: flex; gap: 8px; justify-content: flex-end; white-space: nowrap; }
 .acoes .btn { color: var(--on-brand); }
 .acoes .btn.ghost { color: var(--ink); }
+.acoes .btn.cancelar { color: var(--err, #b3261e); }
 </style>

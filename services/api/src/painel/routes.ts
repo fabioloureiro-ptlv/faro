@@ -13,7 +13,7 @@ import { syncDyCampaigns } from '../jobs/sync-dy-campaigns.ts';
 import { invalidateResultsCache } from '../resultados/results.ts';
 import { syncResults } from '../resultados/jobs/sync-results.ts';
 import { buildDataset, buildTimelineEvents, DY_PSEUDO_PREFIX, invalidateStaticData } from './dataset.ts';
-import { allowedTransitions, closeExperiment, closingChecklist, decideExperiment, type Actor, type CommandResult, type TransitionEvent } from './status/index.ts';
+import { allowedTransitions, closeExperiment, closingChecklist, decideExperiment, transition, type Actor, type CommandResult, type TransitionEvent } from './status/index.ts';
 import { missingDesignFields } from './governance/index.ts';
 
 const STATUS_BY_ERROR: Record<string, number> = {
@@ -102,7 +102,8 @@ export async function painelRoutes(app: FastifyInstance, db: Db) {
     const ds = await buildDataset(db);
     const primary = new Map(ds.experiments.map((e) => [e.faroId, e.design.primaryMetricId]));
     return {
-      experiments: ds.experiments,
+      // Cancelado é terminal e some das telas (o mapa temporal já o escondia): o painel lista só o ciclo vivo.
+      experiments: ds.experiments.filter((e) => e.status !== 'cancelado'),
       norteResults: ds.metricResults.filter((r) => primary.get(r.faroId) === r.metricId),
       alerts: ds.alerts,
       pages: ds.pages,
@@ -150,6 +151,18 @@ export async function painelRoutes(app: FastifyInstance, db: Db) {
     const experiment = await getExperiment(db, faroId);
     if (!experiment) throw new HttpError(404, 'nao_encontrado', 'Experimento não encontrado');
     return applyCommand(db, decideExperiment(experiment, req.body, { actor, now: new Date().toISOString() }));
+  });
+
+  // Cancelamento pela tela de Novo Experimento: só enquanto o desenho não terminou
+  // (rascunho/design_completo). Teste configurado ou rodando se cancela pelo fluxo do painel.
+  app.post<{ Params: { faroId: string } }>('/experiments/:faroId/cancel', async (req) => {
+    const actor = actorFrom(requireActor(req));
+    const faroId = parseFaroId(req.params.faroId);
+    const experiment = await getExperiment(db, faroId);
+    if (!experiment) throw new HttpError(404, 'nao_encontrado', 'Experimento não encontrado');
+    if (experiment.status !== 'rascunho' && experiment.status !== 'design_completo')
+      throw new HttpError(409, 'nao_e_rascunho', 'Só um desenho em andamento pode ser cancelado por aqui.');
+    return applyCommand(db, transition(experiment, 'cancelado', { actor, now: new Date().toISOString(), reason: 'rascunho cancelado' }));
   });
 
   app.post<{ Params: { faroId: string } }>('/experiments/:faroId/close', async (req) => {

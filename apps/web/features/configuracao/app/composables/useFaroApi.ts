@@ -112,6 +112,8 @@ export function useFaroApi() {
     confirm: (id: string, body: { campaignId: string; configuredBy: string; configuredAt: string }) =>
       call<ServerView>(`/experiments/${id}/dy-confirmation`, { method: 'POST', body }),
     duplicate: (id: string) => call<ServerView>(`/experiments/${id}/duplicate`, { method: 'POST', body: {} }),
+    // Cancela um desenho em andamento (status terminal): some das listas e do painel.
+    cancel: (id: string) => call<{ faroId: string; status: string }>(`/experiments/${id}/cancel`, { method: 'POST', body: {} }),
     // Aviso do teste pronto: resumo no Slack e card no Jira com a ficha (quem configura o DY é uma pessoa).
     anunciar: (id: string) => call<AnuncioResult>(`/experiments/${id}/anunciar`, { method: 'POST', body: {} }),
     // Ajustes de produto 15/10: sugestão de datas (com testes interpostos) e de MDE (base histórica).
