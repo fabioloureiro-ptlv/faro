@@ -6,6 +6,7 @@ import { fmtData, fmtDelta } from '../composables/format';
 import { useBuFiltro } from '../composables/useBuFiltro';
 import { mensagemDeErro, useTestesAbApi } from '../composables/useTestesAbApi';
 import type { StatusRoadmap, TesteRoadmap } from '../composables/types';
+import ResultadoBigNumbers from '~~/features/resultados/app/components/ResultadoBigNumbers.vue';
 
 const api = useTestesAbApi();
 const { data, error } = await useAsyncData('ab-roadmap', () => api.roadmap());
@@ -143,6 +144,12 @@ function verNoDy(campanha: string, stream: string) {
                   <AbSig :sig="t.dy.resultado.cmp.sig" />
                   <button type="button" class="ab-link" @click="verNoDy(t.dy.resultado.campanha, t.dy.resultado.stream)">Ver detalhe do teste →</button>
                 </p>
+                <!-- Números-chave (frente 4) da campanha atrelada de maior base, no mesmo formato do detalhe do painel. -->
+                <ResultadoBigNumbers
+                  v-if="t.dy.resultado"
+                  :dy="{ campanha: t.dy.resultado.campanha, stream: t.dy.resultado.stream }"
+                  compacto
+                />
                 <p v-else class="small muted">Sem leitura comparável no último sync (teste decidido ou sem variantes).</p>
               </template>
               <p v-else class="small muted">

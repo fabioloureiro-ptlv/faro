@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { Experiment, Grain, MetricDefinition, Platform } from '@faro/contracts';
-import { useResultados } from '../composables/useResultados';
+import { useResultadosFonte, type FonteResultados } from '../composables/useResultados';
 import { buildBigNumbers, hasData, type BigNumber } from '../domain';
 
+// Duas fontes: um experimento do Faro (detalhe do painel) ou uma campanha do DY (Visão Geral, roadmap).
 const props = defineProps<{
-  experiment: Experiment;
-  metric: (id: string) => MetricDefinition | undefined;
+  experiment?: Experiment;
+  metric?: (id: string) => MetricDefinition | undefined;
+  dy?: { campanha: string; stream: 'web' | 'app' };
+  /** Grão fixado por quem embute (ex.: o grão escolhido na aba do DY); esconde a alternância. */
+  grao?: Grain;
+  /** Sem a moldura do painel: para entrar dentro de um card da Visão Geral. */
+  compacto?: boolean;
 }>();
 
 const PLATFORM_LABEL: Record<Platform | 'all', string> = {
@@ -15,48 +21,65 @@ const PLATFORM_LABEL: Record<Platform | 'all', string> = {
   android: 'Android',
   ios: 'iOS',
 };
-const GRAIN_LABEL: Record<Grain, string> = { user: 'UsuÃ¡rio', session: 'SessÃ£o' };
+const GRAIN_LABEL: Record<Grain, string> = { user: 'Usuário', session: 'Sessão' };
 
 const platform = ref<Platform | 'all'>('all');
-const grain = ref<Grain>('user');
-const faroId = computed(() => props.experiment.faroId);
-const { data, error, status, refresh } = useResultados(faroId, { platform, grain });
+const grain = ref<Grain>(props.grao ?? 'user');
+watch(
+  () => props.grao,
+  (g) => g && (grain.value = g),
+);
+const fonte = computed<FonteResultados>(() =>
+  props.dy
+    ? { kind: 'dy', campanha: props.dy.campanha, stream: props.dy.stream }
+    : { kind: 'faro', faroId: props.experiment?.faroId ?? '' },
+);
+const { data, error, status, refresh } = useResultadosFonte(fonte, { platform, grain });
 
-const platforms = computed<(Platform | 'all')[]>(() => data.value?.platforms ?? ['all']);
-const grains = computed<Grain[]>(() => data.value?.availableGrains ?? ['user']);
-const norteId = toRef(() => props.experiment.design.primaryMetricId);
-const empty = computed(() => !!data.value && !hasData(data.value));
+const results = computed(() => data.value?.results ?? null);
+const platforms = computed<(Platform | 'all')[]>(() => results.value?.platforms ?? ['all']);
+const grains = computed<Grain[]>(() => results.value?.availableGrains ?? ['user']);
+const norteId = computed(
+  () => data.value?.primaryMetricId ?? props.experiment?.design.primaryMetricId ?? '',
+);
+const norteDef = computed(() => data.value?.norte ?? props.metric?.(norteId.value));
+const empty = computed(() => !!results.value && !hasData(results.value));
 const tiles = computed<BigNumber[]>(() =>
-  data.value && !empty.value
+  results.value && !empty.value
     ? buildBigNumbers({
-        results: data.value,
+        results: results.value,
         primaryMetricId: norteId.value,
-        norte: props.metric(norteId.value),
+        norte: norteDef.value,
       })
     : [],
 );
-// Fonte dos nÃºmeros: as consultas do roadmap do Digital (E8) ou, sem snapshot, fixtures de exemplo.
-const roadmap = computed(() => data.value?.source === 'roadmap');
-const fonte = computed(() =>
+const mensagemErro = computed(
+  () =>
+    (error.value as { data?: { message?: string } } | null)?.data?.message ??
+    'Não foi possível carregar os números-chave.',
+);
+// Fonte dos números: as consultas do roadmap do Digital (E8) ou, sem snapshot, fixtures de exemplo.
+const roadmap = computed(() => results.value?.source === 'roadmap');
+const fonteTexto = computed(() =>
   roadmap.value ? 'consultas do roadmap (BigQuery)' : 'dados de exemplo',
 );
 </script>
 
 <template>
-  <section class="bloco" aria-labelledby="big-numbers-titulo">
+  <section class="bloco" :class="{ compacto }" aria-labelledby="big-numbers-titulo">
     <div class="topo">
       <div>
-        <h2 id="big-numbers-titulo">NÃºmeros-chave</h2>
+        <h2 id="big-numbers-titulo">Números-chave</h2>
         <p class="sub">
-          <template v-if="data">
-            Dados atÃ© {{ data.asOf.slice(8, 10) }}/{{ data.asOf.slice(5, 7) }} (D-1) Â· fonte:
-            {{ fonte }}.
+          <template v-if="results">
+            Dados até {{ results.asOf.slice(8, 10) }}/{{ results.asOf.slice(5, 7) }} (D-1) · fonte:
+            {{ fonteTexto }}.
           </template>
           <template v-else>Resultado consolidado do teste, direto da API de resultados.</template>
         </p>
       </div>
-      <div v-if="data && !empty" class="filtros">
-        <div v-if="grains.length > 1" class="seg" role="group" aria-label="GrÃ£o">
+      <div v-if="results && !empty" class="filtros">
+        <div v-if="grains.length > 1 && !grao" class="seg" role="group" aria-label="Grão">
           <button
             v-for="g in grains"
             :key="g"
@@ -81,19 +104,19 @@ const fonte = computed(() =>
       </div>
     </div>
 
-    <p v-if="data && !roadmap" class="aviso" role="note">
-      NÃºmeros de exemplo (fixtures). Para ler a mesma fonte do roadmap do Digital, rode
+    <p v-if="results && !roadmap" class="aviso" role="note">
+      Números de exemplo (fixtures). Para ler a mesma fonte do roadmap do Digital, rode
       <code>npm run job:sync-roadmap</code> (ou <code>npm run job:sync-results</code>) com acesso ao
       BigQuery e recarregue.
     </p>
 
     <p v-if="error" role="alert" class="erro">
-      NÃ£o foi possÃ­vel carregar os nÃºmeros-chave.
+      {{ mensagemErro }}
       <button type="button" class="btn ghost small" @click="refresh()">Tentar de novo</button>
     </p>
-    <p v-else-if="status === 'pending' && !data" class="vazio" aria-busy="true">Carregandoâ€¦</p>
+    <p v-else-if="status === 'pending' && !results" class="vazio" aria-busy="true">Carregando…</p>
     <p v-else-if="empty" class="vazio">
-      Aguardando inÃ­cio. Os nÃºmeros aparecem assim que a primeira exposiÃ§Ã£o for registrada.
+      Aguardando início. Os números aparecem assim que a primeira exposição for registrada.
     </p>
 
     <div v-else-if="tiles.length" class="tiles" :aria-busy="status === 'pending'">
@@ -133,6 +156,15 @@ const fonte = computed(() =>
 </template>
 
 <style scoped>
+.bloco.compacto {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.bloco.compacto h2 {
+  font-size: 15px;
+}
 .bloco {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -202,7 +234,7 @@ h2 {
   margin: 12px 0 0;
 }
 
-/* stat tiles / hero, como no protÃ³tipo (docs/demo) */
+/* stat tiles / hero, como no protótipo (docs/demo) */
 .tiles {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -262,7 +294,7 @@ h2 {
   color: var(--ink);
   font-weight: 600;
 }
-/* status com cor reservada: sempre Ã­cone + texto */
+/* status com cor reservada: sempre ícone + texto */
 .st {
   display: inline-flex;
   align-items: center;

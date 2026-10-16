@@ -12,6 +12,7 @@ export function useTestesAbApi() {
     roadmap: () => get<RoadmapView>('/roadmap'),
     dy: (q: { grao: Grao; stream: StreamFiltro; metrica?: string }) => get<ListaDy>('/dy', q),
     detalhe: (q: { campanha: string; stream: 'web' | 'app'; grao: Grao }) => get<DetalheDy>('/dy/detalhe', q),
+    // Números-chave de uma campanha: o componente ResultadoBigNumbers (features/resultados) busca em /dy/resultado.
     consultas: () => get<ConsultasView>('/consultas'),
     mapa: () => get<MapaDy>('/mapa'),
     sql: (id: string) => $fetch<string>(`${cfg.apiBase}/testes-ab/consultas/${id}/sql`, { headers, responseType: 'text' }),

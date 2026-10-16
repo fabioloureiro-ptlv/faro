@@ -118,6 +118,7 @@ async function atualizarDy() {
 .ab-area { display: flex; flex-direction: column; gap: 3px; }
 .ab-area select { width: auto; min-width: 210px; padding: 9px 12px; border-radius: 999px; font-weight: 600; }
 .ab-ok { color: var(--ok); margin: 0 0 8px; }
+.ab .ab-big { margin: 0 0 18px; }
 .ab-fonte { margin: 0 0 16px; color: var(--muted); }
 .t-warn-box { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 14px; }
 

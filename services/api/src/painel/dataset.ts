@@ -66,6 +66,11 @@ export function invalidateStaticData(): void {
   cached = undefined;
 }
 
+/** Catálogo de métricas (fixtures/metrics-catalog.json), o mesmo que o painel e os resultados usam. */
+export function metricsFromCatalog(): MetricDefinition[] {
+  return loadStatic().metrics;
+}
+
 export function pagesFromCatalog(): PageDefinition[] {
   const catalog = PageCatalogSchema.parse(pageCatalog);
   const platforms = Object.entries(catalog.platformShare) as [Platform, number][];
