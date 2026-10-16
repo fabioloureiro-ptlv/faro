@@ -90,6 +90,10 @@ O catálogo é o arquivo versionado `data/models/audiences/catalog.json`; aparec
 
 Se o banco local (`services/api/.data/pglite`) ficar ilegível por um encerramento brusco, a API o guarda em `pglite-corrompido-<data>` e recria a partir das fixtures; rascunhos locais se perdem.
 
+## Banco de dados
+
+Em dev a API usa o PGlite (Postgres em WASM) em `services/api/.data/pglite`, sem nada para instalar. Em produção (AppBuilder/Cloud Run) usa o **MySQL gerenciado** da plataforma: com `CLOUD_SQL_INSTANCE`, `DB_IAM_USER` e `DB_NAME` no ambiente (fornecidas pelo `create_database` do AppBuilder), a API conecta via `@google-cloud/cloud-sql-connector` com autenticação IAM da service account, sem senha (`CLOUD_SQL_IP_TYPE=PRIVATE` força IP privado). Para validar o modo MySQL com um banco local, `FARO_MYSQL_URL=mysql://user:senha@host:porta/banco` tem precedência. O schema é único (`db/schema.ts`, dialeto MySQL) e cada banco tem seu DDL em `db/migrations/{mysql,pglite}/`, aplicado na subida; timestamps são strings ISO-8601 UTC (ver comentário no schema).
+
 ## Estrutura
 
 | Pasta | O quê |
