@@ -266,6 +266,23 @@ describe('rotas /testes-ab', () => {
     expect(l.statusCode).toBe(200);
     expect(l.json().testes[0]).toMatchObject({ campanha: CAMPANHA, roadmap: { atrelados: [6], relacionados: [] } });
 
+    // Números-chave da campanha: mesmo formato do detalhe do painel, métrica principal do roadmap (ticket → ticket_medio).
+    const bn = await ctx.app.inject({ url: `/testes-ab/dy/resultado?campanha=${encodeURIComponent(CAMPANHA)}&stream=app`, headers: PM });
+    expect(bn.statusCode).toBe(200);
+    const big = bn.json();
+    expect(big.primaryMetricId).toBe('ticket_medio');
+    expect(big.norte).toMatchObject({ id: 'ticket_medio', name: 'Ticket médio', unit: 'brl' });
+    expect(big.results).toMatchObject({ source: 'roadmap', grain: 'user', asOf: '2026-10-14' });
+    expect(big.results.variants.map((v: { key: string; isControl: boolean }) => v.isControl)).toEqual([true, false, false]);
+    expect(big.results.volumes.find((v: { variantKey: string }) => v.variantKey === 'controle')?.users).toBe(1000);
+    expect(big.results.results.some((r: { metricId: string; variantKey: string; deltaRelative?: number }) => r.metricId === 'ticket_medio' && r.deltaRelative !== undefined)).toBe(true);
+    // Grão sessão só tem a linha do controle nesta fixture: avisa em vez de quebrar.
+    const bnSessao = await ctx.app.inject({ url: `/testes-ab/dy/resultado?campanha=${encodeURIComponent(CAMPANHA)}&stream=app&grain=session`, headers: PM });
+    expect(bnSessao.statusCode).toBe(409);
+    expect(bnSessao.json().error).toBe('grao_sem_variantes');
+    expect((await ctx.app.inject({ url: '/testes-ab/dy/resultado?campanha=x&stream=app', headers: PM })).statusCode).toBe(404);
+    expect((await ctx.app.inject({ url: `/testes-ab/dy/resultado?campanha=${encodeURIComponent(CAMPANHA)}&stream=app&platform=tv`, headers: PM })).statusCode).toBe(400);
+
     const d = await ctx.app.inject({ url: `/testes-ab/dy/detalhe?campanha=${encodeURIComponent(CAMPANHA)}&stream=app`, headers: PM });
     expect(d.statusCode).toBe(200);
     expect(d.json().recomendacao.titulo).toBe('Continuar coleta');

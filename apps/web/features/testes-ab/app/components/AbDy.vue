@@ -8,6 +8,7 @@ import { navigateTo, useAsyncData, useRoute } from '#imports';
 import { fmtData, fmtDelta, fmtInt, fmtValor, rotuloStream } from '../composables/format';
 import { useBuFiltro } from '../composables/useBuFiltro';
 import { mensagemDeErro, useTestesAbApi } from '../composables/useTestesAbApi';
+import ResultadoBigNumbers from '~~/features/resultados/app/components/ResultadoBigNumbers.vue';
 import type { Grao, LinhaDy, StatusDy, StreamFiltro } from '../composables/types';
 
 const api = useTestesAbApi();
@@ -145,7 +146,10 @@ const COLUNAS: [Chave, string][] = [
         </div>
       </div>
       <p v-if="erroDetalhe" class="err" role="alert">{{ mensagemDeErro(erroDetalhe, 'Teste não encontrado neste grão.') }}</p>
-      <AbDyDetalhe v-else-if="detalhe" :detalhe="detalhe" />
+      <template v-else-if="detalhe">
+        <ResultadoBigNumbers :dy="{ campanha, stream: streamAberto }" :grao="grao === 'sessao' ? 'session' : 'user'" compacto class="ab-big" />
+        <AbDyDetalhe :detalhe="detalhe" />
+      </template>
     </template>
 
     <!-- Lista -->

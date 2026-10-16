@@ -6,9 +6,10 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { HttpError } from '../errors.ts';
 import { requireActor } from '../http.ts';
-import { pagesFromCatalog, paginasDoExportDy } from '../painel/dataset.ts';
+import { metricsFromCatalog, pagesFromCatalog, paginasDoExportDy } from '../painel/dataset.ts';
 import { REPO_ROOT } from '../resultados/roadmap/paths.ts';
 import { getResultsSource } from '../resultados/roadmap/source.ts';
+import { resultadoDaCampanha } from './big-numbers.ts';
 import { detalharDy, listarDy } from './dy.ts';
 import { METRICAS } from './metricas.ts';
 import { mapaDy } from './mapa.ts';
@@ -24,6 +25,12 @@ const DetalheQuery = z.object({
   campanha: z.string().min(1),
   stream: z.enum(['web', 'app']),
   grao: z.enum(['usuario', 'sessao']).default('usuario'),
+});
+const ResultadoQuery = z.object({
+  campanha: z.string().min(1),
+  stream: z.enum(['web', 'app']),
+  grain: z.enum(['user', 'session']).default('user'),
+  platform: z.enum(['all', 'site', 'android', 'ios']).default('all'),
 });
 
 function snapshot() {
@@ -77,6 +84,17 @@ export async function testesAbRoutes(app: FastifyInstance) {
     const detalhe = detalharDy(snap.results, q.campanha, q.stream, q.grao, { ...(teste ? { teste } : {}), vinculos });
     if (!detalhe) throw new HttpError(404, 'nao_encontrado', 'Teste não encontrado no snapshot do DY.');
     return detalhe;
+  });
+
+  // Números-chave de uma campanha (mesmo formato do detalhe do painel), para os cards da Visão Geral.
+  app.get('/testes-ab/dy/resultado', async (req) => {
+    requireActor(req);
+    const q = ResultadoQuery.parse(req.query);
+    const snap = snapshot();
+    const r = resultadoDaCampanha(snap, carregarRoadmap(), metricsFromCatalog(), q);
+    if (!r.ok && r.erro === 'nao_encontrado') throw new HttpError(404, 'nao_encontrado', 'Campanha não encontrada no snapshot do DY.');
+    if (!r.ok) throw new HttpError(409, 'grao_sem_variantes', `Sem leitura no grão ${q.grain === 'session' ? 'sessão' : 'usuário'} para esta campanha (só o controle tem linhas).`);
+    return r.resultado;
   });
 
   // Mapa temporal: só campanhas da DY, nunca os experimentos cadastrados no Faro.
