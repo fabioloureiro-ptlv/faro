@@ -119,7 +119,7 @@ export function buildDySheet(exp: Experiment, ctx: DySheetContext): DySheet {
       key: 'primary_metric',
       label: 'Métrica primária no DY',
       value: dyPrimaryMetric(exp.design.primaryMetricId),
-      hint: `NORTE no Faro: ${ctx.metric?.name ?? exp.design.primaryMetricId}. A decisão é tomada pelo Faro.`,
+      hint: `Métrica principal no Faro: ${ctx.metric?.name ?? exp.design.primaryMetricId}. A decisão é tomada pelo Faro.`,
     },
     { key: 'dates', label: 'Datas', value: `Início: ${ddmmyyyy(a.startDate)}\nFim: ${ddmmyyyy(a.endDate)}` },
   ];

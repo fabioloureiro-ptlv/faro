@@ -131,7 +131,7 @@ describe('adapter do roadmap (E8): ResultsResponse do Nexus', () => {
     expect(r.recommendation.title).toBe('Implementar a variante e desligar a campanha no DY');
     expect(r.recommendation.body).toContain('Receita por usuário');
     expect(r.recommendation.body).toContain('Roadmap: “Ligar variante”');
-    expect(r.synthesis?.text).toContain('home nova (consolidado): NORTE receita por usuário +108,1% (melhora confirmada, 100%)');
+    expect(r.synthesis?.text).toContain('home nova (consolidado): métrica principal receita por usuário +108,1% (melhora confirmada, 100%)');
     expect(r.synthesis?.parts[0]).toMatchObject({ metricId: 'receita_por_usuario', role: 'norte' });
     expect(r.synthesis?.parts).toHaveLength(4);
   });

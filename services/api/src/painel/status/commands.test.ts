@@ -17,7 +17,7 @@ const frete = byId('FARO-2026-0002'); // rodando, Squad Checkout
 const nexus = byId('FARO-2026-0001'); // decidido, ecossistema
 
 describe('decideExperiment (PNL-09)', () => {
-  const input = { outcome: 'manter_controle', rationale: '  NORTE sem diferença e GUARDA estável.  ' };
+  const input = { outcome: 'manter_controle', rationale: '  Métrica principal sem diferença e guarda estável.  ' };
 
   it('registra decisão com autor e data do ator, e vai a decidido', () => {
     const r = decideExperiment(frete, input, { actor: dono, now: NOW });
@@ -26,7 +26,7 @@ describe('decideExperiment (PNL-09)', () => {
       expect(r.experiment.status).toBe('decidido');
       expect(r.experiment.decision).toEqual({
         outcome: 'manter_controle',
-        rationale: 'NORTE sem diferença e GUARDA estável.',
+        rationale: 'Métrica principal sem diferença e guarda estável.',
         decidedBy: 'pm@example.com',
         decidedAt: '2026-10-15',
       });

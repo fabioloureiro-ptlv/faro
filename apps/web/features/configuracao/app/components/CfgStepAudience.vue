@@ -358,7 +358,7 @@ async function processar() {
         <template v-else-if="dates.data">
           <p class="small" style="margin: 6px 0 0">
             <b>{{ fmtDate(dates.data.startDate) }} → {{ fmtDate(dates.data.endDate) }}</b> ({{ dates.data.days }} dias,
-            {{ dates.data.basedOn === 'amostra' ? 'pela amostra necessária, em semanas inteiras' : 'mínimo de um ciclo semanal; escolha a NORTE para dimensionar pela amostra' }}).
+            {{ dates.data.basedOn === 'amostra' ? 'pela amostra necessária, em semanas inteiras' : 'mínimo de um ciclo semanal; escolha a métrica principal para dimensionar pela amostra' }}).
             <button type="button" class="chip add" style="margin-left: 6px" @click="applyDates(dates.data!)">Usar</button>
           </p>
           <template v-if="dates.data.overlapping.length">

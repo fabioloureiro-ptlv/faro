@@ -31,7 +31,7 @@ const COLUMNS: { key: SortKey; label: string }[] = [
   { key: 'status', label: 'Status' },
   { key: 'onde', label: 'Onde' },
   { key: 'publico', label: 'Público' },
-  { key: 'norte', label: 'NORTE' },
+  { key: 'norte', label: 'Métrica principal' },
   { key: 'periodo', label: 'Período' },
   { key: 'sobreposicao', label: 'Sobreposição' },
   { key: 'alertas', label: 'Alertas' },

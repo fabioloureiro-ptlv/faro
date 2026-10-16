@@ -67,7 +67,18 @@ export interface FaroEventRow {
   type: string;
   faroId: string;
   occurredAt: string;
-  payload: { divergences?: { kind: string; message: string; refdate: string }[] };
+  payload: {
+    divergences?: { kind: string; message: string; refdate: string }[];
+    slack?: { channel?: string };
+    jira?: { key: string; url: string };
+  };
+}
+
+/** Resposta de POST /experiments/:id/anunciar. */
+export interface AnuncioResult {
+  slack: { status: 'enviado' | 'nao_configurado' | 'falhou'; channel?: string };
+  jira: { status: 'enviado' | 'nao_configurado' | 'falhou'; key?: string; url?: string };
+  texto: string;
 }
 
 export function useFaroApi() {
@@ -101,6 +112,8 @@ export function useFaroApi() {
     confirm: (id: string, body: { campaignId: string; configuredBy: string; configuredAt: string }) =>
       call<ServerView>(`/experiments/${id}/dy-confirmation`, { method: 'POST', body }),
     duplicate: (id: string) => call<ServerView>(`/experiments/${id}/duplicate`, { method: 'POST', body: {} }),
+    // Aviso do teste pronto: resumo no Slack e card no Jira com a ficha (quem configura o DY é uma pessoa).
+    anunciar: (id: string) => call<AnuncioResult>(`/experiments/${id}/anunciar`, { method: 'POST', body: {} }),
     // Ajustes de produto 15/10: sugestão de datas (com testes interpostos) e de MDE (base histórica).
     dateSuggestion: (id: string) => call<DateSuggestionView>(`/experiments/${id}/date-suggestion`),
     mdeSuggestion: (id: string) => call<MdeSuggestion>(`/experiments/${id}/mde-suggestion`),

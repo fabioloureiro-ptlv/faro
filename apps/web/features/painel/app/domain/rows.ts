@@ -3,7 +3,7 @@ import type { PainelData, PainelRow } from './types';
 
 const CONTROL_KEY = 'controle';
 
-/** NORTE consolidada da melhor variante (maior probBetter). */
+/** Métrica principal consolidada da melhor variante (maior probBetter). */
 export function pickNorte(e: Experiment, results: MetricResult[]): MetricResult | undefined {
   const candidates = results.filter(
     (r) =>

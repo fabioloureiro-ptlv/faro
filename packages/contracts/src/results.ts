@@ -47,7 +47,7 @@ export interface SampleProgress {
 export interface MdeRow {
   metricId: string;
   mdeCurrent: number | null; // relativo, 0–1
-  mdeDesign?: number; // relativo, 0–1 (só para a NORTE)
+  mdeDesign?: number; // relativo, 0–1 (só para a métrica principal)
 }
 
 export interface TestHealthPoint {

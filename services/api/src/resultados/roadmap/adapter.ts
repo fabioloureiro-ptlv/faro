@@ -34,7 +34,7 @@ export const DISCOVERED_PREFIX = 'FARO-0000-';
 
 const GRAIN_SQL: Record<Grain, 'usuario' | 'sessao'> = { user: 'usuario', session: 'sessao' };
 const DEVICE: Record<Exclude<Platform, 'site'> | 'all', string> = { all: 'Total', android: 'Android', ios: 'iOS' };
-/** NORTEs com série diária acumulável a partir do dy_daily (somas sobre usuarios_leitura). */
+/** Métricas principais com série diária acumulável a partir do dy_daily (somas sobre usuarios_leitura). */
 const CUMULATIVE: Record<string, (c: { receita: number; compradores: number; transacoes: number; usuarios: number }) => number | null> = {
   receita_por_usuario: (c) => (c.usuarios ? c.receita / c.usuarios : null),
   conversao: (c) => (c.usuarios ? c.compradores / c.usuarios : null),

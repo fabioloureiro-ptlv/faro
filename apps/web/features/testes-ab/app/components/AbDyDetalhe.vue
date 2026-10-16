@@ -62,7 +62,7 @@ const fmtCel = (l: LinhaTabela, v: number | null | undefined) => fmtValor(v, l.f
         <b>{{ s.variante }} (consolidado):</b>
         <template v-for="(i, k) in s.itens" :key="i.rotulo">
           <template v-if="k"> · </template>
-          <template v-if="i.norte">NORTE </template>{{ i.rotulo.toLowerCase() }} {{ fmtDelta(i.uplift) }}
+          <template v-if="i.norte">métrica principal </template>{{ i.rotulo.toLowerCase() }} {{ fmtDelta(i.uplift) }}
           <span v-if="i.sig" class="muted">({{ i.sig.rotulo.toLowerCase() }}, {{ i.sig.p }}%)</span>
         </template>
       </p>
@@ -96,7 +96,7 @@ const fmtCel = (l: LinhaTabela, v: number | null | undefined) => fmtValor(v, l.f
               <tr v-for="l in linhasDo(t, g.key)" :key="l.chave" :class="{ norte: l.papel === 'norte' }">
                 <td>
                   {{ l.rotulo }}
-                  <span v-if="l.papel === 'norte'" class="ab-selo t-info">NORTE</span>
+                  <span v-if="l.papel === 'norte'" class="ab-selo t-info">PRINCIPAL</span>
                   <span v-else-if="l.papel === 'guarda'" class="ab-selo t-warn">GUARDA</span>
                 </td>
                 <td class="num">{{ fmtCel(l, l.celulas[0]?.valor) }}</td>

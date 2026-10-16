@@ -2,7 +2,7 @@
 
 Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o quê, por quê e frentes afetadas. Mudança incompatível exige ADR em `docs/adr/`.
 
-## 0.6.0 — 2026-10-15 (amostra a partir do público contado)
+## 0.7.0 — 2026-10-15 (amostra a partir do público contado)
 
 **O quê**
 
@@ -20,6 +20,24 @@ Protocolo: docs/specs/00-contexto-geral.md, seção 9. Toda mudança registra o 
 **Frentes afetadas**
 
 - 1 (wizard e rascunho), 3 (a contagem vem da estimativa do segmento).
+
+## 0.6.0 — 2026-10-15 (aviso do teste pronto: Slack e Jira)
+
+**O quê**
+
+- `ExperimentAnnouncedEventSchema` (`experiment.announced`) no outbox: registra o envio do resumo do teste ao Slack e a abertura do card no Jira (`payload.slack.channel?`, `payload.jira.{key,url}?`).
+
+**Por quê**
+
+- O DY não tem API para criar campanhas (contexto, seção 4). Quem configura é uma pessoa; o Faro avisa o time com o resumo e abre o card com a ficha, e precisa guardar que avisou (e qual card) para não repetir.
+
+**Compatibilidade**
+
+- Aditivo: um tipo novo na união; consumidores que fazem `switch` por tipo e ignoram desconhecidos não mudam.
+
+**Frentes afetadas**
+
+- 1 (dona do wizard e da rota `POST /experiments/:faroId/anunciar`), 2 (pode mostrar o evento na linha do tempo).
 
 ## 0.5.0 — 2026-10-15 (segmentos com query e parâmetros)
 

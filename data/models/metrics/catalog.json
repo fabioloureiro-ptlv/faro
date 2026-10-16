@@ -10,7 +10,7 @@
       "user",
       "session"
     ],
-    "definition": "Receita de pedidos (curated_ga.itd_transactions_ga4) ÷ usuários expostos. NORTE padrão.",
+    "definition": "Receita de pedidos (curated_ga.itd_transactions_ga4) ÷ usuários expostos. Métrica principal padrão.",
     "sqlTemplateRef": "metrics/receita_por_usuario.sql",
     "baseline": 24.5,
     "cv": 6,

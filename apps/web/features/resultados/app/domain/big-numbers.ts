@@ -2,7 +2,7 @@
 // (docs/demo/faro-demo.html, stat tiles). Função pura sobre o ResultsResponse: o componente só renderiza.
 //
 // Quatro tiles, na ordem do protótipo:
-//   1. NORTE (hero): delta relativo da variante vs. controle, rótulo de significância, IC95 e chance de ser melhor.
+//   1. Métrica principal (hero): delta relativo da variante vs. controle, rótulo de significância, IC95 e chance de ser melhor.
 //   2. Expostos: total no grão, por variante, e contaminação (quem viu 2 variantes fica fora).
 //   3. Amostra (quando a API calcula progresso) ou Período (dias lidos na janela).
 //   4. Split: observado vs. planejado, com status do SRM.
@@ -27,7 +27,7 @@ export type BigNumberId = 'norte' | 'expostos' | 'amostra' | 'periodo' | 'split'
 
 export interface BigNumber {
   id: BigNumberId;
-  /** Rótulo em caixa alta no tile (ex.: "NORTE · Receita por usuário"). */
+  /** Rótulo em caixa alta no tile (ex.: "Métrica principal · Receita por usuário"). */
   label: string;
   value: string;
   /** Cor do valor: só o hero usa (delta bom ou ruim, já considerando a direção da métrica). */
@@ -44,9 +44,9 @@ export type NorteDefinition = Pick<MetricDefinition, 'id' | 'name' | 'unit' | 'd
 
 export interface BigNumbersInput {
   results: ResultsResponse;
-  /** Id da métrica NORTE do design (`experiment.design.primaryMetricId`). */
+  /** Id da métrica principal do design (`experiment.design.primaryMetricId`). */
   primaryMetricId: string;
-  /** Definição da NORTE no catálogo, quando conhecida (nome, unidade e direção). */
+  /** Definição da métrica principal no catálogo, quando conhecida (nome, unidade e direção). */
   norte?: NorteDefinition;
 }
 
@@ -150,10 +150,17 @@ export function buildBigNumbers({
 
   const tiles: BigNumber[] = [];
 
-  // 1. NORTE (hero)
+  // 1. Métrica principal (hero)
   const good = isGoodDelta(norte?.direction, nv?.deltaRelative);
   const heroDetail: Segment[] = [];
-  if (variant && control) {
+  const semLeitura =
+    (nv?.value === null || nv?.value === undefined) &&
+    (nc?.value === null || nc?.value === undefined);
+  if (semLeitura)
+    heroDetail.push(
+      seg('Sem leitura ainda: os números aparecem no dia seguinte à primeira exposição.'),
+    );
+  else if (variant && control) {
     heroDetail.push(
       seg(variant.name, true),
       seg(` ${formatMetricValue(nv?.value, unit)} vs `),
@@ -173,7 +180,7 @@ export function buildBigNumbers({
   tiles.push({
     id: 'norte',
     hero: true,
-    label: `NORTE · ${norte?.name ?? primaryMetricId}`,
+    label: `Métrica principal · ${norte?.name ?? primaryMetricId}`,
     value: nv?.deltaRelative === undefined ? '—' : formatSignedPercent(nv.deltaRelative),
     ...(good === undefined ? {} : { valueTone: good ? 'good' : 'bad' }),
     ...(nv?.label ? { badge: SIGNIFICANCE_BADGE[nv.label] } : {}),

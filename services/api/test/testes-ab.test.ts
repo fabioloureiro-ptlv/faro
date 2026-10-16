@@ -14,6 +14,8 @@ const linha = (over: Record<string, unknown>): ResultsRow =>
   ({
     dados_ate: '2026-10-14', grao: 'usuario', stream: 'app', bu: 'ecom', device: 'Total', status: 'saudavel',
     metrica_norte: 'ticket', dias_leitura: 16, usuarios_2_variantes: 0, origem_datas: 'roadmap',
+    // Sem isso o dadosAte do snapshot cai em "ontem" e o teste passa a depender do dia em que roda.
+    data_fim_leitura: '2026-10-14',
     ...over,
   }) as ResultsRow;
 

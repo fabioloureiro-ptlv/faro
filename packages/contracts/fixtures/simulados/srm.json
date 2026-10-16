@@ -384,7 +384,7 @@
     "variantKey": "variante_a",
     "variantName": "Variante A",
     "platform": "all",
-    "text": "Variante A (consolidado): NORTE conversão em saúde +9,9% (tendência de melhora, 93%).",
+    "text": "Variante A (consolidado): métrica principal conversão em saúde +9,9% (tendência de melhora, 93%).",
     "parts": [
       {
         "metricId": "conversao_saude",

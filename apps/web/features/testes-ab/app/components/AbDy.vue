@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Aba "Rodando no DY": todas as campanhas com exposição no DY (consulta de resultados do roadmap), com as
-// variáveis da antiga Lista do Acompanhamento (onde roda, período, NORTE, alertas, testes na mesma página),
+// variáveis da antiga Lista do Acompanhamento (onde roda, período, métrica principal, alertas, testes na mesma página),
 // filtros, KPIs, tabela ordenável e o detalhe de cada teste. Grão, stream, métrica, status e teste aberto
 // vivem na URL; o filtro de área (?bu=) vem da Visão Geral.
 import { computed, ref } from 'vue';
@@ -219,7 +219,7 @@ const COLUNAS: [Chave, string][] = [
               </th>
               <th>IC 95%</th>
               <th :aria-sort="ariaSort('p')"><button type="button" @click="ordenarPor('p')">Significância {{ setaDe('p') }}</button></th>
-              <th :aria-sort="ariaSort('norte')"><button type="button" @click="ordenarPor('norte')">NORTE {{ setaDe('norte') }}</button></th>
+              <th :aria-sort="ariaSort('norte')"><button type="button" @click="ordenarPor('norte')">Métrica principal {{ setaDe('norte') }}</button></th>
               <th :aria-sort="ariaSort('alertas')"><button type="button" @click="ordenarPor('alertas')">Alertas {{ setaDe('alertas') }}</button></th>
               <th :aria-sort="ariaSort('mesmaPagina')"><button type="button" @click="ordenarPor('mesmaPagina')">Na mesma página {{ setaDe('mesmaPagina') }}</button></th>
               <th>No roadmap</th>
@@ -271,7 +271,7 @@ const COLUNAS: [Chave, string][] = [
       </div>
       <p class="small muted ab-nota">
         Testes com exposição no último sync ({{ data.dadosAte.slice(8, 10) }}/{{ data.dadosAte.slice(5, 7) }}), device consolidado. Clique numa linha para abrir o detalhe.
-        Uplift, intervalo e significância são da melhor variante contra o controle na métrica escolhida; a coluna NORTE usa a métrica norte de cada teste. Teste decidido mostra — nas colunas comparativas.
+        Uplift, intervalo e significância são da melhor variante contra o controle na métrica escolhida; a coluna Métrica principal usa a métrica principal de cada teste. Teste decidido mostra — nas colunas comparativas.
         “Na mesma página” conta os outros testes rodando na mesma página com período que cruza o deste. A página vem do export da DY; sem ela, o teste fica como “não identificada”.
       </p>
       <p class="small muted ab-nota">

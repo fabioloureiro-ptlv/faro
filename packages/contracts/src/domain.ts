@@ -40,11 +40,11 @@ export interface Design {
   control: { name: string; description: string; figmaUrl?: string };
   /** Cada variante precisa de Figma OU print (imagem) — um dos dois é obrigatório. */
   variants: { key: string; name: string; description: string; figmaUrl?: string; printUrl?: string }[];
-  primaryMetricId: string; // exatamente uma (NORTE)
+  primaryMetricId: string; // exatamente uma (métrica principal)
   secondaryMetricIds: string[]; // ≥ 1
   guardrailMetricIds: string[]; // ≥ 0 (GUARDA)
   mdeRelative: number; // ex.: 0.05
-  baselineOverride?: number; // ajuste manual da linha de base da NORTE
+  baselineOverride?: number; // ajuste manual da linha de base da métrica principal
 }
 
 // Dono: frente 3 (03-segmentacao-e-sobreposicao.md, seção 8).
@@ -85,7 +85,7 @@ export interface Audience {
   estimatedShare?: number; // 0–1 da base elegível
   dyAttribute?: string; // atributo publicado no DY via User Data API
   params?: Record<string, number>; // 0.5.0: valores dos parâmetros do segmento escolhido (ex.: dias_inadimplencia)
-  eligibleClients?: number; // 0.6.0: clientes do público, contados no BigQuery (base da amostra do experimento)
+  eligibleClients?: number; // 0.7.0: clientes do público, contados no BigQuery (base da amostra do experimento)
 }
 
 /** Acréscimo 0.3.0 (frente 1, ajuste de produto 15/10): onde exatamente a página fica. */

@@ -56,7 +56,7 @@ describe('números-chave sobre a fonte roadmap (E8)', () => {
   it('os quatro tiles saem preenchidos (sem Amostra: o SQL do roadmap não calcula progresso)', () => {
     expect(tiles.map((t) => t.id)).toEqual(['norte', 'expostos', 'periodo', 'split']);
     const hero = byId(tiles, 'norte');
-    expect(hero.label).toBe('NORTE · Receita por usuário');
+    expect(hero.label).toBe('Métrica principal · Receita por usuário');
     expect(hero.value).toMatch(/^[+−]\d/);
     expect(hero.badge).toBeDefined();
     expect(text(hero)).toMatch(

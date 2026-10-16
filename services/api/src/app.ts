@@ -10,6 +10,8 @@ import { painelRoutes } from './painel/routes.ts';
 import { resultadosRoutes } from './resultados/routes.ts';
 import { getResultsSource } from './resultados/roadmap/source.ts';
 import { fileDyExport, hasDyExportFile } from './adapters/dy-export-file.ts';
+import { anuncioPortsFromEnv } from './anuncio/clients.ts';
+import { anuncioRoutes } from './anuncio/routes.ts';
 import { mockDyExport } from './mocks/dy-export.ts';
 import { mockMetricCatalog } from './mocks/metric-catalog.ts';
 import { audiencePort, overlapPort } from './publico/engine.ts';
@@ -28,6 +30,8 @@ export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports 
     templates: templatesPort(),
     // Export real quando o sync já rodou (npm run job:sync-dy); mock caso contrário.
     dyExport: hasDyExportFile() ? fileDyExport() : mockDyExport(),
+    // Slack (webhook) e Jira (REST) só quando as variáveis FARO_SLACK_* / FARO_JIRA_* existem.
+    anuncio: anuncioPortsFromEnv(),
     now,
   };
 }
@@ -56,6 +60,7 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
   app.get('/health', async () => ({ ok: true, results: getResultsSource().info() }));
   const svc = createExperimentService(db, ports);
   await experimentRoutes(app, svc, db);
+  await anuncioRoutes(app, svc, db, ports);
   await catalogRoutes(app, ports);
   await painelRoutes(app, db);
   await resultadosRoutes(app, db);

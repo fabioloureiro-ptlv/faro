@@ -581,7 +581,7 @@
     "variantKey": "variante_a",
     "variantName": "Variante A",
     "platform": "all",
-    "text": "Variante A (consolidado): NORTE conversão +7,0% (melhora confirmada, 96%) · ticket médio −3,3% (queda confirmada, 0%).",
+    "text": "Variante A (consolidado): métrica principal conversão +7,0% (melhora confirmada, 96%) · ticket médio −3,3% (queda confirmada, 0%).",
     "parts": [
       {
         "metricId": "conversao",

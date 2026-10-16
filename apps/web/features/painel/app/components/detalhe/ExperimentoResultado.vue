@@ -38,7 +38,7 @@ const platformLabel = (p: NorteRow['platform']) => (p === 'all' ? 'Consolidado' 
   <section class="bloco" aria-labelledby="resultado-titulo">
     <h2 id="resultado-titulo">Resultado</h2>
     <p class="sub">
-      Resumo da NORTE ({{ norte()?.name ?? experiment.design.primaryMetricId }}).
+      Resumo da métrica principal ({{ norte()?.name ?? experiment.design.primaryMetricId }}).
       <template v-if="health">Dados até {{ formatDateTime(health.asOf) }} (D-1).</template>
     </p>
 
