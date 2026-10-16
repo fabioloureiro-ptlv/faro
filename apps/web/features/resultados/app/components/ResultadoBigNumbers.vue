@@ -15,7 +15,7 @@ const PLATFORM_LABEL: Record<Platform | 'all', string> = {
   android: 'Android',
   ios: 'iOS',
 };
-const GRAIN_LABEL: Record<Grain, string> = { user: 'Usuário', session: 'Sessão' };
+const GRAIN_LABEL: Record<Grain, string> = { user: 'UsuÃ¡rio', session: 'SessÃ£o' };
 
 const platform = ref<Platform | 'all'>('all');
 const grain = ref<Grain>('user');
@@ -35,7 +35,7 @@ const tiles = computed<BigNumber[]>(() =>
       })
     : [],
 );
-// Fonte dos números: as consultas do roadmap do Digital (E8) ou, sem snapshot, fixtures de exemplo.
+// Fonte dos nÃºmeros: as consultas do roadmap do Digital (E8) ou, sem snapshot, fixtures de exemplo.
 const roadmap = computed(() => data.value?.source === 'roadmap');
 const fonte = computed(() =>
   roadmap.value ? 'consultas do roadmap (BigQuery)' : 'dados de exemplo',
@@ -46,17 +46,17 @@ const fonte = computed(() =>
   <section class="bloco" aria-labelledby="big-numbers-titulo">
     <div class="topo">
       <div>
-        <h2 id="big-numbers-titulo">Números-chave</h2>
+        <h2 id="big-numbers-titulo">NÃºmeros-chave</h2>
         <p class="sub">
           <template v-if="data">
-            Dados até {{ data.asOf.slice(8, 10) }}/{{ data.asOf.slice(5, 7) }} (D-1) · fonte:
+            Dados atÃ© {{ data.asOf.slice(8, 10) }}/{{ data.asOf.slice(5, 7) }} (D-1) Â· fonte:
             {{ fonte }}.
           </template>
           <template v-else>Resultado consolidado do teste, direto da API de resultados.</template>
         </p>
       </div>
       <div v-if="data && !empty" class="filtros">
-        <div v-if="grains.length > 1" class="seg" role="group" aria-label="Grão">
+        <div v-if="grains.length > 1" class="seg" role="group" aria-label="GrÃ£o">
           <button
             v-for="g in grains"
             :key="g"
@@ -82,18 +82,18 @@ const fonte = computed(() =>
     </div>
 
     <p v-if="data && !roadmap" class="aviso" role="note">
-      Números de exemplo (fixtures). Para ler a mesma fonte do roadmap do Digital, rode
+      NÃºmeros de exemplo (fixtures). Para ler a mesma fonte do roadmap do Digital, rode
       <code>npm run job:sync-roadmap</code> (ou <code>npm run job:sync-results</code>) com acesso ao
       BigQuery e recarregue.
     </p>
 
     <p v-if="error" role="alert" class="erro">
-      Não foi possível carregar os números-chave.
+      NÃ£o foi possÃ­vel carregar os nÃºmeros-chave.
       <button type="button" class="btn ghost small" @click="refresh()">Tentar de novo</button>
     </p>
-    <p v-else-if="status === 'pending' && !data" class="vazio" aria-busy="true">Carregando…</p>
+    <p v-else-if="status === 'pending' && !data" class="vazio" aria-busy="true">Carregandoâ€¦</p>
     <p v-else-if="empty" class="vazio">
-      Aguardando início. Os números aparecem assim que a primeira exposição for registrada.
+      Aguardando inÃ­cio. Os nÃºmeros aparecem assim que a primeira exposiÃ§Ã£o for registrada.
     </p>
 
     <div v-else-if="tiles.length" class="tiles" :aria-busy="status === 'pending'">
@@ -202,12 +202,18 @@ h2 {
   margin: 12px 0 0;
 }
 
-/* stat tiles / hero, como no protótipo (docs/demo) */
+/* stat tiles / hero, como no protÃ³tipo (docs/demo) */
 .tiles {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
   margin-top: 14px;
+}
+.tile {
+  grid-column: span 2;
+}
+.tile.hero {
+  grid-column: 1 / -1;
 }
 .tiles[aria-busy='true'] {
   opacity: 0.6;
@@ -216,7 +222,7 @@ h2 {
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   min-width: 0;
 }
 .k {
@@ -256,7 +262,7 @@ h2 {
   color: var(--ink);
   font-weight: 600;
 }
-/* status com cor reservada: sempre ícone + texto */
+/* status com cor reservada: sempre Ã­cone + texto */
 .st {
   display: inline-flex;
   align-items: center;
@@ -309,19 +315,13 @@ h2 {
   border-radius: 4px;
 }
 @media (max-width: 980px) {
-  .tiles {
-    grid-template-columns: 1fr 1fr;
-  }
-  .tile.hero {
-    grid-column: span 2;
+  .tile {
+    grid-column: span 3;
   }
 }
 @media (max-width: 520px) {
-  .tiles {
-    grid-template-columns: 1fr;
-  }
-  .tile.hero {
-    grid-column: auto;
+  .tile {
+    grid-column: 1 / -1;
   }
   .hero .v {
     font-size: 32px;
