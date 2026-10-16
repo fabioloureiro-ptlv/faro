@@ -165,9 +165,13 @@ async function submitConfirm() {
               O DY não tem API para criar a campanha: esse card é o pedido.
             </p>
           </div>
-          <button type="button" class="btn" :disabled="anuncioBusy" @click="anunciar">
-            {{ anuncioBusy ? 'Enviando…' : announced ? 'Avisar de novo' : 'Enviar para o Slack e abrir card no Jira' }}
-          </button>
+          <!-- Integração Slack/Jira ainda sem credenciais no ambiente: botão desativado até a configuração. -->
+          <div style="display: flex; align-items: center; gap: 10px">
+            <button type="button" class="btn" disabled>
+              {{ anuncioBusy ? 'Enviando…' : announced ? 'Avisar de novo' : 'Enviar para o Slack e abrir card no Jira' }}
+            </button>
+            <span class="small muted">Em configuração</span>
+          </div>
         </div>
         <p v-if="anuncioErr" class="err" role="alert">{{ anuncioErr }}</p>
         <p v-if="anuncio" class="small" role="status" style="margin: 10px 0 0">
