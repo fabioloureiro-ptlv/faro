@@ -215,7 +215,7 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
       </fieldset>
 
       <div class="field">
-        <span id="l-primary" class="lbl">Métrica primária (NORTE)</span>
+        <span id="l-primary" class="lbl">Métrica principal</span>
         <p class="hint">Escolha a área e depois a métrica. Só uma: é ela que decide se o teste ganhou.</p>
         <CfgMetricPicker
           label="Métrica primária"
@@ -282,11 +282,11 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
           <p v-if="mde.erro" class="err" role="alert">{{ mde.erro }}</p>
           <template v-else-if="mde.data">
             <p v-if="mde.data.suggested == null || mde.data.medianAbsEffect == null" class="small muted" style="margin: 6px 0 0">
-              Nenhum teste anterior com {{ primaryMetric?.name ?? 'essa métrica' }} como NORTE. Sem base para sugerir.
+              Nenhum teste anterior com {{ primaryMetric?.name ?? 'essa métrica' }} como métrica principal. Sem base para sugerir.
             </p>
             <template v-else>
               <p class="small" style="margin: 6px 0 0">
-                <b>{{ mde.data.sampleCount }}</b> {{ mde.data.sampleCount === 1 ? 'teste parecido' : 'testes parecidos' }} com NORTE {{ primaryMetric?.name }}:
+                <b>{{ mde.data.sampleCount }}</b> {{ mde.data.sampleCount === 1 ? 'teste parecido' : 'testes parecidos' }} com a métrica principal {{ primaryMetric?.name }}:
                 efeito típico de <b>{{ fmtPct(mde.data.medianAbsEffect) }}</b> (mediana do efeito observado, sem sinal);
                 {{ mde.data.improved }} {{ mde.data.improved === 1 ? 'melhorou' : 'melhoraram' }} e {{ mde.data.worsened }} {{ mde.data.worsened === 1 ? 'piorou' : 'pioraram' }}.
               </p>
@@ -301,7 +301,7 @@ const BUS = Object.entries(BU_LABEL) as [Bu, string][];
             </template>
           </template>
           <p v-else class="small muted" style="margin: 6px 0 0">
-            Testes anteriores com a mesma NORTE mostram que tamanho de efeito é realista para este teste.
+            Testes anteriores com a mesma métrica principal mostram que tamanho de efeito é realista para este teste.
           </p>
         </section>
       </div>

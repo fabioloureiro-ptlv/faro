@@ -1,5 +1,5 @@
 {
-  "_fonte": "Mock da frente 4: só a NORTE, grão usuário, D-1 = 13/10/2026. Nexus copiado do export do DY no protótipo (consolidado e por plataforma). Simulados: valores derivados dos lifts do protótipo; probBetter arbitrado para cobrir os casos de borda.",
+  "_fonte": "Mock da frente 4: só a métrica principal, grão usuário, D-1 = 13/10/2026. Nexus copiado do export do DY no protótipo (consolidado e por plataforma). Simulados: valores derivados dos lifts do protótipo; probBetter arbitrado para cobrir os casos de borda.",
   "items": [
     { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "all", "grain": "user", "variantKey": "controle", "value": 21.83, "n": 21379, "asOf": "2026-10-13" },
     { "faroId": "FARO-2026-0001", "metricId": "receita_por_usuario", "platform": "all", "grain": "user", "variantKey": "home_nova", "value": 88.2, "n": 1100094, "deltaRelative": 1.081, "probBetter": 1, "label": "melhora_confirmada", "mde": 0.045, "asOf": "2026-10-13" },

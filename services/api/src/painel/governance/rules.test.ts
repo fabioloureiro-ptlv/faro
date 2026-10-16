@@ -104,7 +104,7 @@ describe('parada_antecipada', () => {
     expect(
       RULES.parada_antecipada(frete, ctx({ norte: norteOf(frete.faroId), health: healthOf(frete.faroId) }))
         ?.message,
-    ).toBe('Melhora confirmada na NORTE com 57% da amostra planejada (148.210 de 260.000 por braço).');
+    ).toBe('Melhora confirmada na métrica principal com 57% da amostra planejada (148.210 de 260.000 por braço).');
   });
   it('negativo: amostra completa', () => {
     const h: ExperimentHealth = { ...healthOf(frete.faroId), plannedSamplePerArm: 100000 };

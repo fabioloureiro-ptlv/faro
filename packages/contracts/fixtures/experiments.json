@@ -40,7 +40,7 @@
       },
       "decision": {
         "outcome": "implementar_variante",
-        "rationale": "home nova com melhora confirmada na NORTE (receita por usuário +108,1%). A variante já recebe 98% do tráfego; o controle residual só gera ruído.",
+        "rationale": "home nova com melhora confirmada na métrica principal (receita por usuário +108,1%). A variante já recebe 98% do tráfego; o controle residual só gera ruído.",
         "decidedBy": "squad-nexus@example.com",
         "decidedAt": "2026-10-13"
       },

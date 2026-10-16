@@ -12,7 +12,7 @@ import type {
 /** Uma linha da lista (PNL-01): experimento + o que outras frentes calculam sobre ele. */
 export interface PainelRow {
   experiment: Experiment;
-  /** Leitura atual da NORTE na melhor variante (frente 4). */
+  /** Leitura atual da métrica principal na melhor variante (frente 4). */
   norte?: MetricResult;
   alerts: GovernanceAlert[];
 }

@@ -24,7 +24,7 @@ export interface RelatedExperiment {
 /** Payload de GET /api/experiments/:faroId. */
 export interface ExperimentDetail {
   experiment: Experiment;
-  /** Todas as leituras da NORTE (consolidado e por plataforma, todos os braços). */
+  /** Todas as leituras da métrica principal (consolidado e por plataforma, todos os braços). */
   norteResults: MetricResult[];
   health?: ExperimentHealth;
   events: ExperimentAuditEvent[];
@@ -59,7 +59,7 @@ const FIELD_LABEL: Record<string, string> = {
   hypothesis: 'hipótese',
   control: 'controle',
   variants: 'variantes',
-  primaryMetricId: 'métrica NORTE',
+  primaryMetricId: 'métrica principal',
   secondaryMetricIds: 'métricas secundárias',
   guardrailMetricIds: 'métricas GUARDA',
   mdeRelative: 'MDE',
@@ -166,7 +166,7 @@ export interface NorteRow {
   variants: MetricResult[];
 }
 
-/** Leituras da NORTE agrupadas por plataforma: consolidado primeiro, depois na ordem da alocação. */
+/** Leituras da métrica principal agrupadas por plataforma: consolidado primeiro, depois na ordem da alocação. */
 export function norteRows(e: Experiment, results: MetricResult[]): NorteRow[] {
   const mine = results.filter((r) => r.faroId === e.faroId && r.metricId === e.design.primaryMetricId);
   const order: (Platform | 'all')[] = ['all', ...e.allocation.platforms];

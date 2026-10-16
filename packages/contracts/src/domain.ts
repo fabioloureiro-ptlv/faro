@@ -40,11 +40,11 @@ export interface Design {
   control: { name: string; description: string; figmaUrl?: string };
   /** Cada variante precisa de Figma OU print (imagem) — um dos dois é obrigatório. */
   variants: { key: string; name: string; description: string; figmaUrl?: string; printUrl?: string }[];
-  primaryMetricId: string; // exatamente uma (NORTE)
+  primaryMetricId: string; // exatamente uma (métrica principal)
   secondaryMetricIds: string[]; // ≥ 1
   guardrailMetricIds: string[]; // ≥ 0 (GUARDA)
   mdeRelative: number; // ex.: 0.05
-  baselineOverride?: number; // ajuste manual da linha de base da NORTE
+  baselineOverride?: number; // ajuste manual da linha de base da métrica principal
 }
 
 // Dono: frente 3 (03-segmentacao-e-sobreposicao.md, seção 8).

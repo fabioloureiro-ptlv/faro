@@ -6,7 +6,7 @@ export interface SynthesisInput {
   variantName: string;
   platform: Platform | 'all';
   metrics: SynthesisPart[];
-  /** Quantas métricas além da NORTE. Padrão 3. */
+  /** Quantas métricas além da métrica principal. Padrão 3. */
   maxOthers?: number;
 }
 
@@ -19,7 +19,7 @@ export function formatDelta(d: number): string {
 }
 
 function piece(p: SynthesisPart): string {
-  const tag = p.role === 'norte' ? 'NORTE ' : '';
+  const tag = p.role === 'norte' ? 'métrica principal ' : '';
   return `${tag}${p.name.toLowerCase()} ${formatDelta(p.deltaRelative)} (${LABEL_TEXT[p.label]}, ${Math.round(p.probBetter * 100)}%)`;
 }
 

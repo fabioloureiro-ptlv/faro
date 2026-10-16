@@ -64,7 +64,7 @@ const safeHref = (url?: string) => (url && url.startsWith('https://') ? url : un
     <h3>Métricas</h3>
     <ul class="metricas">
       <li>
-        <span class="chip chip--ok">NORTE</span> {{ metricName(experiment.design.primaryMetricId) }}
+        <span class="chip chip--ok">Principal</span> {{ metricName(experiment.design.primaryMetricId) }}
         <small>MDE {{ Math.round(experiment.design.mdeRelative * 100) }}%</small>
       </li>
       <li v-for="id in experiment.design.secondaryMetricIds" :key="id">

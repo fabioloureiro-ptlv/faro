@@ -2,7 +2,7 @@
 // Etapa 4 — Revisão, ficha do DY e confirmação (CFG-11, CFG-12, CFG-13).
 import type { DySheet } from '@faro/contracts';
 import { pageLine } from '@faro/config-core';
-import { ApiError, useFaroApi, type FaroEventRow } from '../composables/useFaroApi';
+import { ApiError, useFaroApi, type AnuncioResult, type FaroEventRow } from '../composables/useFaroApi';
 import { useExperimentDraft } from '../composables/useExperimentDraft';
 import { PLATFORM_LABEL, fmtDate, fmtInt, fmtPct } from '../utils/labels';
 
@@ -24,11 +24,34 @@ const divergences = ref<FaroEventRow[]>([]);
 const error = ref('');
 const busy = ref(false);
 
+// Aviso ao time (Slack + card no Jira): o último evento `experiment.announced` diz se já foi feito e qual card.
+const announced = ref<FaroEventRow | null>(null);
+const anuncio = ref<AnuncioResult | null>(null);
+const anuncioErr = ref('');
+const anuncioBusy = ref(false);
+
 async function loadSheet() {
   if (preDy.value) return;
   sheet.value = await api.sheet(e.value.faroId);
-  divergences.value = (await api.events(e.value.faroId)).filter((x) => x.type === 'experiment.config_divergence');
+  const events = await api.events(e.value.faroId);
+  divergences.value = events.filter((x) => x.type === 'experiment.config_divergence');
+  announced.value = events.filter((x) => x.type === 'experiment.announced').at(-1) ?? null;
 }
+
+async function anunciar() {
+  anuncioBusy.value = true;
+  anuncioErr.value = '';
+  try {
+    anuncio.value = await api.anunciar(e.value.faroId);
+    if (anuncio.value.slack.status === 'enviado') phase.copied = true;
+    await loadSheet();
+  } catch (err) {
+    anuncioErr.value = err instanceof ApiError ? err.message : 'Falha ao avisar o time.';
+  } finally {
+    anuncioBusy.value = false;
+  }
+}
+const DESTINO = { enviado: 'enviado', nao_configurado: 'não configurado na API', falhou: 'falhou, tente de novo' } as const;
 onMounted(loadSheet);
 
 async function finish() {
@@ -133,6 +156,33 @@ async function submitConfirm() {
 
       <div class="panel"><CfgDySheet :sheet="sheet" :markdown-url="api.sheetMarkdownUrl(e.faroId)" @exported="phase.copied = true" /></div>
 
+      <section class="panel" aria-labelledby="aviso-title">
+        <div class="spread">
+          <div>
+            <h2 id="aviso-title">Avisar o time</h2>
+            <p class="small muted" style="margin: 0">
+              Manda o resumo do teste para o canal do Slack e abre um card no Jira com a ficha acima, para quem configura o DY.
+              O DY não tem API para criar a campanha: esse card é o pedido.
+            </p>
+          </div>
+          <button type="button" class="btn" :disabled="anuncioBusy" @click="anunciar">
+            {{ anuncioBusy ? 'Enviando…' : announced ? 'Avisar de novo' : 'Enviar para o Slack e abrir card no Jira' }}
+          </button>
+        </div>
+        <p v-if="anuncioErr" class="err" role="alert">{{ anuncioErr }}</p>
+        <p v-if="anuncio" class="small" role="status" style="margin: 10px 0 0">
+          Slack: {{ DESTINO[anuncio.slack.status] }}<template v-if="anuncio.slack.channel"> em {{ anuncio.slack.channel }}</template>
+          · Jira: {{ DESTINO[anuncio.jira.status] }}<template v-if="anuncio.jira.url"> — <a :href="anuncio.jira.url" target="_blank" rel="noopener">{{ anuncio.jira.key }}</a></template>
+        </p>
+        <p v-else-if="announced" class="small muted" style="margin: 10px 0 0">
+          Avisado em {{ fmtDate(announced.occurredAt) }}<template v-if="announced.payload.jira"> · card <a :href="announced.payload.jira.url" target="_blank" rel="noopener">{{ announced.payload.jira.key }}</a></template>.
+        </p>
+        <details v-if="anuncio" class="small" style="margin-top: 8px">
+          <summary class="muted">Ver a mensagem enviada</summary>
+          <pre class="msg">{{ anuncio.texto }}</pre>
+        </details>
+      </section>
+
       <section v-if="e.status === 'pronto_para_configurar'" class="panel" aria-labelledby="conf-title">
         <h2 id="conf-title">Confirmar configuração no DY</h2>
         <p class="small muted">Em três passos: copie a ficha, cole no console do DY e só então confirme com o ID da campanha. O status muda para configurado no DY e o Faro passa a checar a campanha todo dia.</p>
@@ -189,6 +239,7 @@ async function submitConfirm() {
 </template>
 
 <style scoped>
+.msg { white-space: pre-wrap; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 8px 0 0; }
 .stack { display: flex; flex-direction: column; gap: 18px; }
 .phases { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .phases li { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }

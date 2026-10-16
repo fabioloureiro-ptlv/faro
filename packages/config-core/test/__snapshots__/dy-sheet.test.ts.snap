@@ -65,7 +65,7 @@ FARO-2026-0042:a: 50%
 Controle: FARO-2026-0042:controle",
     },
     {
-      "hint": "NORTE no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.",
+      "hint": "Métrica principal no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.",
       "key": "primary_metric",
       "label": "Métrica primária no DY",
       "value": "Add to Cart",
@@ -168,7 +168,7 @@ Controle: FARO-2026-0042:controle
 Add to Cart
 \`\`\`
 
-> NORTE no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.
+> Métrica principal no Faro: Conversão para o carrinho. A decisão é tomada pelo Faro.
 
 ## Datas
 

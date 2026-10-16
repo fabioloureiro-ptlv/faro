@@ -17,7 +17,7 @@ import { DESIGN_FIELD_LABEL } from './labels.ts';
 export interface RuleContext {
   today: string; // YYYY-MM-DD
   campaign?: DyCampaignStatus;
-  /** NORTE consolidada da melhor variante. */
+  /** Métrica principal consolidada da melhor variante. */
   norte?: MetricResult;
   health?: ExperimentHealth;
   /** CFG-13 (frente 1): campos em que ficha e campanha no DY divergem. */
@@ -110,7 +110,7 @@ export const RULES: Record<Exclude<GovernanceRule, 'campanha_orfa'>, Rule> = {
     const what = norte.label === 'melhora_confirmada' ? 'Melhora confirmada' : 'Queda confirmada';
     return {
       severity: 'atencao',
-      message: `${what} na NORTE com ${pct(minArm / health.plannedSamplePerArm)} da amostra planejada (${nf(minArm)} de ${nf(health.plannedSamplePerArm)} por braço).`,
+      message: `${what} na métrica principal com ${pct(minArm / health.plannedSamplePerArm)} da amostra planejada (${nf(minArm)} de ${nf(health.plannedSamplePerArm)} por braço).`,
       suggestedAction: 'Manter rodando até a amostra planejada para evitar falso positivo.',
     };
   },
@@ -163,7 +163,7 @@ export const RULES: Record<Exclude<GovernanceRule, 'campanha_orfa'>, Rule> = {
 export interface GovernanceInput {
   experiments: readonly Experiment[];
   campaigns: readonly DyCampaignStatus[];
-  /** NORTE consolidada (platform 'all'); outras linhas são ignoradas. */
+  /** Métrica principal consolidada (platform 'all'); outras linhas são ignoradas. */
   norteResults: readonly MetricResult[];
   health: readonly ExperimentHealth[];
   configDivergences?: Readonly<Record<string, string[]>>;

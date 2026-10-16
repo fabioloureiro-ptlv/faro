@@ -12,7 +12,7 @@ describe('síntese (MET-13)', () => {
         { metricId: 'churn_clube', name: 'Churn do clube', role: 'outra', deltaRelative: 1.398, probBetter: 0.19, label: 'sem_tendencia' }
       ]
     });
-    expect(s.text).toBe('home nova (consolidado): NORTE receita por usuário +108,1% (melhora confirmada, 100%) · conversão +241,3% (melhora confirmada, 100%) · conversão em saúde −74,7% (tendência de queda, 9%).');
+    expect(s.text).toBe('home nova (consolidado): métrica principal receita por usuário +108,1% (melhora confirmada, 100%) · conversão +241,3% (melhora confirmada, 100%) · conversão em saúde −74,7% (tendência de queda, 9%).');
     expect(s.parts.map((p) => p.metricId)).toEqual(['receita_por_usuario', 'conversao', 'conversao_saude']);
   });
   it('limita a três métricas além da NORTE, por |delta|', () => {

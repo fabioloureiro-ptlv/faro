@@ -31,7 +31,7 @@ const system: Actor = { kind: 'system' };
 
 const decision: Decision = {
   outcome: 'implementar_variante',
-  rationale: 'Melhora confirmada na NORTE com amostra completa.',
+  rationale: 'Melhora confirmada na métrica principal com amostra completa.',
   decidedBy: 'dono@example.com',
   decidedAt: '2026-10-14',
 };
