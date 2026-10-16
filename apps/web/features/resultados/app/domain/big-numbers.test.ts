@@ -80,7 +80,7 @@ describe('Nexus (fixture real, consolidado × usuário)', () => {
 
   it('hero: NORTE +108,1%, melhora confirmada, home nova vs home antiga, chance 100%', () => {
     const hero = byId(tiles, 'norte');
-    expect(hero.label).toBe('NORTE · Receita por usuário');
+    expect(hero.label).toBe('Métrica principal · Receita por usuário');
     expect(hero.value).toBe('+108,1%');
     expect(hero.valueTone).toBe('good');
     expect(hero.badge).toMatchObject({ tone: 'good', text: 'Melhora confirmada' });
@@ -128,7 +128,7 @@ describe('Nexus (fixture real, consolidado × usuário)', () => {
 
   it('sem definição da NORTE no catálogo, usa o id e não colore o valor', () => {
     const t = byId(buildBigNumbers({ results: r, primaryMetricId: NORTE.id }), 'norte');
-    expect(t.label).toBe('NORTE · receita_por_usuario');
+    expect(t.label).toBe('Métrica principal · receita_por_usuario');
     expect(t.value).toBe('+108,1%');
     expect(t.valueTone).toBe('good'); // direção padrão: maior é melhor
     expect(text(t)).toContain('home nova 88,2 vs home antiga 21,83');
@@ -188,6 +188,21 @@ describe('cenários simulados', () => {
     const nv = r.results.find((x) => x.metricId === CONV.id && x.variantKey === 'variante_a');
     if (nv?.ci95) expect(text(t)).toContain('IC95');
     else expect(text(t)).not.toContain('IC95');
+  });
+});
+
+describe('sem leitura da métrica principal', () => {
+  it('hero explica em vez de mostrar "— vs —"', () => {
+    const r = { ...slice(parse(nexus)), results: [] };
+    const t = byId(
+      buildBigNumbers({ results: r, primaryMetricId: NORTE.id, norte: NORTE }),
+      'norte',
+    );
+    expect(t.value).toBe('—');
+    expect(t.badge).toBeUndefined();
+    expect(text(t)).toBe(
+      'Sem leitura ainda: os números aparecem no dia seguinte à primeira exposição.',
+    );
   });
 });
 

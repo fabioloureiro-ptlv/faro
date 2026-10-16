@@ -11,6 +11,7 @@ import type {
   Template,
 } from '@faro/contracts';
 import type { DyCampaignSnapshot } from '@faro/config-core';
+import type { AnuncioPorts } from './anuncio/clients.ts';
 
 /** Frente 4. */
 export interface MetricCatalogPort {
@@ -76,5 +77,7 @@ export interface Ports {
   overlap: OverlapPort;
   templates: TemplatePort;
   dyExport: DyExportPort;
+  /** Aviso do teste pronto (Slack e Jira); cada destino é opcional e vem do ambiente. */
+  anuncio: AnuncioPorts;
   now: () => Date;
 }

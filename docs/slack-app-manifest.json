@@ -1,0 +1,20 @@
+{
+  "display_information": {
+    "name": "Faro",
+    "description": "Avisos de testes A/B prontos para configurar no Dynamic Yield",
+    "background_color": "#6b3fa0"
+  },
+  "features": {
+    "bot_user": { "display_name": "Faro", "always_online": false }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": ["chat:write", "chat:write.public", "users:read", "users:read.email"]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": false
+  }
+}

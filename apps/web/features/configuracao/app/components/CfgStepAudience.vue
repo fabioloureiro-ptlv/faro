@@ -139,7 +139,7 @@ const splitSum = computed(() => Math.round(a.value.split.reduce((s, x) => s + x,
 const failing = computed(() => audience.value.filter((c) => !c.ok));
 // Amostra e usuários por dia são estimativas informativas: o texto diz o que falta para calculá-las, sem barrar o avanço.
 const estimateHint = computed(() => {
-  if (!duration.value?.totalSample) return 'Escolha a métrica primária (NORTE) no design para calcular a amostra.';
+  if (!duration.value?.totalSample) return 'Escolha a métrica principal no design para calcular a amostra.';
   if (duration.value.periodDays == null) return 'Defina início e fim na aba Definição para estimar os usuários por dia.';
   return `Estimativa: amostra total (${fmtInt(duration.value.totalSample)}) ÷ ${duration.value.periodDays} dias do período.`;
 });
@@ -349,7 +349,7 @@ async function processar() {
         <template v-else-if="dates.data">
           <p class="small" style="margin: 6px 0 0">
             <b>{{ fmtDate(dates.data.startDate) }} → {{ fmtDate(dates.data.endDate) }}</b> ({{ dates.data.days }} dias,
-            {{ dates.data.basedOn === 'amostra' ? 'pela amostra necessária, em semanas inteiras' : 'mínimo de um ciclo semanal; escolha a NORTE para dimensionar pela amostra' }}).
+            {{ dates.data.basedOn === 'amostra' ? 'pela amostra necessária, em semanas inteiras' : 'mínimo de um ciclo semanal; escolha a métrica principal para dimensionar pela amostra' }}).
             <button type="button" class="chip add" style="margin-left: 6px" @click="applyDates(dates.data!)">Usar</button>
           </p>
           <template v-if="dates.data.overlapping.length">

@@ -3663,7 +3663,7 @@
     "variantKey": "home_nova",
     "variantName": "home nova",
     "platform": "all",
-    "text": "home nova (consolidado): NORTE receita por usuário +108,1% (melhora confirmada, 100%) · conversão +241,3% (melhora confirmada, 100%) · conversão em saúde −74,7% (tendência de queda, 9%).",
+    "text": "home nova (consolidado): métrica principal receita por usuário +108,1% (melhora confirmada, 100%) · conversão +241,3% (melhora confirmada, 100%) · conversão em saúde −74,7% (tendência de queda, 9%).",
     "parts": [
       {
         "metricId": "receita_por_usuario",

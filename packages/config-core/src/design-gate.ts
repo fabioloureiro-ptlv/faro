@@ -93,7 +93,7 @@ export function evaluateDesignGate(input: DesignInput, knownMetricIds?: Readonly
     ),
     check(
       'metrica_primaria',
-      'Exatamente uma métrica primária (NORTE)',
+      'Exatamente uma métrica principal',
       d.primaryMetricId.trim() !== '' && known(d.primaryMetricId),
       d.primaryMetricId.trim() === ''
         ? 'Escolha a métrica primária. Só uma: é ela que decide o teste.'

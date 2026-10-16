@@ -19,7 +19,8 @@
     "dev:api": "npm run dev -w @faro/api",
     "dev:web": "npm run dev -w @faro/web",
     "job:dy-consistency": "npm run job:dy-consistency -w @faro/api --",
-    "job:sync-roadmap": "npm run job:sync-roadmap -w @faro/api --"
+    "job:sync-roadmap": "npm run job:sync-roadmap -w @faro/api --",
+    "job:anuncio": "npm run job:anuncio -w @faro/api --"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

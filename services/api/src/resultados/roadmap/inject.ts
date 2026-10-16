@@ -27,7 +27,7 @@ export function markerRowsFromExperiments(experiments: Experiment[]): MarkerRows
     );
     const metrica = FARO_METRIC_TO_ROADMAP[e.design.primaryMetricId];
     if (metrica) rows.norte.push({ campanha, metrica });
-    else warnings.push(`${e.faroId}: NORTE ${e.design.primaryMetricId} sem equivalente no SQL do roadmap; omitida`);
+    else warnings.push(`${e.faroId}: métrica principal ${e.design.primaryMetricId} sem equivalente no SQL do roadmap; omitida`);
   }
   return { ...rows, warnings };
 }

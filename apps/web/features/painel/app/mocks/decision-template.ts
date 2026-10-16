@@ -9,7 +9,7 @@ export const DECISION_TEMPLATE: {
     {
       value: 'implementar_variante',
       label: 'Implementar variante',
-      hint: 'A variante venceu na NORTE sem piorar as GUARDA.',
+      hint: 'A variante venceu na métrica principal sem piorar as métricas de guarda.',
     },
     {
       value: 'manter_controle',
@@ -20,7 +20,7 @@ export const DECISION_TEMPLATE: {
     { value: 'invalido', label: 'Teste inválido', hint: 'SRM, contaminação ou configuração errada no DY.' },
   ],
   rationalePrompts: [
-    'O que a NORTE mostrou (efeito e chance de ser melhor).',
+    'O que a métrica principal mostrou (efeito e chance de ser melhor).',
     'Como ficaram as métricas GUARDA.',
     'O que acontece agora com a variante e com a campanha no DY.',
   ],

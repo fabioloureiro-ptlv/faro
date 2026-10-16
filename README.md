@@ -42,6 +42,40 @@ npm test && npm run typecheck && npm run lint
 
 **Fonte de resultados (E8).** `GET /results/:faroId?grain=user|session&platform=all|site|android|ios` devolve o `ResultsResponse` do contrato. `FARO_SOURCE=roadmap|fixtures` escolhe a fonte; sem a variável, roadmap quando existe `data/snapshots/roadmap/latest.json` ou `services/api/.data/results.json`, senão fixtures. `GET /health` diz a fonte em uso e cada resposta traz `source`, `readWindow.origin` e `status`. Testes ativos no DY sem cadastro aparecem como `FARO-0000-NNNN` na API e no painel.
 
+## Avisar o time (Slack e Jira)
+
+O DY não tem API para criar campanhas, então quem configura é uma pessoa. Na etapa de revisão do wizard, depois da ficha, o botão **Enviar para o Slack e abrir card no Jira** (`POST /experiments/:faroId/anunciar`) manda o resumo do teste para um canal e abre um card com a ficha. Cada destino só existe se as variáveis dele estiverem na API (`services/api/.env` é lido automaticamente; sem nada configurado o botão responde "não configurado"):
+
+```bash
+# Slack, modo recomendado: app com token de bot (escopos chat:write e users:read.email),
+# posta no canal e marca o PM que preencheu o teste (e os e-mails de FARO_SLACK_MENTIONS)
+FARO_SLACK_BOT_TOKEN=xoxb-...
+FARO_SLACK_CHANNEL=#testes-ab
+FARO_SLACK_MENTIONS=lider@petlove.com.br,dados@petlove.com.br   # opcional
+
+# Slack, modo simples: Incoming Webhook do canal (só posta, não marca ninguém)
+FARO_SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+
+# Jira Cloud: token de API de um usuário (id.atlassian.com → Security → API tokens)
+FARO_JIRA_BASE_URL=https://petlove.atlassian.net
+FARO_JIRA_EMAIL=quem@petlove.com.br
+FARO_JIRA_API_TOKEN=...
+FARO_JIRA_PROJECT_KEY=EXP                 # projeto onde o card é criado
+FARO_JIRA_ISSUE_TYPE=Task                 # opcional (padrão: Task)
+
+# Link "ficha e design" na mensagem (já usado pelo CORS)
+FARO_WEB_ORIGIN=http://localhost:3000
+```
+
+Passo a passo: copie `services/api/.env.example` para `services/api/.env`; crie o app do Slack em https://api.slack.com/apps → *Create New App* → *From a manifest*, colando `docs/slack-app-manifest.json`, instale no workspace e cole o *Bot User OAuth Token* em `FARO_SLACK_BOT_TOKEN`; gere um token de API do Jira e preencha `FARO_JIRA_EMAIL` e `FARO_JIRA_API_TOKEN`. Para testar sem a tela (com a API parada):
+
+```bash
+npm run job:anuncio -- FARO-2026-0001 --dry-run   # mostra a mensagem e quem seria marcado
+npm run job:anuncio -- FARO-2026-0001             # envia
+```
+
+Avisar de novo repete o Slack e reaproveita o card já aberto. O envio fica registrado no outbox (`experiment.announced`, `GET /events?faroId=`).
+
 ## Catálogo de segmentos
 
 O catálogo é o arquivo versionado `data/models/audiences/catalog.json`; aparece em `/segmento` (aba Segmentos) e na etapa de Público do wizard. Hoje tem dois segmentos: **Todos os clientes** (sem query) e **Clientes inadimplentes**. Cada segmento com query aponta (`sqlRef`) para um `.sql` na mesma pasta que devolve **uma linha por cliente, com `cuid`** (`dim_cliente.public_id`, o identificador da DY).
