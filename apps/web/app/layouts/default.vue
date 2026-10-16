@@ -19,7 +19,7 @@ const segmentoAtivo = computed(() => under('/segmento'));
           <circle cx="22" cy="13" r="3" fill="var(--on-brand)" />
           <path d="M9 22c3 3 13 3 16 0" stroke="var(--on-brand)" stroke-width="2.4" fill="none" stroke-linecap="round" />
         </svg>
-        <span>Faro<small>Experimentos Petlove</small></span>
+        <span>Faro Experimentos<small>Petlove</small></span>
       </NuxtLink>
       <nav aria-label="Principal">
         <NuxtLink to="/visao-geral" :class="{ active: geralAtivo }" :aria-current="geralAtivo ? 'page' : undefined">
