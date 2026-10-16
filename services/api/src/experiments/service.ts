@@ -38,8 +38,10 @@ import {
 import type { Db } from '../db/client.ts';
 import type { Ports } from '../ports.ts';
 import { HttpError } from '../errors.ts';
-import { buildDataset } from '../painel/dataset.ts';
+import { buildDataset, pagesFromCatalog, paginasDoExportDy } from '../painel/dataset.ts';
 import { busyWindows } from './busy.ts';
+import { getResultsSource } from '../resultados/roadmap/source.ts';
+import { mapaDy, rodandoPorArea } from '../testes-ab/mapa.ts';
 import {
   appendAudit,
   appendEvent,
@@ -306,7 +308,7 @@ export function createExperimentService(db: Db, ports: Ports) {
 
     /**
      * Ajuste de produto 15/10: sugestão de datas a partir da duração mínima (CFG-08),
-     * com os testes interpostos (mesmas páginas e plataformas, ativos ou agendados).
+     * com os testes interpostos na mesma página (na DY ou em design, ver busy.ts).
      */
     async suggestDates(faroId: string) {
       const catalog = await ports.metrics.list();
@@ -315,8 +317,11 @@ export function createExperimentService(db: Db, ports: Ports) {
       const a = exp.allocation;
       // Mesma base do Acompanhamento: os experimentos do Faro e os testes ativos que ele lê da DY.
       const ds = await buildDataset(db);
-      const { busy, dy } = busyWindows({ experiments: ds.experiments, faroId, pages: a.pages, platforms: a.platforms, asOf: ds.asOf });
-      return { ...suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy }), dy };
+      const { busy, dy } = busyWindows({ experiments: ds.experiments, faroId, pages: a.pages, asOf: ds.asOf });
+      // O que está rodando na DY agora, por área (BU): contexto para escolher as datas.
+      const snap = getResultsSource().snapshot();
+      const rodando = snap ? rodandoPorArea(mapaDy(snap.results, snap.meta.dadosAte, paginasDoExportDy(), pagesFromCatalog()).testes) : [];
+      return { ...suggestDates({ today: nowIso().slice(0, 10), durationDays: d.duration.durationDays, busy }), dy, rodandoPorArea: rodando };
     },
 
     /**

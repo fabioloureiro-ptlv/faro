@@ -1,5 +1,5 @@
 <script setup lang="ts">
-await navigateTo('/painel', { replace: true });
+await navigateTo('/visao-geral', { replace: true });
 </script>
 
 <template>

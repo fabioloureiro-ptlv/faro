@@ -110,6 +110,7 @@ export const AudienceSchema = z.object({
   estimatedShare: z.number().min(0).max(1).optional(),
   dyAttribute: z.string().optional(),
   params: z.record(z.string(), z.number()).optional(),
+  eligibleClients: z.number().int().nonnegative().optional(),
 });
 
 export const PageTargetSchema = z.object({

@@ -1,0 +1,210 @@
+{
+  "origem": "Roadmap Digital Petlove (roadmap.petlove.cloud/r/digital/testes), capturado em 15/10/2026 — seção 8.1 e 8.2 da especificação 'Testes A/B'.",
+  "nota": "Cadastro dos testes do roadmap, só leitura por enquanto. campanhasDy são as campanhas atreladas (as que o roadmap injeta na consulta); campanhasRelacionadas existem no DY mas não estão atreladas.",
+  "overrides": [
+    { "campanha": "FIDE | Android | Modal Upsize Embalagem", "inicio": "2026-09-22", "fim": "2026-10-08", "controle": null, "norte": "ticket", "teste": 2 },
+    { "campanha": "FIDE | iOS | Modal Upsize Embalagem", "inicio": "2026-09-22", "fim": "2026-10-08", "controle": null, "norte": "ticket", "teste": 2 },
+    { "campanha": "[Ecom Fidelidade] TKM - Upsize de embalagem PDP - WEB", "inicio": null, "fim": null, "controle": "do_nothing_action", "norte": "ticket", "teste": 3 },
+    { "campanha": "[Ecom Aquisição] Novo layout cards do catálogo", "inicio": "2026-09-15", "fim": "2026-09-23", "controle": "do_nothing_action", "norte": "ticket", "teste": 4 },
+    { "campanha": "[Ecom Aquisição] Novo layout modal do catálogo - WEB", "inicio": "2026-09-21", "fim": "2026-10-08", "controle": "do_nothing_action", "norte": "ticket", "teste": 5 },
+    { "campanha": "[FIDE] Modal de variantes - Novo layout do card catálogo - APP", "inicio": "2026-09-23", "fim": "2026-10-08", "controle": "Controle", "norte": "ticket", "teste": 6 },
+    { "campanha": "[Ecom Fidelidade] Incluir counter na vitrine da Pagina Intermediária - App", "inicio": "2026-10-05", "fim": null, "controle": "Controle - botão \"Adicionar\"", "norte": "ticket", "teste": 15 },
+    { "campanha": "[Ecom Fidelidade] Novo layout das vitrines da busca - APP", "inicio": "2026-10-05", "fim": null, "controle": "Controle - card atual", "norte": "ticket", "teste": 16 },
+    { "campanha": "AQSI | Clube Anual Grátis - Repet", "inicio": null, "fim": null, "controle": null, "norte": "ticket", "teste": 12 },
+    { "campanha": "AQSI | Clube Anual Grátis - Saúde", "inicio": null, "fim": null, "controle": null, "norte": "ticket", "teste": 12 }
+  ],
+  "testes": [
+    {
+      "id": 3, "nome": "Teste A/B - Upsize de embalagem na pdp - WEB", "status": "rodando", "dataInicio": "2026-09-29",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "PDP: upsell, melhorias no seletor de tamanhos, recomendação",
+      "campanhasDy": ["[Ecom Fidelidade] TKM - Upsize de embalagem PDP - WEB"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Modal sugerindo troca para variante com melhor custo benefício" }
+      ],
+      "contexto": "Modal pós adição do produto na PDP incentivando upsell para embalagem maior. Mesma alavanca do seletor de tamanho da PDP, em outra superfície — o valor está contado lá, não somar duas vezes. 591 mil unidades/ano saem no menor pacote da família pagando 28% mais por quilo. Controle: fluxo atual. Variante B: modal sugerindo a troca para a variante com melhor custo benefício, mostrando a economia relativa à escolha original. Teste iniciado em 23/09. 50% controle / 50% variante.",
+      "documentacao": "https://docs.google.com/document/d/1JaQU4O4lale9Y3eLqwLhpC8WZrp2DY_Q9HtTzb9qJN4/edit?tab=t.0",
+      "temAcompanhamento": true
+    },
+    {
+      "id": 15, "nome": "Teste A/B - Incluir counter na vitrine da Pagina Intermediária (App)", "status": "rodando", "dataInicio": "2026-10-05",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "Revisitar regras de exposição, testes com novos layouts e vitrines",
+      "campanhasDy": ["[Ecom Fidelidade] Incluir counter na vitrine da Pagina Intermediária - App"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Com counter na Vitrine" }
+      ],
+      "contexto": "Incluir contador (counter) de quantidade direto na vitrine da página intermediária, reduzindo etapas até a compra.",
+      "temAcompanhamento": true
+    },
+    {
+      "id": 16, "nome": "Teste A/B/C - Melhorias na vitrine da home/busca (App)", "status": "rodando", "dataInicio": "2026-10-05",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "Revisitar regras de exposição, testes com novos layouts e vitrines",
+      "campanhasDy": ["[Ecom Fidelidade] Novo layout das vitrines da busca - APP"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante A", "descricao": "Cards de produto horizontais + as duas vitrines na primeira dobra" },
+        { "nome": "Variante B", "descricao": "Cards de produto verticais + as duas vitrines na primeira dobra" }
+      ],
+      "contexto": "A primeira vitrine da home é responsável hoje por 4MM; a segunda ~100k (2,5% — dados de ago/26). Hipótese: enxugar o layout da 1ª vitrine para deixar a 2ª visível.",
+      "midias": 1
+    },
+    {
+      "id": 7, "nome": "Teste A/B/C - PDP com melhor custo benefício selecionado - APP", "status": "rodando", "dataInicio": "2026-10-09",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "PDP: upsell, melhorias no seletor de tamanhos, recomendação",
+      "campanhasDy": [],
+      "campanhasRelacionadas": ["[Ecom Fidelidade] PDP com melhor custo benefício selecionado - APP"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "opção com melhor custo benefício selecionada, independente da opção do cliente (força carregar a PDP na melhor opção)" },
+        { "nome": "Variante C", "descricao": "mantém escolha do cliente, com destaque visual na melhor opção" }
+      ],
+      "contexto": "Em ambas as variantes, melhorias na exibição dos tamanhos. 591 mil unidades/ano no menor pacote, pagando 28% mais por quilo — 1,98 mi de unidades de cão e 1,28 mi de gato em famílias multitamanho. Guardrail: conversão da PDP no primeiro pedido, onde o preço na tela dobra."
+    },
+    {
+      "id": 10, "nome": "Teste A/B - Clube Anual Gratuito para repet e saúde - WEB", "status": "rodando", "dataInicio": "2026-09-23",
+      "indicador": "Conversão e contratação do clube anual", "metricaNorte": "ticket", "squad": "Aquisição",
+      "campanhasDy": [],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Step do clube normal na checkout" },
+        { "nome": "Variante B", "descricao": "Clientes com Plano de Saúde ativo e pelo menos 1 pedido entregue OU Clientes Repet (mínimo 5 pedidos nos últimos 6 meses, pelo menos 1 agendado)" }
+      ],
+      "documentacao": "https://docs.google.com/document/d/1bbX6dGVeFjMaNR9GwycqaDg_nwhuXTyR/edit",
+      "temAcompanhamento": true
+    },
+    {
+      "id": 12, "nome": "Teste A/B - Clube Anual Gratuito para repet e saúde - App", "status": "rodando", "dataInicio": "2026-09-29",
+      "indicador": "Conversão e contratação do clube anual", "metricaNorte": "ticket", "squad": "Aquisição",
+      "campanhasDy": ["AQSI | Clube Anual Grátis - Repet", "AQSI | Clube Anual Grátis - Saúde"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Step do clube normal na checkout" },
+        { "nome": "Variante B", "descricao": "Clientes com Plano de Saúde ativo e pelo menos 1 pedido entregue OU Clientes Repet (mínimo 5 pedidos nos últimos 6 meses, pelo menos 1 agendado)" }
+      ],
+      "temAcompanhamento": true
+    },
+    {
+      "id": 19, "nome": "Teste A/B/C/D - Novo design da LP do Clube", "status": "rodando", "dataInicio": "2026-09-25",
+      "indicador": "Conversão do clube", "metricaNorte": "ticket", "squad": "Aquisição",
+      "campanhasDy": [],
+      "campanhasRelacionadas": ["[Ecom Aquisição] Nova LP clube"],
+      "cenarios": [
+        { "nome": "do_nothing_action", "descricao": "Controle | LP As Is" },
+        { "nome": "variation d", "descricao": "Layout: Atual | Ordenação: Nova (Benefícios na 2ª dobra e planos na sequência)" },
+        { "nome": "variation c", "descricao": "Layout: Novo | Ordenação: Atual (Planos na 2ª dobra e benefícios depois da calculadora)" },
+        { "nome": "variation b", "descricao": "Layout: Novo | Ordenação: Nova" }
+      ],
+      "temAcompanhamento": true
+    },
+    {
+      "id": 17, "nome": "Teste A/B/C - Inclusão de incentivos: Frete OU Parcelamento na Página Intermediária (App)", "status": "pronto", "dataInicio": "2026-10-20",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "Revisitar regras de exposição, testes com novos layouts e vitrines",
+      "campanhasDy": [],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Frete conquistado, incentivando o cliente aproveitar o frete" },
+        { "nome": "Variante C", "descricao": "Gatilho de parcelamento" }
+      ],
+      "contexto": "Testar gatilhos de frete conquistado e ancoragem do valor do pedido com parcelamento na página intermediária."
+    },
+    {
+      "id": 18, "nome": "Teste A/B - Card de produto no catálogo - APP", "status": "desenhando",
+      "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "Catálogo - Melhorias no seletor/exibição dos produtos",
+      "campanhasDy": [],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "card atual" },
+        { "nome": "Variante B", "descricao": "traz quantidade de variantes + destaca CTA de adicionar ao carrinho" }
+      ],
+      "contexto": "Evoluir o card do catálogo com nome mais descritivo e indicação das variantes disponíveis."
+    },
+    {
+      "id": 9, "nome": "Teste A/B/C - Frete Grátis como incentivo pra aquisição de Clube no carrinho (App)", "status": "desenhando",
+      "indicador": "Conversão do clube", "metricaNorte": "ticket", "squad": "Aquisição",
+      "iniciativa": "Carrinho | Teste A/B - Frete Grátis como incentivo pra aquisição de Clube no carrinho",
+      "campanhasDy": [],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo Atual" },
+        { "nome": "Variante B", "descricao": "Destaque do clube fora do componente de frete" },
+        { "nome": "Variante C", "descricao": "Clube vira uma opção de entrega grátis dentro do modal de escolha de frete" }
+      ],
+      "contexto": "Usar o frete grátis como incentivo para aquisição do Clube dentro do carrinho."
+    },
+    { "id": 20, "nome": "Teste A/B - Card do Catalogo com preço por Kg/Uni (App)", "status": "desenhando", "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade", "iniciativa": "Catálogo | R$/kg no card abaixo da foto do produto", "campanhasDy": [] },
+    { "id": 23, "nome": "Teste A/B - Vitrine com preço/kg(unidade) - Home web - Vitrine ME", "status": "desenhando", "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade", "iniciativa": "Revisitar regras de exposição, testes com novos layouts e vitrines", "campanhasDy": [] },
+    { "id": 21, "nome": "Teste A/B - Card do Catalogo com preço por Kg/Uni (Web)", "status": "desenhando", "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Aquisição", "iniciativa": "Catálogo | R$/kg no card abaixo da foto do produto", "campanhasDy": [] },
+    { "id": 25, "nome": "Teste A/B - Inclusão de incentivo: Brinde na Página Intermediária (App)", "status": "desenhando", "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade", "iniciativa": "PDP/Tela intermediária: impulso por mimos (brindes)", "campanhasDy": [] },
+    { "id": 24, "nome": "Teste A/B - Novo layout na Página Intermediária (App)", "status": "desenhando", "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade", "iniciativa": "Revisitar regras de exposição, testes com novos layouts e vitrines", "campanhasDy": [] },
+    {
+      "id": 8, "nome": "Teste A/B/C - PDP com melhor custo benefício selecionado - WEB", "status": "desenhando",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Aquisição",
+      "iniciativa": "PDP: upsell, melhorias no seletor de tamanhos, recomendação",
+      "campanhasDy": [],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "fluxo atual" },
+        { "nome": "B", "descricao": "mantém escolha do cliente, mas com destaque visual na opção com melhor custo benefício" }
+      ],
+      "contexto": "Mesmo do #7, e: diferente do App, web terá somente 1 variante (só destaca a melhor, sem selecionar), para não impactar o Google Shopping."
+    },
+    { "id": 26, "nome": "Teste A/B - Adição de produtos após conclusão do pedido", "status": "desenhando", "campanhasDy": [] },
+    {
+      "id": 5, "nome": "Teste A/B/C - Modal do produto no catálogo - WEB", "status": "concluido", "dataInicio": "2026-09-23",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Aquisição",
+      "iniciativa": "Catálogo - Melhorias no seletor/exibição dos produtos",
+      "campanhasDy": ["[Ecom Aquisição] Novo layout modal do catálogo - WEB"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Destaque pra variante de melhor preço por unidade/kg", "rollout": true },
+        { "nome": "Variante C", "descricao": "Mesma exibição da B, somada ao total da embalagem com desconto do Clube" }
+      ],
+      "contexto": "Melhoria na exibição dos tamanhos + destaque para opção com melhor custo benefício; evoluir o modal de seleção de variante para destacar a melhor opção e a economia relativa. Iniciado em 21/09. 34% controle / 33% B / 33% C.",
+      "documentacao": "https://docs.google.com/document/d/1u34yWnn4PHSr4l2u11URdpesKNjuhJdeEAQs7PxJrSE/edit?tab=t.0#heading=h.ug35iwtxo7k8",
+      "resumo": "Web — Variante B (consolidado): norte ticket médio +1,8% (tendência de melhora, 91%) · conversão −1,6% (tendência de queda, 15%) · receita por usuário −0,9% (sem tendência, 32%).",
+      "decisao": { "variante": "Variante B", "data": "2026-10-08" }
+    },
+    {
+      "id": 4, "nome": "Teste A/B - Card de produto no catálogo - WEB", "status": "concluido", "dataInicio": "2026-09-15",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Aquisição",
+      "iniciativa": "Catálogo - Melhorias no seletor/exibição dos produtos",
+      "campanhasDy": ["[Ecom Aquisição] Novo layout cards do catálogo"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Traz quantidade de variantes + destaca CTA de adicionar ao carrinho", "rollout": true }
+      ],
+      "resumo": "Receita por usuário +1,1%, ticket médio +2,2% (melhora confirmada) e −1,8% conversão.",
+      "decisao": { "variante": "Variante B", "data": "2026-10-05" }
+    },
+    {
+      "id": 6, "nome": "Teste A/B/C - Modal do produto no catálogo - APP", "status": "concluido", "dataInicio": "2026-09-23",
+      "indicador": "Ticket Médio", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "Catálogo - Melhorias no seletor/exibição dos produtos",
+      "campanhasDy": ["[FIDE] Modal de variantes - Novo layout do card catálogo - APP"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Destaque pra variante de melhor preço por unidade/kg", "rollout": true },
+        { "nome": "Variante C", "descricao": "Mesma exibição da B, somada ao total da embalagem com desconto do Clube" }
+      ],
+      "contexto": "Cenários e contexto iguais ao #5. Iniciado em 23/09. 34/33/33. Mesma documentação do #5.",
+      "documentacao": "https://docs.google.com/document/d/1u34yWnn4PHSr4l2u11URdpesKNjuhJdeEAQs7PxJrSE/edit?tab=t.0#heading=h.ug35iwtxo7k8",
+      "resumo": "App — Variante B (consolidado): norte ticket médio +0,2% (sem tendência, 58%) · conversão +1,3% (tendência de melhora, 91%) · receita por usuário +1,7% (tendência de melhora, 86%).",
+      "decisao": { "variante": "Variante B", "data": "2026-10-08" }
+    },
+    {
+      "id": 2, "nome": "Teste A/B - Upsize de embalagem na pdp - APP", "status": "concluido", "dataInicio": "2026-09-22",
+      "indicador": "Ticket Médio, Conversão", "metricaNorte": "ticket", "squad": "Fidelidade",
+      "iniciativa": "PDP: upsell, melhorias no seletor de tamanhos, recomendação",
+      "campanhasDy": ["FIDE | Android | Modal Upsize Embalagem", "FIDE | iOS | Modal Upsize Embalagem"],
+      "cenarios": [
+        { "nome": "Controle", "descricao": "Fluxo atual" },
+        { "nome": "Variante B", "descricao": "Modal sugerindo troca para variante com melhor custo benefício", "rollout": true }
+      ],
+      "contexto": "Igual ao #3. Iniciado em 23/09. 50/50.",
+      "resumo": "Variante (com modal de upsize embalagem) (consolidado): norte ticket médio +1,1% (tendência de melhora, 91%) · conversão +0,9% (tendência de melhora, 93%) · receita por usuário +0,6% (sem tendência, 70%).",
+      "decisao": { "variante": "Variante B", "data": "2026-10-08" }
+    }
+  ]
+}

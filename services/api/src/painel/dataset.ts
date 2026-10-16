@@ -66,7 +66,7 @@ export function invalidateStaticData(): void {
   cached = undefined;
 }
 
-function pagesFromCatalog(): PageDefinition[] {
+export function pagesFromCatalog(): PageDefinition[] {
   const catalog = PageCatalogSchema.parse(pageCatalog);
   const platforms = Object.entries(catalog.platformShare) as [Platform, number][];
   return catalog.pages.map((p) => ({
@@ -142,8 +142,25 @@ function pageFromSegment(seg: string): string | undefined {
   if (s.includes('checkout')) return 'checkout';
   if (s.includes('saude') || s.includes('plano')) return 'saude';
   if (s.includes('conta')) return 'conta';
-  if (['cachorro', 'gato', 'gatos', 'passaros', 'roedores', 'peixes', 'repteis'].includes(s)) return 'produto';
+  if (['cachorro', 'gato', 'gatos', 'passaros', 'roedores', 'peixes', 'repteis'].includes(s)) return 'pdp';
   return undefined;
+}
+
+/** Páginas por campanha, do export real do DY (casa pelo nome da campanha, sem caixa). Sem export, vazio. */
+export function paginasDoExportDy(): Map<string, { campaignId: string; pages: string[] }> {
+  const out = new Map<string, { campaignId: string; pages: string[] }>();
+  try {
+    const raw = JSON.parse(readFileSync(DY_EXPORT_PATH, 'utf-8')) as {
+      campaigns: { campaignId: string; campaignName: string; pages: string[] }[];
+    };
+    for (const c of raw.campaigns) {
+      const pages = [...new Set(c.pages.map(pageFromSegment).filter((p): p is string => !!p))];
+      out.set(c.campaignName.trim().toLowerCase(), { campaignId: c.campaignId, pages });
+    }
+  } catch {
+    /* sem export: segue sem páginas */
+  }
+  return out;
 }
 
 /**
@@ -159,19 +176,11 @@ function dyActiveExperiments(existing: Experiment[]): Experiment[] {
   if (!snap) return [];
   const found = discoverExperiments(snap, existing, { ownerEmail: EXPERIMENTATION_TEAM });
   if (!found.length) return found;
-  const exportPages = new Map<string, { campaignId: string; pages: string[] }>();
-  try {
-    const raw = JSON.parse(readFileSync(DY_EXPORT_PATH, 'utf-8')) as {
-      campaigns: { campaignId: string; campaignName: string; pages: string[] }[];
-    };
-    for (const c of raw.campaigns) exportPages.set(c.campaignName.trim().toLowerCase(), { campaignId: c.campaignId, pages: c.pages });
-  } catch {
-    /* sem export: segue sem páginas */
-  }
+  const exportPages = paginasDoExportDy();
   return found.map((e) => {
     const exp = exportPages.get(e.name.trim().toLowerCase());
     if (!exp) return e;
-    const pages = [...new Set(exp.pages.map(pageFromSegment).filter((p): p is string => !!p))];
+    const pages = exp.pages;
     return { ...e, allocation: { ...e.allocation, pages }, dy: { campaignName: e.name, labels: [], ...e.dy, campaignId: exp.campaignId } };
   });
 }

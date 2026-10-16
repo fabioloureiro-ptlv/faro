@@ -12,6 +12,7 @@ function describe(b: TimeMapBar): string {
     STATUS_LABEL[b.status],
     `${formatDayMonth(b.startDate)} a ${formatDayMonth(b.endDate)}`,
   ];
+  if (b.note) parts.push(b.note);
   if (b.faded) parts.push(`outra BU: ${BU_LABEL[b.bu]}`);
   if (b.overlap) {
     parts.push(`sobreposição ${OVERLAP_F[b.overlap]}${b.overlapUnresolved ? ' sem decisão' : ' resolvida'}`);
@@ -57,7 +58,7 @@ function barStyle(b: TimeMapBar) {
         <NuxtLink
           v-for="b in lane.bars"
           :key="b.faroId"
-          :to="`/painel/${b.faroId}`"
+          :to="b.href ?? `/painel/${b.faroId}`"
           class="barra"
           :class="[
             `s-${b.status}`,

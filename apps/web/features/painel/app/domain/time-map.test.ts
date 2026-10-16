@@ -138,3 +138,20 @@ describe('filtro de BU', () => {
     expect(lane(m, 'pdp')).toBeUndefined(); // só ecom na PDP
   });
 });
+
+describe('destino e observação por barra (mapa só com testes da DY)', () => {
+  it('sem extra, a barra não traz destino; com extra, traz href e nota', () => {
+    const [primeiro] = exps;
+    const sem = buildTimeMap([primeiro!], catalog, { bu: 'todas', today: TODAY });
+    const barra = sem.lanes.flatMap((l) => l.bars)[0]!;
+    expect(barra).not.toHaveProperty('href');
+    expect(barra).not.toHaveProperty('note');
+
+    const com = buildTimeMap([primeiro!], catalog, {
+      bu: 'todas',
+      today: TODAY,
+      extra: (e) => ({ href: `/testes-ab?campanha=${e.faroId}`, note: 'DY · saudável' }),
+    });
+    expect(com.lanes.flatMap((l) => l.bars)[0]).toMatchObject({ href: `/testes-ab?campanha=${primeiro!.faroId}`, note: 'DY · saudável' });
+  });
+});

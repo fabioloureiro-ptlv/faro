@@ -1,6 +1,6 @@
 // Sugestão de datas (ajuste de produto 15/10): a partir da duração mínima (CFG-08), propõe
-// um período e mostra os testes interpostos — os que já ocupam as mesmas páginas e
-// plataformas nesse intervalo — e a próxima janela livre.
+// um período e mostra os testes interpostos — os que já ocupam a mesma página
+// nesse intervalo — e a próxima janela livre.
 import { MIN_DAYS } from './duration.ts';
 
 export interface BusyWindow {
@@ -8,8 +8,8 @@ export interface BusyWindow {
   name: string;
   startDate: string; // AAAA-MM-DD
   endDate: string; // AAAA-MM-DD
-  /** De onde veio: cadastrado no Faro ou visto na DY pelo Acompanhamento. */
-  source?: 'faro' | 'dy';
+  /** 'na_dy': ativo na DY (o que o Acompanhamento mostra); 'em_design': experimento do Faro em andamento, ainda não na DY. */
+  status?: 'na_dy' | 'em_design';
   /** Teste da DY sem data de fim planejada: `endDate` é uma estimativa. */
   endEstimated?: boolean;
 }
@@ -18,7 +18,7 @@ export interface DateSuggestionInput {
   today: string; // AAAA-MM-DD
   /** Duração mínima calculada (CFG-08); null quando ainda não há amostra ou elegíveis. */
   durationDays: number | null;
-  /** Testes ativos ou agendados que cruzam páginas e plataformas com este. */
+  /** Testes na DY ou em andamento no Faro que cruzam alguma página com este. */
   busy: BusyWindow[];
 }
 

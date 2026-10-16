@@ -40,6 +40,9 @@ export interface TimeMapBar {
   overlapUnresolved: boolean;
   /** Com filtro de BU: teste de outra BU que cruza um teste da BU. */
   faded: boolean;
+  /** Destino do clique e observação extra, quando quem monta o mapa informa (`extra`). */
+  href?: string;
+  note?: string;
 }
 
 export interface TimeMapLane {
@@ -70,6 +73,8 @@ export interface TimeMapOptions {
   /** Janela; padrão: 45 dias para trás e 75 para frente de hoje. */
   from?: string;
   to?: string;
+  /** Destino do clique e observação de cada barra; sem isso, a barra abre o teste do painel. */
+  extra?: (e: Experiment) => { href?: string; note?: string };
 }
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -124,6 +129,7 @@ export function buildTimeMap(
         undefined,
       );
 
+      const extra = opts.extra?.(e) ?? {};
       const from = Math.max(toDay(a.startDate), s);
       const to = Math.min(toDay(a.endDate), toDay(end));
       return {
@@ -142,6 +148,8 @@ export function buildTimeMap(
         ...(worst ? { overlap: worst } : {}),
         overlapUnresolved: related.some((o) => !o.resolution),
         faded: !inBu(e, opts.bu),
+        ...(extra.href ? { href: extra.href } : {}),
+        ...(extra.note ? { note: extra.note } : {}),
       };
     });
     lanes.push({ pageId: page.id, pageName: page.name, rows: rowEnds.length, bars });

@@ -17,6 +17,7 @@ import { mockMetricCatalog } from './mocks/metric-catalog.ts';
 import { audiencePort, overlapPort } from './publico/engine.ts';
 import { publicoRoutes } from './publico/routes.ts';
 import { templatesPort } from './templates/library.ts';
+import { testesAbRoutes } from './testes-ab/routes.ts';
 import type { Ports } from './ports.ts';
 
 export function defaultPorts(db: Db, now: () => Date = () => new Date()): Ports {
@@ -64,5 +65,6 @@ export async function buildApp(db: Db, ports: Ports, opts: { logger?: boolean; c
   await painelRoutes(app, db);
   await resultadosRoutes(app, db);
   await publicoRoutes(app);
+  await testesAbRoutes(app);
   return app;
 }
